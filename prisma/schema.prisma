@@ -33,7 +33,7 @@ model Comment {
 
 model Blog {
     id        String    @id @default(cuid())
-    content   String
+    content   Json
     title     String
     createdAt DateTime  @default(now())
     user_id   String
