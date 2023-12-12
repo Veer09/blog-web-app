@@ -1,9 +1,15 @@
 import { Button } from "@/components/ui/button";
+import { auth } from "@clerk/nextjs";
 import { ChevronRight, MoveRight } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import React from "react";
 
 const page = () => {
+  const { userId } = auth();
+  if(userId){
+    redirect('/dashboard');
+  } 
   return (
     <div className=" flex flex-col text-center justify-center items-center my-16">
       <p className=" text-4xl  font-bold">
