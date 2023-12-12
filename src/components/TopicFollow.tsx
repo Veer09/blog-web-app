@@ -16,16 +16,13 @@ import { redirect } from "next/navigation";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { getAuth } from "@clerk/nextjs/server";
+import FollowContainer from "./FollowContainer";
 
 interface OnLoginProps {
   topics: TopicWithCount[];
 }
 
-const OnLogin: FC<OnLoginProps> = ({ topics }) => {
-  const { user: loggedIn } = useUser();
-  if (!loggedIn) {
-    redirect("/sign-in");
-  }
+const TopicFollow: FC<OnLoginProps> = ({ topics }) => {
 
   return (
     <Card className=" w-[70%]">
@@ -36,19 +33,7 @@ const OnLogin: FC<OnLoginProps> = ({ topics }) => {
         <Separator />
       </CardHeader>
       <CardContent>
-        {topics.map((topic, key) => {
-          const followObj = {
-            ...topic,
-            isFollowed:
-              topic.users.filter((user) => user.user_id === loggedIn.id).length !==
-              0,
-          };
-          return (
-            <ContextProvider followObj={followObj} key={key}>
-              <TopicsSelect key={key} />
-            </ContextProvider>
-          );
-        })}
+        <FollowContainer topics={topics} />
       </CardContent>
       <Separator/>
       <div className=" py-2 flex justify-center">
@@ -60,4 +45,4 @@ const OnLogin: FC<OnLoginProps> = ({ topics }) => {
   );
 };
 
-export default OnLogin;
+export default TopicFollow;
