@@ -1,42 +1,49 @@
-"use client";
-import React, { useEffect, useRef, useState } from "react";
-import EditorJS from "@editorjs/editorjs";
-const Editor = () => {
-  const [isMounted, setIsMounted] = useState(false);
+import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import EditorJS, { OutputData } from "@editorjs/editorjs";
+import { EDITOR_TOOLS } from "../lib/tools";
+import { Button } from "./ui/button";
+
+export default function Editor({
+  holder,
+  data,
+  setData,
+}: {
+  holder: string;
+  data: OutputData | undefined;
+  setData: Dispatch<SetStateAction<OutputData | undefined>>;
+}) {
   const ref = useRef<EditorJS>();
-  const initializeEditor = async () => {
-    const EditorJS = (await import("@editorjs/editorjs")).default;
-    const Header = (await import("@editorjs/header")).default;
+  useEffect(() => {
     if (!ref.current) {
       const editor = new EditorJS({
-        holder: "editorjs",
-        tools: {
-            header: Header,
-        }
+        holder: holder,
+        tools: EDITOR_TOOLS,
+        autofocus: true,
+        data: data,
+        inlineToolbar: true,
       });
       ref.current = editor;
     }
-  };
-  useEffect(() => {
-    if (typeof window !== undefined) {
-      setIsMounted(true);
-    }
-  }, []);
-  useEffect(() => {
-    const init = async () => {
-      await initializeEditor();
+    return () => {
+      if (ref.current && ref.current.destroy) {
+        ref.current.destroy();
+      }
     };
-    if (isMounted) {
-      init();
-      return () => {
-        if (ref.current) {
-          ref.current.destroy();
-        }
-      };
-    }
-  }, [isMounted]);
+  }, []);
 
-  return <div id="editorjs"></div>;
-};
+  const saveData = () => {
+      if(!ref.current) return ;
+      ref.current.save().then((data) => {
+        console.log(data);
+      })
+  }
 
-export default Editor;
+  return (
+    <div>
+      <div id={holder} className="prose max-w-full" />
+      <div className=" flex justify-center">
+        <Button className=" w-[100px]" onClick={saveData}>Post</Button>
+      </div>
+    </div>
+  );
+}
