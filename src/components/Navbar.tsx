@@ -24,7 +24,7 @@ const Navbar = () => {
         {pathname === "/dashboard" ? (
           <Button>
             <Link
-              href="/blog-create"
+              href="/blog/create"
               className=" flex justify-center items-center text-[18px]"
             >
               Write

@@ -4,19 +4,19 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 model Topic {
-    id    String @id @default(cuid())
-    name  String
+    id    String        @id @default(cuid())
+    name  String        @unique
     users UserToTopic[]
     blogs BlogToTopic[]
 }
 
 model User {
-    id       String    @id
-    topics UserToTopic[]
+    id       String        @id
+    topics   UserToTopic[]
     blogs    Blog[]
     comments Comment[]
 }
@@ -32,30 +32,32 @@ model Comment {
 }
 
 model Blog {
-    id        String    @id @default(cuid())
-    content   Json
-    title     String
-    createdAt DateTime  @default(now())
+    id          String @id @default(cuid())
+    content     Json
+    title       String 
+    coverImage  String   
+    description String
+    createdAt DateTime      @default(now())
     user_id   String
-    user      User      @relation(fields: [user_id], references: [id])
+    user      User          @relation(fields: [user_id], references: [id])
     topics    BlogToTopic[]
     comments  Comment[]
 }
 
-model UserToTopic{
-    user_id String
+model UserToTopic {
+    user_id  String
     topic_id String
-    user User @relation(fields: [user_id], references: [id])
-    topic Topic @relation(fields: [topic_id], references: [id])
+    user     User   @relation(fields: [user_id], references: [id])
+    topic    Topic  @relation(fields: [topic_id], references: [id])
 
     @@id([user_id, topic_id])
 }
 
-model BlogToTopic{
-    blog_id String
+model BlogToTopic {
+    blog_id  String
     topic_id String
-    blog Blog @relation(fields: [blog_id], references: [id])
-    topic Topic @relation(fields: [topic_id], references: [id])
+    blog     Blog   @relation(fields: [blog_id], references: [id])
+    topic    Topic  @relation(fields: [topic_id], references: [id])
 
     @@id([blog_id, topic_id])
 }
