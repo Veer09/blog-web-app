@@ -4,7 +4,7 @@ import { OutputData } from "@editorjs/editorjs";
 import dynamic from "next/dynamic";
 import React, { FC, useState } from "react";
 const page: FC = () => {
-  const Editor = dynamic(() => import("@/components/Editor"), {
+  const Editor = dynamic(() => import("@/components/blog-post/Editor"), {
     ssr: false,
   });
   const [data, setData] = useState<OutputData>()

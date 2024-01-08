@@ -11,7 +11,6 @@ import CheckList from '@editorjs/checklist'
 
 export const EDITOR_TOOLS = {
     embed: Embed,
-    table: Table,
     list: List,
     code: Code,
     linkTool: LinkTool,

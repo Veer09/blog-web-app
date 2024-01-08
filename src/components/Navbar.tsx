@@ -22,7 +22,7 @@ const Navbar = () => {
           </Button>
         ) : null}
         {pathname === "/dashboard" ? (
-          <Button>
+          <Button variant='outline' className=" border-0 ">
             <Link
               href="/blog/create"
               className=" flex justify-center items-center text-[18px]"
@@ -34,7 +34,9 @@ const Navbar = () => {
             </Link>
           </Button>
         ) : null}
-        {userId ? <UserButton afterSignOutUrl="/sign-in" /> : null}
+        {userId ? <UserButton afterSignOutUrl="/sign-in">
+          <UserButton.UserProfileLink label="Blogs" url="/me/blogs" labelIcon={<PenSquare width={16} height={16}/>}/>
+        </UserButton> : null}
       </div>
     </nav>
   );

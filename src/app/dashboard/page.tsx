@@ -1,10 +1,10 @@
-import DashboardSlider from '@/components/DashboardSlider'
+import BlogSelection from '@/components/dashboard/BlogSelection'
 import React, { FC } from 'react'
 
 const page: FC = () => {
   return (
     <div className=' w-full my-6 flex justify-center'>
-        <DashboardSlider/>
+        <BlogSelection/>
     </div>
   )
 }

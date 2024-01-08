@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/card";
 import TopicsSelect from "./TopicsSelect";
 import { TopicWithCount } from "@/lib/topic";
-import { Separator } from "./ui/separator";
-import ContextProvider from "./ContextProvider";
+import { Separator } from "../../ui/separator";
+import ContextProvider from "../../provider/ContextProvider";
 import { auth, useUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { Button } from "./ui/button";
+import { Button } from "../../ui/button";
 import Link from "next/link";
 import { getAuth } from "@clerk/nextjs/server";
 import FollowContainer from "./FollowContainer";

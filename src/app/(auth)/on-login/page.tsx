@@ -1,5 +1,5 @@
-import TopicFollow from "@/components/TopicFollow";
-import OnLogin from "@/components/TopicFollow";
+import TopicFollow from "@/components/general/topic/TopicFollow";
+import OnLogin from "@/components/general/topic/TopicFollow";
 import { getAllTopic } from "@/lib/topic";
 import React, { FC } from "react";
 

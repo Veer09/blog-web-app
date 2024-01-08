@@ -1,7 +1,7 @@
 'use client'
 import React, { FC, useContext } from "react";
-import FollowButton from "./FollowButton";
-import { FollowContext } from "./ContextProvider";
+import FollowButton from "../FollowButton";
+import { FollowContext } from "../../provider/ContextProvider";
 
 const TopicsSelect: FC = () => {
   const follow = useContext(FollowContext);

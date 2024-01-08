@@ -1,6 +1,6 @@
 import { TopicWithCount } from "@/lib/topic";
 import React, { FC } from "react";
-import ContextProvider from "./ContextProvider";
+import ContextProvider from "../../provider/ContextProvider";
 import TopicsSelect from "./TopicsSelect";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
