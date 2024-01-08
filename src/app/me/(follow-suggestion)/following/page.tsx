@@ -1,5 +1,5 @@
-import FollowContainer from '@/components/FollowContainer';
-import TopicFollow from '@/components/TopicFollow';
+import FollowContainer from '@/components/general/topic/FollowContainer';
+import TopicFollow from '@/components/general/topic/TopicFollow';
 import { getUserTopicCount } from '@/lib/user'
 import React, { FC } from 'react'
 

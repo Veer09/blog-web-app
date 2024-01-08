@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useContext } from "react";
-import { Button } from "./ui/button";
-import { FollowContext } from "./ContextProvider";
+import { Button } from "../ui/button";
+import { FollowContext } from "../provider/ContextProvider";
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { TopicFollowSchema } from "@/type/topic";
 import axios from "axios";
