@@ -1,6 +1,7 @@
 import { auth, useUser } from "@clerk/nextjs"
 import prisma from "./db";
 import { TopicWithCount, getAllTopic } from "./topic";
+import { Blog } from "@prisma/client";
 
 export const getUserTopic = async () => {
     const { userId } = auth();
@@ -48,4 +49,15 @@ export const getUnfollowedTopics = async () : Promise<TopicWithCount[] | null> =
         return a.length === 0
     })
     return unfollowedTopics
+}
+
+export const getUserBlogs = async () : Promise<Blog[] | null> => {
+    const { userId } = auth();
+    if(!userId) return null;
+    const blogs = await prisma.blog.findMany({
+        where: {
+            user_id: userId
+        }
+    })
+    return blogs;
 }

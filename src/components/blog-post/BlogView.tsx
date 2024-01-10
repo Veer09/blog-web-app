@@ -10,7 +10,7 @@ const BlogView: FC<BlogViewProps> = ({ content }) => {
     const edjsParser = edjsHTML();
     const html = edjsParser.parse(content);
   return (
-  <div className=" prose">
+  <div className=" prose mx-16">
     {
         parse(html.join(""))
     }

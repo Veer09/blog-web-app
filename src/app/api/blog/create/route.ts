@@ -1,14 +1,14 @@
 import { blogSchema, blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs";
-import { error } from "console";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+
 
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
   const blog = blogUploadSchema.safeParse(body);
 
   if (!blog.success) {
+    console.log(blog.error);
     return NextResponse.json(blog.error, { status: 405 });
   }
 
