@@ -8,17 +8,21 @@ generator client {
 }
 
 model Topic {
-    id    String        @id @default(cuid())
-    name  String        @unique
-    users UserToTopic[]
-    blogs BlogToTopic[]
+    id    String @id @default(cuid())
+    name  String @unique
+    users User[]
+    blogs Blog[]
 }
 
 model User {
-    id       String        @id
-    topics   UserToTopic[]
-    blogs    Blog[]
-    comments Comment[]
+    id              String    @id
+    blogs           Blog[]
+    saved_blog      Blog[]    @relation("SavedBlog")
+    reading_history Blog[]    @relation("ReadingHistory")
+    topics          Topic[]
+    followers       User[]    @relation("UserFollows")
+    following       User[]    @relation("UserFollows")
+    comments        Comment[]
 }
 
 model Comment {
@@ -32,32 +36,17 @@ model Comment {
 }
 
 model Blog {
-    id          String @id @default(cuid())
+    id          String    @id @default(cuid())
     content     Json
-    title       String 
-    coverImage  String   
+    title       String
+    coverImage  String
+    likes       Int       @default(0)
     description String
-    createdAt DateTime      @default(now())
-    user_id   String
-    user      User          @relation(fields: [user_id], references: [id])
-    topics    BlogToTopic[]
-    comments  Comment[]
-}
-
-model UserToTopic {
-    user_id  String
-    topic_id String
-    user     User   @relation(fields: [user_id], references: [id])
-    topic    Topic  @relation(fields: [topic_id], references: [id])
-
-    @@id([user_id, topic_id])
-}
-
-model BlogToTopic {
-    blog_id  String
-    topic_id String
-    blog     Blog   @relation(fields: [blog_id], references: [id])
-    topic    Topic  @relation(fields: [topic_id], references: [id])
-
-    @@id([blog_id, topic_id])
+    createdAt   DateTime  @default(now())
+    user_id     String
+    user        User      @relation(fields: [user_id], references: [id])
+    savedBy     User[]    @relation("SavedBlog")
+    readedBy    User[]    @relation("ReadingHistory")
+    comments    Comment[]
+    topics      Topic[]
 }

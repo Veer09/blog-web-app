@@ -6,12 +6,12 @@ import { Blog } from "@prisma/client";
 export const getUserTopic = async () => {
     const { userId } = auth();
     if(!userId) return 
-    const topics = await prisma.userToTopic.findMany({
-        where: {
-            user_id: userId
+    const topics = await prisma.user.findFirst({
+        where:{
+            id: userId
         },
-        include: {
-            topic: true
+        select: {
+            topics: true
         }
     })
     return topics
@@ -20,13 +20,14 @@ export const getUserTopic = async () => {
 export const getUserTopicCount = async () : Promise<TopicWithCount[] | null> => {
     const { userId } = auth();
     if(!userId) return null;
-    const topics = await prisma.userToTopic.findMany({
-        where: {
-            user_id: userId
+
+    const topics = await prisma.user.findFirst({
+        where:{
+            id: userId
         },
         select: {
-            topic:{
-                select: {
+            topics: {
+                select:{
                     id: true,
                     name: true,
                     _count: true,
@@ -35,7 +36,24 @@ export const getUserTopicCount = async () : Promise<TopicWithCount[] | null> => 
             }
         }
     })
-    return Array.from(topics.map(topic => topic.topic))
+    if(!topics) return null;
+    return topics.topics;
+}
+
+export const getFollowersCount = async () => {
+    const { userId } = auth();
+    const follower = await prisma.user.findMany({
+        where: {
+            id: userId as string
+        },
+        select: {
+            followers: {
+                select: {
+                    
+                }
+            }
+        }
+    })
 }
 
 export const getUnfollowedTopics = async () : Promise<TopicWithCount[] | null> => {

@@ -1,11 +1,8 @@
-import BlogSelection from '@/components/dashboard/BlogSelection'
-import React, { FC } from 'react'
+import React from 'react'
 
-const page: FC = () => {
+const page = () => {
   return (
-    <div className=' w-full my-6 flex justify-center'>
-        <BlogSelection/>
-    </div>
+    <div>page</div>
   )
 }
 

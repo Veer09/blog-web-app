@@ -7,9 +7,11 @@ export const POST = async (req: NextRequest) => {
     try {
         const { payload } = await req.json();
         const topicId = TopicFollowSchema.parse(payload);
+
         const { userId } = auth();
         if (!userId)
           return NextResponse.json({ error: "User Unauthorized" }, { status: 401 });
+
         const validTopic = await prisma.topic.findFirst({
           where: {
             id: topicId,
@@ -17,22 +19,19 @@ export const POST = async (req: NextRequest) => {
         });
         if (!validTopic)
           return NextResponse.json({ error: "Topic Not Found" }, { status: 400 });
-        const alreadyFollowed = await prisma.userToTopic.findFirst({
+        
+        await prisma.user.update({
           where: {
-            user_id: userId,
-            topic_id: topicId,
+            id: userId
           },
-        });
-        if (!alreadyFollowed)
-          return NextResponse.json({ error: "Topic is not Followed" }, { status: 400 });
-        await prisma.userToTopic.delete({
-            where: {
-                user_id_topic_id: {
-                    user_id: userId,
-                    topic_id: topicId
-                }
+          data: {
+            blogs: {
+              disconnect: {
+                id: topicId
+              }
             }
-        })  
+          }
+        })
         return NextResponse.json({ message: 'sucess'}, {status : 200})  
     }catch(err){
         if(err instanceof ZodError){

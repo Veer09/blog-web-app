@@ -9,7 +9,7 @@ export interface TopicWithCount {
     blogs: number;
   };
   users: {
-    user_id: string
+    id: string
   }[];
 }
 
@@ -26,7 +26,7 @@ export const getAllTopic = async (
       select: {
         users: {
           select: {
-            user_id: true
+            id: true
           }
         },
         name: true,
@@ -46,7 +46,7 @@ export const getAllTopic = async (
     select: {
       users: {
         select: {
-          user_id: true
+          id: true
         }
       },
       name: true,

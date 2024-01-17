@@ -2,7 +2,6 @@ import { blogSchema, blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
-
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
   const blog = blogUploadSchema.safeParse(body);
@@ -17,27 +16,6 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json("Unauthorized", { status: 400 });
   }
   try {
-    let topicsArray: string[] = [];
-    if (blog.data.topics) {
-      blog.data.topics.forEach(async (topic) => {
-        let temp = topic.toLowerCase().split(' ');
-        for (let i = 0; i < temp.length; i++) {
-            temp[i] = temp[i].charAt(0).toUpperCase() + temp[i].slice(1);
-        }
-        topic = temp.join(' ');
-        const uniqueTopics = await prisma.topic.upsert({
-          where: {
-            name: topic as string,
-          },
-          create: {
-            name: topic as string,
-          },
-          update: {},
-        });
-        topicsArray.push(uniqueTopics.id);
-      });
-    }
-
     const blogData = await prisma.blog.create({
       data: {
         user_id: userId,
@@ -46,11 +24,12 @@ export const POST = async (req: NextRequest) => {
         description: blog.data.description,
         coverImage: blog.data.image,
         topics: {
-          createMany: {
-            data: topicsArray.map((topic) => {
-              return { topic_id: topic };
-            }),
-          },
+          connectOrCreate: (blog.data.topics) ? blog.data.topics.map((topic) => {
+            return {
+              where: { name: topic },
+              create: { name: topic },
+            };
+          }) : undefined,
         },
       },
     });

@@ -20,7 +20,7 @@ const FollowContainer: FC<FollowContainerProps> = ({topics}) => {
           const followObj = {
             ...topic,
             isFollowed:
-              topic.users.filter((user) => user.user_id === userId).length !==
+              topic.users.filter((user) => user.id === userId).length !==
               0,
           };
           return (

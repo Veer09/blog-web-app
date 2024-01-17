@@ -9,6 +9,7 @@ const page : FC = async () => {
   return (
     <div>
         <FollowContainer topics={topics}/>
+        {/* <FollowContainer ={topics}/> */}
     </div>
   )
 }

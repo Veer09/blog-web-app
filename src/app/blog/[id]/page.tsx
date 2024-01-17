@@ -5,6 +5,7 @@ import BlogView from "@/components/blog-post/BlogView";
 import { clerkClient, useUser } from "@clerk/nextjs";
 import FollowButton from "@/components/general/FollowButton";
 import { BookmarkPlus, Heart } from "lucide-react";
+import { findBlogById } from "@/lib/blog";
 interface Props {
   params: {
     id: string;
@@ -12,11 +13,7 @@ interface Props {
 }
 
 const page: FC<Props> = async ({ params }) => {
-  const blog = await prisma.blog.findFirst({
-    where: {
-      id: params.id,
-    },
-  });
+  const blog = await findBlogById(params.id);
   if (!blog) return;
   const content = JSON.parse(JSON.stringify(blog.content)) as OutputData;
   const user = await clerkClient.users.getUser(blog.user_id);
