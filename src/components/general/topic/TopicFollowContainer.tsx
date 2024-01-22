@@ -9,7 +9,7 @@ interface FollowContainerProps {
   topics: TopicWithCount[];
 }
 
-const FollowContainer: FC<FollowContainerProps> = ({topics}) => {
+const TopicFollowContainer: FC<FollowContainerProps> = ({topics}) => {
   const { userId } = auth();
   if (!userId) {
     redirect("/sign-in");
@@ -33,4 +33,4 @@ const FollowContainer: FC<FollowContainerProps> = ({topics}) => {
   )
 }
 
-export default FollowContainer;
+export default TopicFollowContainer;

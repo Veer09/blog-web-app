@@ -16,7 +16,7 @@ import { redirect } from "next/navigation";
 import { Button } from "../../ui/button";
 import Link from "next/link";
 import { getAuth } from "@clerk/nextjs/server";
-import FollowContainer from "./FollowContainer";
+import FollowContainer from "./TopicFollowContainer";
 
 interface OnLoginProps {
   topics: TopicWithCount[];

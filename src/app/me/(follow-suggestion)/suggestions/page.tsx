@@ -1,4 +1,4 @@
-import FollowContainer from "@/components/general/topic/FollowContainer";
+import FollowContainer from "@/components/general/topic/TopicFollowContainer";
 import { getAllTopic } from "@/lib/topic";
 import { getUnfollowedTopics } from "@/lib/user";
 import React from "react";

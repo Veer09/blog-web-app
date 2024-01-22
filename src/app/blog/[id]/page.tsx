@@ -4,8 +4,11 @@ import { OutputData } from "@editorjs/editorjs";
 import BlogView from "@/components/blog-post/BlogView";
 import { clerkClient, useUser } from "@clerk/nextjs";
 import FollowButton from "@/components/general/FollowButton";
-import { BookmarkPlus, Heart } from "lucide-react";
+import { BookmarkPlus, Heart, MessagesSquare } from "lucide-react";
 import { findBlogById } from "@/lib/blog";
+import TopicList from "@/components/general/TopicList";
+import { Separator } from "@/components/ui/separator";
+import UserInteraction from "@/components/general/blog/UserInteraction";
 interface Props {
   params: {
     id: string;
@@ -37,13 +40,15 @@ const page: FC<Props> = async ({ params }) => {
             </div>
           </div>
           <div>
-            <div>
-              <BookmarkPlus />
+            <div className="flex gap-2">
+              <UserInteraction blogId = {blog.id}/>
             </div>
           </div>
         </div>
         {blog.coverImage ? <img src={blog.coverImage} className=" m-auto w-[80%] h-[300px] my-10" alt="" /> : null}
         <BlogView content={content} />
+        <Separator className=" my-5"/>
+        <TopicList topics = {blog.topics}/>
       </div>
     </div>
   );

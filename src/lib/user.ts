@@ -3,6 +3,25 @@ import prisma from "./db";
 import { TopicWithCount, getAllTopic } from "./topic";
 import { Blog } from "@prisma/client";
 
+export const getUserWithCounts = async () => {
+    const { userId } = auth();
+    if(!userId) return ;
+    const users = await prisma.user.findFirst({
+        where: {
+            id: userId
+        },
+        select: {
+            following: {
+                select: {
+                    id: true,
+                    _count: true,
+                }
+            }
+        }
+    })
+    return users 
+}
+
 export const getUserTopic = async () => {
     const { userId } = auth();
     if(!userId) return 
@@ -40,21 +59,6 @@ export const getUserTopicCount = async () : Promise<TopicWithCount[] | null> => 
     return topics.topics;
 }
 
-export const getFollowersCount = async () => {
-    const { userId } = auth();
-    const follower = await prisma.user.findMany({
-        where: {
-            id: userId as string
-        },
-        select: {
-            followers: {
-                select: {
-                    
-                }
-            }
-        }
-    })
-}
 
 export const getUnfollowedTopics = async () : Promise<TopicWithCount[] | null> => {
     const { userId } = auth();
