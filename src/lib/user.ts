@@ -83,3 +83,35 @@ export const getUserBlogs = async () : Promise<Blog[] | null> => {
     })
     return blogs;
 }
+
+export const getSavedBlog = async () => {
+    const { userId } = auth();
+    if(!userId) return;
+    const savedBlog = await prisma.user.findFirst({
+        where: {
+            id: userId
+        },
+        select: {
+            saved_blog: true
+        }
+    })
+    if(!savedBlog) return ;
+    return savedBlog.saved_blog;
+}
+
+export const isBlogSaved = async ( blogId: string ) => {
+    const { userId } = auth();
+    if(!userId) return false;
+    const blog = await prisma.user.findFirst({
+        where: {
+            id: userId,
+            saved_blog: {
+                some: {
+                    id: blogId
+                }
+            }
+        }
+    })
+    if(!blog) return false
+    return true;
+}

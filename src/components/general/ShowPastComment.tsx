@@ -8,7 +8,7 @@ interface ShowPastCommentProps {
 
 const ShowPastComment: FC<ShowPastCommentProps> = ({ pastComments }) => {
   return (
-    <div>
+    <div className="ml-1">
       {pastComments
         ? pastComments.map((comment) => {
             return (

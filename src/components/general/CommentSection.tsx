@@ -82,7 +82,7 @@ const CommentSection: FC<CommentProps> = ({ comment }) => {
   })
   if (!user) return;
   return (
-    <div>
+    <div className=" border-b-2 ">
       <div className=" flex justify-between items-center">
         <div className=" flex gap-4 my-4 items-center">
           <img

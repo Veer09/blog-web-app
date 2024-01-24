@@ -79,7 +79,7 @@ const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
         <SheetTrigger>
           <MessagesSquare onClick={() => getComments()} />
         </SheetTrigger>
-        <SheetContent className=" w-[40%] overflow-scroll">
+        <SheetContent className="overflow-scroll">
           <SheetHeader>
             <SheetTitle>Comments:</SheetTitle>
             <SheetDescription>

@@ -12,7 +12,7 @@ const page: FC = async () => {
   return (
     <div>
       {topics ? <TopicFollowContainer topics={topics} /> : <></>}
-      {users ? <UserFollowContainer users={users} /> : <></>}
+      {/* {users ? <UserFollowContainer users={users} /> : <></>} */}
     </div>
   );
 };

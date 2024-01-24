@@ -9,6 +9,7 @@ import { findBlogById } from "@/lib/blog";
 import TopicList from "@/components/general/TopicList";
 import { Separator } from "@/components/ui/separator";
 import UserInteraction from "@/components/general/blog/UserInteraction";
+import { isBlogSaved } from "@/lib/user";
 interface Props {
   params: {
     id: string;
@@ -17,6 +18,7 @@ interface Props {
 
 const page: FC<Props> = async ({ params }) => {
   const blog = await findBlogById(params.id);
+  const saved = await isBlogSaved(params.id);
   if (!blog) return;
   const content = JSON.parse(JSON.stringify(blog.content)) as OutputData;
   const user = await clerkClient.users.getUser(blog.user_id);
@@ -41,7 +43,7 @@ const page: FC<Props> = async ({ params }) => {
           </div>
           <div>
             <div className="flex gap-2">
-              <UserInteraction blogId = {blog.id}/>
+              <UserInteraction blogId = {blog.id} saved = {saved}/>
             </div>
           </div>
         </div>
