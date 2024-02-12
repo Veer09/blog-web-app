@@ -1,6 +1,7 @@
-import BlogView from "@/components/blog-post/BlogView";
-import BlogCard from "@/components/general/blog/BlogCard";
+import BlogView from "@/components/BlogView";
+import BlogCard from "@/components/BlogCard";
 import { findLatestBlog } from "@/lib/blog";
+import { getFollowBlogs } from "@/lib/user";
 import React, { FC } from "react";
 interface Props {
   params: {
@@ -9,11 +10,17 @@ interface Props {
 }
 const page: FC<Props> = async ({ params }) => {
   const name = decodeURI(params.name);
-  const blogs = await findLatestBlog(name);
+  let blogs;
+  if (name === "following") {
+    blogs = await getFollowBlogs();
+  } else {
+    blogs = await findLatestBlog(name);
+  }
+  if(!blogs) return ;
   return (
-    <div className=" w-[60%]">
-      {blogs.map((blog) => {
-        return <BlogCard blog={blog} />;
+    <div className=" w-[50%]">
+      {blogs.map((blog, key) => {
+        return <BlogCard blog={blog} key={key} />;
       })}
     </div>
   );

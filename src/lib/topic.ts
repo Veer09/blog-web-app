@@ -1,21 +1,11 @@
 import { Topic, User } from "@prisma/client";
 import prisma from "./db";
+import { TopicDetails } from "@/type/topic";
 
-export interface TopicWithCount {
-  id: string;
-  name: string;
-  _count: {
-    users: number;
-    blogs: number;
-  };
-  users: {
-    id: string
-  }[];
-}
 
 export const getAllTopic = async (
   count: number | null
-): Promise<TopicWithCount[]> => {
+): Promise<TopicDetails[]> => {
   if (!count) {
     const topics = await prisma.topic.findMany({
       orderBy: {

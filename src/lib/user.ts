@@ -1,117 +1,238 @@
-import { auth, useUser } from "@clerk/nextjs"
+import { auth } from "@clerk/nextjs";
 import prisma from "./db";
-import { TopicWithCount, getAllTopic } from "./topic";
-import { Blog } from "@prisma/client";
+import { TopicDetails } from "@/type/topic";
+import { Blog, Topic } from "@prisma/client";
+import { unstable_cache } from "next/cache";
+import { UserDetails } from "@/type/user";
 
-export const getUserWithCounts = async () => {
-    const { userId } = auth();
-    if(!userId) return ;
-    const users = await prisma.user.findFirst({
-        where: {
-            id: userId
-        },
+export const getUserWithCounts = async (): Promise<UserDetails[] | null> => {
+  const { userId } = auth();
+  if (!userId) return null;
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      following: {
         select: {
-            following: {
-                select: {
-                    id: true,
-                    _count: true,
-                }
-            }
-        }
-    })
-    return users 
-}
+          id: true,
+          _count: true,
+        },
+      },
+    },
+  });
+  if (!user) return null;
+  return user.following;
+};
 
-export const getUserTopic = async () => {
+export const getUserFollowingDetails = async (
+  count: number | undefined
+): Promise<UserDetails[]> => {
+  const { userId } = auth();
+  if (!userId) return [];
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      following: {
+        select: {
+          id: true,
+          _count: {
+            select: {
+              followers: true,
+              blogs: true,
+            },
+          },
+        },
+        orderBy: {
+          followers: {
+            _count: "desc",
+          },
+        },
+        take: count,
+      },
+    },
+  });
+  if (!user) return [];
+  return user.following;
+};
+
+export const getUnfollowedUsers = async (
+  count: number | undefined
+): Promise<UserDetails[]> => {
+  const { userId } = auth();
+  if (!userId) return [];
+  const users = await prisma.user.findMany({
+    where: {
+      following: {
+        none: {
+          id: userId,
+        },
+      },
+      id: {
+        not: userId,
+      }
+    },
+    select: {
+      id: true,
+      _count: {
+        select: {
+          followers: true,
+          blogs: true,
+        },
+      },
+    },
+    orderBy: {
+      followers: {
+        _count: "desc",
+      },
+    },
+    take: count,
+  });
+  return users;
+};
+
+export const getUserTopic = unstable_cache(
+  async () => {
     const { userId } = auth();
-    if(!userId) return 
+    if (!userId) return null;
     const topics = await prisma.user.findFirst({
-        where:{
-            id: userId
-        },
-        select: {
-            topics: true
-        }
-    })
-    return topics
-}
+      where: {
+        id: userId,
+      },
+      select: {
+        topics: true,
+      },
+    });
+    return topics;
+  },
+  ["topics", "followed"],
+  {
+    tags: ["followedTopics"],
+  }
+);
 
-export const getUserTopicCount = async () : Promise<TopicWithCount[] | null> => {
+export const getUserTopicDetail = unstable_cache(
+  async (count: number | undefined): Promise<TopicDetails[]> => {
     const { userId } = auth();
-    if(!userId) return null;
+    if (!userId) return [];
 
     const topics = await prisma.user.findFirst({
-        where:{
-            id: userId
+      where: {
+        id: userId,
+      },
+      select: {
+        topics: {
+          select: {
+            id: true,
+            name: true,
+            _count: true,
+            users: true,
+          },
+          take: count,
         },
-        select: {
-            topics: {
-                select:{
-                    id: true,
-                    name: true,
-                    _count: true,
-                    users: true
-                }
-            }
-        }
-    })
-    if(!topics) return null;
+      },
+    });
+    if (!topics) return [];
     return topics.topics;
-}
+  },
+  ["topics", "followedCount"],
+  {
+    tags: ["followedTopics"],
+  }
+);
 
-
-export const getUnfollowedTopics = async () : Promise<TopicWithCount[] | null> => {
+export const getUnfollowedTopics = unstable_cache(
+  async (count: number | undefined): Promise<TopicDetails[]> => {
     const { userId } = auth();
-    if(!userId) return null;
-    const allTopics = await getAllTopic(null);
-    const followedTopics = await getUserTopicCount();
-    if(!followedTopics) return allTopics;
-    const unfollowedTopics = allTopics.filter(topic => {
-        const a = followedTopics?.filter(t => t.id === topic.id);
-        return a.length === 0
-    })
-    return unfollowedTopics
-}
+    if (!userId) return [];
 
-export const getUserBlogs = async () : Promise<Blog[] | null> => {
-    const { userId } = auth();
-    if(!userId) return null;
-    const blogs = await prisma.blog.findMany({
-        where: {
-            user_id: userId
-        }
-    })
-    return blogs;
-}
+    const unfollowedTopics = await prisma.topic.findMany({
+      where: {
+        users: {
+          none: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        _count: true,
+        users: true,
+      },
+      take: count,
+    });
+    return unfollowedTopics;
+  },
+  ["topics", "unfollowed"],
+  {
+    tags: ["followedTopics"],
+  }
+);
+
+export const getUserBlogs = async (): Promise<Blog[] | null> => {
+  const { userId } = auth();
+  if (!userId) return null;
+  const blogs = await prisma.blog.findMany({
+    where: {
+      user_id: userId,
+    },
+  });
+  return blogs;
+};
 
 export const getSavedBlog = async () => {
-    const { userId } = auth();
-    if(!userId) return;
-    const savedBlog = await prisma.user.findFirst({
-        where: {
-            id: userId
-        },
-        select: {
-            saved_blog: true
-        }
-    })
-    if(!savedBlog) return ;
-    return savedBlog.saved_blog;
-}
+  const { userId } = auth();
+  if (!userId) return;
+  const savedBlog = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      saved_blog: true,
+    },
+  });
+  if (!savedBlog) return;
+  return savedBlog.saved_blog;
+};
 
-export const isBlogSaved = async ( blogId: string ) => {
-    const { userId } = auth();
-    if(!userId) return false;
-    const blog = await prisma.user.findFirst({
-        where: {
-            id: userId,
-            saved_blog: {
-                some: {
-                    id: blogId
-                }
-            }
-        }
-    })
-    if(!blog) return false
-    return true;
-}
+export const getFollowBlogs = async () => {
+  const { userId } = auth();
+  if (!userId) return;
+  const blogs = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      following: {
+        select: {
+          blogs: true,
+        },
+      },
+    },
+  });
+  if (!blogs) return;
+  let blogsArray = [];
+  blogs.following.forEach((following) => {
+    following.blogs.forEach((blogs) => {
+      blogsArray.push(blogs);
+    });
+  });
+};
+
+export const isBlogSaved = async (blogId: string) => {
+  const { userId } = auth();
+  if (!userId) return false;
+  const blog = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      saved_blog: {
+        some: {
+          id: blogId,
+        },
+      },
+    },
+  });
+  if (!blog) return false;
+  return true;
+};

@@ -8,7 +8,7 @@ import React from "react";
 const page = () => {
   const { userId } = auth();
   if(userId){
-    redirect('/dashboard');
+    redirect('/dashboard/following');
   } 
   return (
     <div className=" flex flex-col text-center justify-center items-center my-16">
@@ -22,7 +22,7 @@ const page = () => {
       <p className=" text-lg font-semibold text-slate-500 py-3 leading-tight">
         {" "}
         Blog is website where user share their knowledge as blog, and also<br/>
-        increase their knowledge by reading other's block{" "}
+        increase their knowledge by reading others block{" "}
       </p>
       <Button className=" my-3 font-bold">
         <Link href='#' className=" flex items-center gap-2">Browse Populer Blogs <ChevronRight/></Link>

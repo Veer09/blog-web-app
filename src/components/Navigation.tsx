@@ -17,18 +17,14 @@ function FollowNav() {
       <NavigationMenu defaultValue="suggestions">
         <NavigationMenuList className=" gap-2">
           <NavigationMenuItem>
-            <Link href="/me/following" legacyBehavior passHref>
-              <NavigationMenuLink active={path === '/me/following'}  className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink' , ' font-extrabold')}>
+              <NavigationMenuLink active={path === '/me/following'} href="/me/following"  className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink' , ' font-extrabold')}>
                 Following 
               </NavigationMenuLink>
-            </Link>
           </NavigationMenuItem>
           <NavigationMenuItem value="suggestions">
-            <Link href="/me/suggestions" legacyBehavior passHref>
-              <NavigationMenuLink active={path === '/me/suggestions'} className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink', ' font-extrabold')}>
+              <NavigationMenuLink active={path === '/me/suggestions'} href="/me/suggestions" className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink', ' font-extrabold')}>
                 Suggestions 
               </NavigationMenuLink>
-            </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <Link href="/me/reading-history" legacyBehavior passHref>

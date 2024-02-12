@@ -11,35 +11,26 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import {
-  PastComments,
-  commentGetResponseSchema,
-  commentGetSchema,
   commentUploadSchema,
 } from "@/type/comment";
-import { Comment } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { MessagesSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { comment } from "postcss";
 import React, { FC, useState } from "react";
 import { ZodError } from "zod";
-import Comments from "../CommentSection";
-import CommentSection from "../CommentSection";
-import { User } from "@clerk/nextjs/server";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import ShowPastComment from "../ShowPastComment";
+import ShowPastComment from "./ShowPastComment";
+import { Comment } from "@prisma/client";
 
 interface CommentSheetProps {
-  blogId: string;
+  comments: Array<Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}}>,
+  blogId: string
 }
 
-const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
+const CommentSheet: FC<CommentSheetProps> = ({ comments, blogId }) => {
   const router = useRouter();
   const [comment, setComment] = useState<string>("");
-  const [pastComments, setPastComments] = useState<
-    undefined | PastComments[]
-  >();
+
   const { mutate: saveComment } = useMutation({
     mutationFn: () => {
       const commentObj = {
@@ -61,23 +52,12 @@ const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
       }
     },
   });
-  const { mutate: getComments } = useMutation({
-    mutationFn: () => {
-      const payload = commentGetSchema.parse(blogId);
-      return axios.post("/api/comment/get", { blogId });
-    },
-    onSuccess: (data) => {
-      const response = commentGetResponseSchema.safeParse(data.data);
-      if (!response.success) return;
-      setPastComments(response.data);
-    },
-  });
 
   return (
     <div>
       <Sheet>
         <SheetTrigger>
-          <MessagesSquare onClick={() => getComments()} />
+          <MessagesSquare/>
         </SheetTrigger>
         <SheetContent className="overflow-scroll">
           <SheetHeader>
@@ -95,7 +75,7 @@ const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
           </SheetHeader>
           <p className=" my-5 text-lg font-semibold">Past Comments: </p>
           <div>
-            <ShowPastComment pastComments={pastComments}/>
+            <ShowPastComment pastComments={comments} baseComment={undefined}/>
           </div>
         </SheetContent>
       </Sheet>

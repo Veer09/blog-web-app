@@ -1,4 +1,4 @@
-import BlogCard from '@/components/general/blog/BlogCard';
+import BlogCard from '@/components/BlogCard';
 import { getSavedBlog } from '@/lib/user'
 import React, { FC } from 'react'
 
@@ -7,8 +7,8 @@ const page: FC = async () => {
     if(!savedBlog) return ; 
   return (
     <div>
-        {savedBlog.map((blog) => {
-            return <BlogCard blog={blog} />
+        {savedBlog.map((blog, key) => {
+            return <BlogCard blog={blog} key={key}/>
         })}
     </div>
   )

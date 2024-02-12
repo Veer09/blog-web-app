@@ -1,5 +1,5 @@
 import React, { Dispatch, FC, SetStateAction } from "react";
-import { Input } from "../ui/input";
+import { Input } from "./ui/input";
 
 interface TopicsSearchProps {
   topics: Array<string>;

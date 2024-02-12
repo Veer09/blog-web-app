@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { auth } from "@clerk/nextjs";
 import { ZodError } from "zod";
+import { revalidatePath, revalidateTag } from "next/cache";
 export const POST = async (req: NextRequest) => {
     try {
         const { payload } = await req.json();
@@ -25,17 +26,19 @@ export const POST = async (req: NextRequest) => {
             id: userId
           },
           data: {
-            blogs: {
+            topics: {
               disconnect: {
                 id: topicId
               }
             }
           }
         })
+        revalidateTag('followedTopics');
         return NextResponse.json({ message: 'sucess'}, {status : 200})  
-    }catch(err){
+    }catch(err: any){
         if(err instanceof ZodError){
             return NextResponse.json({ err: err.message}, {status: 400})
         }
+        return NextResponse.json({ err: err.message}, {status: 400})
     }
 }

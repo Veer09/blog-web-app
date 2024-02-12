@@ -1,5 +1,5 @@
 "use client";
-import { auth, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { Blog } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import React, { FC } from "react";

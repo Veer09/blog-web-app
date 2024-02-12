@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import prisma from "@/lib/db";
 import { useUser } from "@clerk/nextjs";
 import { getUserBlogs } from "@/lib/user";
-import BlogCard from "@/components/general/blog/BlogCard";
+import BlogCard from "@/components/BlogCard";
 import { Separator } from "@/components/ui/separator";
 
 const page: FC = async () => {
@@ -13,7 +13,7 @@ const page: FC = async () => {
       <div className=" w-[50%]">
         {blogs.map((blog, key) => {
           return (
-            <div>
+            <div key={key}>
               <BlogCard blog={blog} key={key}/>
               <Separator />
             </div>

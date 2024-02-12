@@ -2,9 +2,10 @@
 import React from "react";
 import { LibraryBig, PenSquare } from "lucide-react";
 import { UserButton, useAuth } from "@clerk/nextjs";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const { userId } = useAuth();
@@ -21,22 +22,26 @@ const Navbar = () => {
             <Link href="/sign-in">Login</Link>
           </Button>
         ) : null}
-        {pathname === "/dashboard" ? (
-          <Button variant='outline' className=" border-0 ">
-            <Link
-              href="/blog/create"
-              className=" flex justify-center items-center text-[18px]"
-            >
-              Write
-              <span className=" pl-3">
-                <PenSquare />
-              </span>
-            </Link>
-          </Button>
+
+        <Link
+          href="/blog/create"
+          className={cn(buttonVariants, "flex justify-center items-center mx-2 px-2 py-1 rounded-md bg-slate-800 text-white hover:bg-slate-900 cursor-pointer")}
+        >
+          <p className=" text-md font-semibold">Write</p>
+          <span className=" pl-2">
+            <PenSquare />
+          </span>
+        </Link>
+
+        {userId ? (
+          <UserButton afterSignOutUrl="/sign-in">
+            <UserButton.UserProfileLink
+              label="Blogs"
+              url="/me/blogs"
+              labelIcon={<PenSquare width={16} height={16} />}
+            />
+          </UserButton>
         ) : null}
-        {userId ? <UserButton afterSignOutUrl="/sign-in">
-          <UserButton.UserProfileLink label="Blogs" url="/me/blogs" labelIcon={<PenSquare width={16} height={16}/>}/>
-        </UserButton> : null}
       </div>
     </nav>
   );

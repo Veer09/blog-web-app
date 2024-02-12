@@ -6,8 +6,8 @@ import React, {
   useState,
 } from "react";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
-import { EDITOR_TOOLS } from "../../lib/tools";
-import { Button } from "../ui/button";
+import { EDITOR_TOOLS } from "../lib/tools";
+import { Button } from "./ui/button";
 import axios, { AxiosError } from "axios";
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { blogSchema, blogUploadSchema } from "@/type/blog";
@@ -21,10 +21,10 @@ import {
   DrawerTrigger,
   DrawerFooter,
 } from "@/components/ui/drawer";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 import { ZodError } from "zod";
-import { toast } from "../ui/use-toast";
+import { toast } from "./ui/use-toast";
 import TopicSearch from "./TopicSearch";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +43,7 @@ export default function Editor({
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
   const [topics, setTopics] = useState<Array<string>>(new Array());
-  const queryClient = new QueryClient();
+
   const router = useRouter();
   const { mutate: uplaod } = useMutation({
     mutationFn: async (blog: OutputData) => {
@@ -58,7 +58,6 @@ export default function Editor({
       return axios.post("/api/blog/create", payload);
     },
     onError: (error) => {
-      console.log(error);
       if (error instanceof ZodError || error instanceof AxiosError) {
         toast({
           variant: "destructive",

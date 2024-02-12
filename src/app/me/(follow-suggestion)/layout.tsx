@@ -1,5 +1,5 @@
 
-import FollowNav from "@/components/FollowNav";
+import FollowNav from "@/components/Navigation";
 import { Separator } from "@/components/ui/separator";
 import React, { FC, ReactNode } from "react";
 
@@ -7,7 +7,7 @@ import React, { FC, ReactNode } from "react";
 
 const layout = ({ children }: { children: ReactNode }) => {
   return (
-    <section className=" my-14 mx-28">
+    <section className=" my-14 mx-28 pb-10">
       <h1 className=" text-[40px] font-bold pb-3">
         Explore some new Topics and People
       </h1>

@@ -27,10 +27,7 @@ export const commentGetResponseSchema = z.array(z.object({
     user: z.custom<User>(),
 }))
 
-export const repliesGetSchema = z.string();
-
 export interface PastComments {
     comment: Comment & {_count: { replies: number}},
     user: User,
-
 }

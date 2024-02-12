@@ -1,18 +1,18 @@
-import FollowContainer from "@/components/general/topic/TopicFollowContainer";
-import TopicFollow from "@/components/general/topic/TopicFollow";
-import { getUserTopicCount, getUserWithCounts } from "@/lib/user";
+import { getUserFollowingDetails, getUserTopicDetail } from "@/lib/user";
 import React, { FC } from "react";
-import TopicFollowContainer from "@/components/general/topic/TopicFollowContainer";
-import UserFollowContainer from "@/components/general/user/UserFollowContainer";
+import TopicFollow from "@/components/TopicFollow";
+import { unstable_noStore } from "next/cache";
+import UserFollow from "@/components/UserFollow";
 
 const page: FC = async () => {
-  const topics = await getUserTopicCount();
-  const users = await getUserWithCounts();
-
+  unstable_noStore();
+  const followedTopics = await getUserTopicDetail(7);
+  const following = await getUserFollowingDetails(7);
+  
   return (
-    <div>
-      {topics ? <TopicFollowContainer topics={topics} /> : <></>}
-      {/* {users ? <UserFollowContainer users={users} /> : <></>} */}
+    <div className=" my-10">
+      <TopicFollow title="Topics you follow" topics={followedTopics} followed={true}/>
+      <UserFollow title="People you follow" users={following} followed={true}/>
     </div>
   );
 };

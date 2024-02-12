@@ -1,15 +1,14 @@
 import React, { FC } from "react";
-import prisma from "@/lib/db";
 import { OutputData } from "@editorjs/editorjs";
-import BlogView from "@/components/blog-post/BlogView";
-import { clerkClient, useUser } from "@clerk/nextjs";
-import FollowButton from "@/components/general/FollowButton";
-import { BookmarkPlus, Heart, MessagesSquare } from "lucide-react";
+import BlogView from "@/components/BlogView";
+import { clerkClient } from "@clerk/nextjs";
 import { findBlogById } from "@/lib/blog";
-import TopicList from "@/components/general/TopicList";
+import TopicList from "@/components/TopicList";
 import { Separator } from "@/components/ui/separator";
-import UserInteraction from "@/components/general/blog/UserInteraction";
+import UserInteraction from "@/components/UserInteraction";
 import { isBlogSaved } from "@/lib/user";
+
+
 interface Props {
   params: {
     id: string;
@@ -18,6 +17,24 @@ interface Props {
 
 const page: FC<Props> = async ({ params }) => {
   const blog = await findBlogById(params.id);
+  if (!blog) return;
+  if (!blog?.comments) return;
+  const fullComment = Array.from(
+    await Promise.all(
+      blog.comments.map(async (comment) => {
+        const user = await clerkClient.users.getUser(comment.user_id);
+        const obj = {
+          ...comment,
+          user: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            imageUrl: user.imageUrl
+          }
+        };
+        return obj;
+      })
+    )
+  );
   const saved = await isBlogSaved(params.id);
   if (!blog) return;
   const content = JSON.parse(JSON.stringify(blog.content)) as OutputData;
@@ -35,22 +52,34 @@ const page: FC<Props> = async ({ params }) => {
               alt="User Image"
             />
             <div>
-              <p className=" font-bold text-lg">
-                {user.firstName + " " + user.lastName}
-              </p>
+              <div className=" font-bold text-lg">
+                <p>
+                  {user.firstName + " " + (user.lastName ? user.lastName : "")}
+                </p>
+              </div>
               <p className=" ">{blog.createdAt.toDateString()}</p>
             </div>
           </div>
           <div>
             <div className="flex gap-2">
-              <UserInteraction blogId = {blog.id} saved = {saved}/>
+              <UserInteraction
+                blogId={blog.id}
+                saved={saved}
+                comments={fullComment}
+              />
             </div>
           </div>
         </div>
-        {blog.coverImage ? <img src={blog.coverImage} className=" m-auto w-[80%] h-[300px] my-10" alt="" /> : null}
+        {blog.coverImage ? (
+          <img
+            src={blog.coverImage}
+            className=" m-auto w-[80%] h-[300px] my-10"
+            alt=""
+          />
+        ) : null}
         <BlogView content={content} />
-        <Separator className=" my-5"/>
-        <TopicList topics = {blog.topics}/>
+        <Separator className=" my-5" />
+        <TopicList topics={blog.topics} />
       </div>
     </div>
   );

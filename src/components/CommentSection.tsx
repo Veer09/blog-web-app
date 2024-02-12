@@ -1,38 +1,44 @@
 import {
-  PastComments,
   commentDeleteSchema,
-  commentGetResponseSchema,
   replayCommentSchema,
-  repliesGetSchema,
+
 } from "@/type/comment";
-import { auth, clerkClient, useUser } from "@clerk/nextjs";
-import { Comment } from "@prisma/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
+import { useMutation} from "@tanstack/react-query";
 import axios from "axios";
-import React, { FC, useState } from "react";
-import { Button } from "../ui/button";
-import { toast } from "../ui/use-toast";
-import { Textarea } from "../ui/textarea";
+import React, { FC, useEffect, useRef, useState } from "react";
+import { Button } from "./ui/button";
+import { toast } from "./ui/use-toast";
+import { Textarea } from "./ui/textarea";
 import ShowPastComment from "./ShowPastComment";
+import { Comment } from "@prisma/client";
+import { User } from "@clerk/nextjs/server";
+import { useRouter } from "next/navigation";
 
 interface CommentProps {
-  comment: PastComments;
+  comment: Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}};
+  allComments: Array<Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}}>;
 }
 
-const CommentSection: FC<CommentProps> = ({ comment }) => {
+const CommentSection: FC<CommentProps> = ({ comment, allComments }) => {
   const { user } = useUser();
+  const router = useRouter();
   const [reply, setReply] = useState<string>("");
   const [show, setShow] = useState<boolean>(false);
   const [showReply, setShowReply] = useState<boolean>(false);
-  const [pastReplies, setPastReplies] = useState<PastComments[] | undefined>()
+  const replies = allComments.filter(comm => comm.reply_id === comment.id)
+
   const { mutate: deleteComment } = useMutation({
     mutationFn: () => {
       const payloadObj = {
-        comment: comment.comment.id,
-        userId: comment.user.id,
+        comment: comment.id,
+        userId: comment.user_id,
       };
       const payload = commentDeleteSchema.parse(payloadObj);
       return axios.post("/api/comment/delete", { payload });
+    },
+    onSuccess: () => {
+      router.refresh();
     },
     onError: (err) => {
       toast({
@@ -42,17 +48,21 @@ const CommentSection: FC<CommentProps> = ({ comment }) => {
     },
   });
 
+
+
   const { mutate: replyComment } = useMutation({
     mutationFn: () => {
       const payloadObj = {
         comment: reply,
-        commentId: comment.comment.id,
-        blogId: comment.comment.blog_id,
+        commentId: comment.id,
+        blogId: comment.blog_id,
       };
       const payload = replayCommentSchema.parse(payloadObj);
       return axios.post("/api/comment/reply", payload);
     },
-
+    onSuccess: () => {
+      router.refresh();
+    },
     onError: (error) => {
       toast({
         variant: 'destructive',
@@ -61,28 +71,10 @@ const CommentSection: FC<CommentProps> = ({ comment }) => {
     }
   });
 
-  const { mutate: getReplies } = useMutation({
-    mutationFn: () => {
-      const commentId  = repliesGetSchema.parse(comment.comment.id);
-      return axios.post('/api/comment/getReplies', { commentId })
-    },
-    onSuccess: (response) => {
-      setShowReply(!showReply);
-      const res = commentGetResponseSchema.safeParse(response.data);
-      if(!res.success) return ;
-      setPastReplies(res.data);
-    },
-    onError: (error) => {
-      console.log(error);
-      toast({
-        variant: 'destructive',
-        title: error.message
-      })
-    }
-  })
   if (!user) return;
+
   return (
-    <div className=" border-b-2 ">
+    <div>
       <div className=" flex justify-between items-center">
         <div className=" flex gap-4 my-4 items-center">
           <img
@@ -94,25 +86,25 @@ const CommentSection: FC<CommentProps> = ({ comment }) => {
             <p className=" text-lg font-semibold">
               {comment.user.firstName} {comment.user.lastName}
             </p>
-            <p>{comment.comment.content}</p>
+            <p>{comment.content}</p>
           </div>
         </div>
         <div>
-          {user?.id === comment.user.id ? (
+          {user?.id === comment.user_id ? (
             <Button onClick={() => deleteComment()}>Delete</Button>
           ) : (
-            <Button onClick={() => setShow(!show)}>Reply</Button>
+            <Button onClick={() => setShow(!show)}>{(show) ? "Close" : "Reply"}</Button>
           )}
         </div>
       </div>
       <div>
-        {comment.comment._count.replies != 0 ? (
+        {replies.length != 0 ? (
           (!showReply) ? 
-          <Button variant="link" onClick={() => getReplies()}>{comment.comment._count.replies + " Replies"}</Button>
+          <Button variant="link" onClick={() => setShowReply(!showReply)}>{replies.length + " Replies"}</Button>
           : 
           <div>
             <Button variant="link" onClick={() => setShowReply(!showReply)}>Hide Replies</Button>
-            <ShowPastComment pastComments={pastReplies}/>            
+            <ShowPastComment pastComments={allComments} baseComment={comment} />            
           </div>
         ) : null}
       </div>

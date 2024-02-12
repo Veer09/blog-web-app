@@ -15,6 +15,7 @@ export const POST = async (req: NextRequest) => {
   if (!userId) {
     return NextResponse.json("Unauthorized", { status: 400 });
   }
+  
   try {
     const blogData = await prisma.blog.create({
       data: {

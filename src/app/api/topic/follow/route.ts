@@ -2,6 +2,7 @@ import { TopicFollowSchema } from "@/type/topic";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -46,6 +47,7 @@ export const POST = async (req: NextRequest) => {
         }
       }
     })
+    revalidateTag('followedTopics');
     return NextResponse.json({ followObj });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
