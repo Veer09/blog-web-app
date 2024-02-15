@@ -23,6 +23,7 @@ model User {
     followers       User[]    @relation("UserFollows")
     following       User[]    @relation("UserFollows")
     comments        Comment[]
+    likes           Like[]
 }
 
 model Comment {
@@ -37,6 +38,13 @@ model Comment {
     blog    Blog   @relation(fields: [blog_id], references: [id])
 }
 
+model Like {
+    user_id String
+    user    User   @relation(fields: [user_id], references: [id])
+    blog_id String
+    blog    Blog   @relation(fields: [blog_id], references: [id])
+    @@unique([user_id, blog_id])
+}
 model Blog {
     id          String    @id @default(cuid())
     content     Json
@@ -50,4 +58,5 @@ model Blog {
     readedBy    User[]    @relation("ReadingHistory")
     comments    Comment[]
     topics      Topic[]
+    like        Like[]
 }

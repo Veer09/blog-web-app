@@ -1,6 +1,5 @@
+"use client"
 import React, {
-  Dispatch,
-  SetStateAction,
   useEffect,
   useRef,
   useState,
@@ -9,7 +8,7 @@ import EditorJS, { OutputData } from "@editorjs/editorjs";
 import { EDITOR_TOOLS } from "../lib/tools";
 import { Button } from "./ui/button";
 import axios, { AxiosError } from "axios";
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { blogSchema, blogUploadSchema } from "@/type/blog";
 import {
   Drawer,
@@ -19,7 +18,6 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-  DrawerFooter,
 } from "@/components/ui/drawer";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -32,11 +30,9 @@ import { useRouter } from "next/navigation";
 export default function Editor({
   holder,
   data,
-  setData,
 }: {
   holder: string;
   data: OutputData | undefined;
-  setData: Dispatch<SetStateAction<OutputData | undefined>>;
 }) {
   const ref = useRef<EditorJS>();
   const [title, setTitle] = useState("");
@@ -86,8 +82,8 @@ export default function Editor({
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,
-        autofocus: true,
         data: data,
+        placeholder: "Write your blog here...",
         inlineToolbar: true,
       });
       ref.current = editor;

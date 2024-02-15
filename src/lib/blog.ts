@@ -1,5 +1,6 @@
 import { unstable_noStore } from "next/cache";
 import prisma from "./db";
+
 export const findBlogById = async (blogId : string) => {
   unstable_noStore();
   const blog = await prisma.blog.findFirst({
@@ -8,7 +9,8 @@ export const findBlogById = async (blogId : string) => {
     },
     include: {
       topics: true,
-      comments: true
+      comments: true,
+      like: true,
     }
   });
   return blog;

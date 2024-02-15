@@ -1,24 +1,20 @@
-import BlogView from "@/components/BlogView";
 import BlogCard from "@/components/BlogCard";
+import { Separator } from "@/components/ui/separator";
 import { findLatestBlog } from "@/lib/blog";
-import { getFollowBlogs } from "@/lib/user";
 import React, { FC } from "react";
+
 interface Props {
   params: {
-    name: string;
+    id: string;
   };
 }
 const page: FC<Props> = async ({ params }) => {
-  const name = decodeURI(params.name);
-  let blogs;
-  if (name === "following") {
-    blogs = await getFollowBlogs();
-  } else {
-    blogs = await findLatestBlog(name);
-  }
-  if(!blogs) return ;
+  const blogs = await findLatestBlog(params.id);
+  if (!blogs) return;
   return (
-    <div className=" w-[70%]">
+    <div className=" container my-10">
+      <p className=" text-2xl font-bold text-left my-5">{params.id}</p>
+      <Separator className=" h-[2px]" />
       {blogs.map((blog, key) => {
         return <BlogCard blog={blog} key={key} />;
       })}

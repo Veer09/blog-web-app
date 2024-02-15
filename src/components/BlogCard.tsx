@@ -9,10 +9,9 @@ interface BlogCardprops {
 }
 
 const BlogCard: FC<BlogCardprops> = ({ blog }) => {
-  const user = useUser();
   const router = useRouter();
   return (
-    <div className=" flex gap-4 justify-between items-center mx-10 h-44 " onClick={() => router.replace(`/blog/${blog.id}`)}>
+    <div className=" flex gap-4 justify-between cursor-pointer items-center mx-10 h-44 " onClick={() => router.replace(`/blog/${blog.id}`)}>
       <div className=" flex flex-col justify-evenly h-full">
         <div>
           <p className=" text-xl font-bold py-3">{blog.title}</p>

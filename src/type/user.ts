@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const savedBySchema = z.string();
 
-export const UserFollowSchema = z.string().length(25);
+export const UserFollowSchema = z.string();
 export type UserDetails = {
     id: string;
     _count: {

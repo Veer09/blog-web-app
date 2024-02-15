@@ -65,7 +65,7 @@ export const getUnfollowedUsers = async (
   if (!userId) return [];
   const users = await prisma.user.findMany({
     where: {
-      following: {
+      followers: {
         none: {
           id: userId,
         },
@@ -212,12 +212,14 @@ export const getFollowBlogs = async () => {
     },
   });
   if (!blogs) return;
-  let blogsArray = [];
+  let blogsArray: Blog[] = [];
   blogs.following.forEach((following) => {
     following.blogs.forEach((blogs) => {
       blogsArray.push(blogs);
     });
   });
+  blogsArray.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return blogsArray;
 };
 
 export const isBlogSaved = async (blogId: string) => {
@@ -236,3 +238,18 @@ export const isBlogSaved = async (blogId: string) => {
   if (!blog) return false;
   return true;
 };
+
+export const isBlogLiked = async (blogId: string) => {
+  const { userId } = auth();
+  if (!userId) return false;
+  const blog = await prisma.like.findUnique({
+    where: {
+      user_id_blog_id: {
+        user_id: userId,
+        blog_id: blogId,
+      },
+    },
+  });
+  if (!blog) return false;
+  return true;
+}

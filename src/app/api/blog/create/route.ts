@@ -27,8 +27,8 @@ export const POST = async (req: NextRequest) => {
         topics: {
           connectOrCreate: (blog.data.topics) ? blog.data.topics.map((topic) => {
             return {
-              where: { name: topic },
-              create: { name: topic },
+              where: { name: topic.trim().charAt(0).toUpperCase() + topic.trim().slice(1).toLowerCase()},
+              create: { name: topic.trim().charAt(0).toUpperCase() + topic.trim().slice(1).toLowerCase() },
             };
           }) : undefined,
         },

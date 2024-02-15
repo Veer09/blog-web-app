@@ -6,6 +6,7 @@ import { OutputData } from "@editorjs/editorjs";
 interface BlogViewProps{
     content: OutputData
 }
+
 const BlogView: FC<BlogViewProps> = ({ content }) => {
     const edjsParser = edjsHTML();
     const html = edjsParser.parse(content);

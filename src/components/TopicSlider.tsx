@@ -19,7 +19,7 @@ const TopicSlider: FC<TopicSliderProps> = ({ topics }) => {
   const currentTopic = decodeURI(pathname.split("/")[2]);
   if (!topics) return;
   return (
-    <ScrollArea className=" w-[50%]">
+    <ScrollArea className=" w-[70%]">
       <Tabs value={currentTopic} >
         <TabsList>
           <TabsTrigger value="add">

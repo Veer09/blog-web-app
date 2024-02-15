@@ -27,6 +27,7 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
       setUser({...user, _count: { followers: user._count.followers + 1, blogs: user._count.blogs }, isFollowed: !user.isFollowed});
     },
     onError: (err) => {
+      setUser({...user, _count: { followers: user._count.followers + 1, blogs: user._count.blogs }, isFollowed: !user.isFollowed});
         if(err instanceof ZodError || err instanceof AxiosError){
             toast({ 
               title: "Incorrect Data",
@@ -34,7 +35,6 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
               variant: 'destructive'
             })
         }
-        router.refresh();
     },
   });
 

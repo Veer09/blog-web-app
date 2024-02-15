@@ -13,14 +13,6 @@ export const POST = async (req: NextRequest) => {
     if (!userId)
       return NextResponse.json({ error: "User Unauthorized" }, { status: 401 });
 
-    const validTopic = await prisma.topic.findFirst({
-      where: {
-        id: topicId,
-      },
-    });
-    if (!validTopic)
-      return NextResponse.json({ error: "Topic Not Found" }, { status: 400 });
-
     const alreadyFollowed = await prisma.user.findFirst({
       where: {
         id: userId,
