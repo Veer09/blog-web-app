@@ -1,8 +1,10 @@
 import { unstable_noStore } from "next/cache";
 import prisma from "./db";
+import { auth } from "@clerk/nextjs";
 
 export const findBlogById = async (blogId : string) => {
-  unstable_noStore();
+  const { userId } = auth();
+  if(!userId) return;
   const blog = await prisma.blog.findFirst({
     where: {
       id: blogId,
@@ -10,21 +12,13 @@ export const findBlogById = async (blogId : string) => {
     include: {
       topics: true,
       comments: true,
-      like: true,
+      _count: {
+        select: {
+          like: true,
+        }
+      }
     }
   });
   return blog;
 };
 
-export const findLatestBlog = async (topicName : string) => {
-  const blogs = await prisma.blog.findMany({
-    where: {
-      topics: {
-        some: {
-          name: topicName
-        }
-      }
-    }
-  })
-  return blogs
-}

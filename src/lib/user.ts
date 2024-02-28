@@ -1,255 +1,121 @@
 import { auth } from "@clerk/nextjs";
-import prisma from "./db";
-import { TopicDetails } from "@/type/topic";
-import { Blog, Topic } from "@prisma/client";
-import { unstable_cache } from "next/cache";
-import { UserDetails } from "@/type/user";
+import { redis } from "./redis";
+import { cachedBlog } from "@/type/blog";
+import { cachedUser } from "@/type/user";
+import { cachedTopic } from "@/type/topic";
 
-export const getUserWithCounts = async (): Promise<UserDetails[] | null> => {
-  const { userId } = auth();
-  if (!userId) return null;
-  const user = await prisma.user.findFirst({
-    where: {
-      id: userId,
-    },
-    select: {
-      following: {
-        select: {
-          id: true,
-          _count: true,
-        },
-      },
-    },
-  });
-  if (!user) return null;
-  return user.following;
-};
-
-export const getUserFollowingDetails = async (
+export const getUserFollowings = async (
   count: number | undefined
-): Promise<UserDetails[]> => {
+) => {
   const { userId } = auth();
   if (!userId) return [];
-  const user = await prisma.user.findFirst({
-    where: {
-      id: userId,
-    },
-    select: {
-      following: {
-        select: {
-          id: true,
-          _count: {
-            select: {
-              followers: true,
-              blogs: true,
-            },
-          },
-        },
-        orderBy: {
-          followers: {
-            _count: "desc",
-          },
-        },
-        take: count,
-      },
-    },
-  });
-  if (!user) return [];
-  return user.following;
+  const users = await redis.smembers(`user:${userId}:following`);
+  if (users.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  if(!count) count = users.length;  
+  if(count > users.length) count = users.length;
+  for(let i = 0; i < count; i++) {
+    redisPipe.hgetall(`user:${users[i]}`);
+  }
+  const following = await redisPipe.exec(); 
+  return following as cachedUser[]; 
 };
 
 export const getUnfollowedUsers = async (
   count: number | undefined
-): Promise<UserDetails[]> => {
+) => {
   const { userId } = auth();
   if (!userId) return [];
-  const users = await prisma.user.findMany({
-    where: {
-      followers: {
-        none: {
-          id: userId,
-        },
-      },
-      id: {
-        not: userId,
-      }
-    },
-    select: {
-      id: true,
-      _count: {
-        select: {
-          followers: true,
-          blogs: true,
-        },
-      },
-    },
-    orderBy: {
-      followers: {
-        _count: "desc",
-      },
-    },
-    take: count,
-  });
-  return users;
+  const unfollowed = await redis.sdiff(`users`, `user:${userId}:following`);
+  if (unfollowed.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  if(!count) count = unfollowed.length;  
+  if(count > unfollowed.length) count = unfollowed.length;
+  for(let i = 0; i < count; i++) {
+    if(unfollowed[i] === userId) {
+      continue
+    };
+    redisPipe.hgetall(`user:${unfollowed[i]}`);
+  }
+  if(redisPipe.length() === 0) return [];
+  const unfollowedUsers = await redisPipe.exec();
+  return unfollowedUsers as cachedUser[];
 };
 
-export const getUserTopic = unstable_cache(
-  async () => {
-    const { userId } = auth();
-    if (!userId) return null;
-    const topics = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-      select: {
-        topics: true,
-      },
-    });
-    return topics;
-  },
-  ["topics", "followed"],
-  {
-    tags: ["followedTopics"],
+export const getUserTopics = async (count: number | undefined) => {
+  const { userId } = auth();
+  if (!userId) return [];
+  const topics = await redis.smembers(`user:${userId}:topics`);
+  if (topics.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  if(!count) count = topics.length;  
+  if(count > topics.length) count = topics.length;
+  for(let i = 0; i < count; i++) {
+    redisPipe.hgetall(`topic:${topics[i]}`);
   }
-);
+  const topicData: any = await redisPipe.exec();
+  return topicData as cachedTopic[];
+}
 
-export const getUserTopicDetail = unstable_cache(
-  async (count: number | undefined): Promise<TopicDetails[]> => {
-    const { userId } = auth();
-    if (!userId) return [];
-
-    const topics = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
-      select: {
-        topics: {
-          select: {
-            id: true,
-            name: true,
-            _count: true,
-            users: true,
-          },
-          take: count,
-        },
-      },
-    });
-    if (!topics) return [];
-    return topics.topics;
-  },
-  ["topics", "followedCount"],
-  {
-    tags: ["followedTopics"],
+export const getUnfollowedTopics = async (count: number | undefined) => {
+  const { userId } = auth();
+  if (!userId) return [];
+  const unfollowed = await redis.sdiff(`topics`, `user:${userId}:topics`);
+  if (unfollowed.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  if(!count) count = unfollowed.length;  
+  if(count > unfollowed.length) count = unfollowed.length;
+  for(let i = 0; i < count; i++) {
+    redisPipe.hgetall(`topic:${unfollowed[i]}`);
   }
-);
+  const unfollowedTopics = await redisPipe.exec();
+  return unfollowedTopics as cachedTopic[];
+}
 
-export const getUnfollowedTopics = unstable_cache(
-  async (count: number | undefined): Promise<TopicDetails[]> => {
-    const { userId } = auth();
-    if (!userId) return [];
-
-    const unfollowedTopics = await prisma.topic.findMany({
-      where: {
-        users: {
-          none: {
-            id: userId,
-          },
-        },
-      },
-      include: {
-        _count: true,
-        users: true,
-      },
-      take: count,
-    });
-    return unfollowedTopics;
-  },
-  ["topics", "unfollowed"],
-  {
-    tags: ["followedTopics"],
-  }
-);
-
-export const getUserBlogs = async (): Promise<Blog[] | null> => {
+export const getUserBlogs = async () => {
   const { userId } = auth();
   if (!userId) return null;
-  const blogs = await prisma.blog.findMany({
-    where: {
-      user_id: userId,
-    },
+  const blogs: string[] | null = await redis.lrange(`user:${userId}:blogs`, 0, -1);
+  if(blogs.length === 0) return null;
+  const redisPipe = redis.pipeline();
+  blogs.forEach((blog) => {
+    redisPipe.hgetall(`blog:${blog}`);
   });
-  return blogs;
+  const blogData: any = await redisPipe.exec();
+  return blogData as cachedBlog[];
 };
 
 export const getSavedBlog = async () => {
   const { userId } = auth();
-  if (!userId) return;
-  const savedBlog = await prisma.user.findFirst({
-    where: {
-      id: userId,
-    },
-    select: {
-      saved_blog: true,
-    },
+  if (!userId) return null;
+  const blogs = await redis.smembers(`user:${userId}:saved`);
+  if (blogs.length === 0) return null;
+  const redisPipe = redis.pipeline();
+  blogs.forEach((blog) => {
+    redisPipe.hgetall(`blog:${blog}`);
   });
-  if (!savedBlog) return;
-  return savedBlog.saved_blog;
+  const blogData: any = await redisPipe.exec();
+  return blogData as cachedBlog[];
 };
 
-export const getFollowBlogs = async () => {
+export const getFeedBlogs = async (count: number, index: number) => {
   const { userId } = auth();
   if (!userId) return;
-  const blogs = await prisma.user.findFirst({
-    where: {
-      id: userId,
-    },
-    select: {
-      following: {
-        select: {
-          blogs: true,
-        },
-      },
-    },
+  const feed: string[] = await redis.zrange(`user:${userId}:feed`, index, index + count -1, {
+    rev: true,
   });
-  if (!blogs) return;
-  let blogsArray: Blog[] = [];
-  blogs.following.forEach((following) => {
-    following.blogs.forEach((blogs) => {
-      blogsArray.push(blogs);
+  if (feed.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  feed.forEach((blog) => {
+    redisPipe.hgetall(`blog:${blog}`);
+    redisPipe.zadd(`user:${userId}:feed`, {
+      score: Date.now(),
+      member: blog,
     });
-  });
-  blogsArray.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  return blogsArray;
+  })
+  const blogData = await redisPipe.exec();
+  console.log(blogData);
+  return blogData.filter((blog: any, index) => !(index%2)) as cachedBlog[];
 };
 
-export const isBlogSaved = async (blogId: string) => {
-  const { userId } = auth();
-  if (!userId) return false;
-  const blog = await prisma.user.findFirst({
-    where: {
-      id: userId,
-      saved_blog: {
-        some: {
-          id: blogId,
-        },
-      },
-    },
-  });
-  if (!blog) return false;
-  return true;
-};
 
-export const isBlogLiked = async (blogId: string) => {
-  const { userId } = auth();
-  if (!userId) return false;
-  const blog = await prisma.like.findUnique({
-    where: {
-      user_id_blog_id: {
-        user_id: userId,
-        blog_id: blogId,
-      },
-    },
-  });
-  if (!blog) return false;
-  return true;
-}

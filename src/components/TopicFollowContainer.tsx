@@ -1,4 +1,4 @@
-import { TopicDetails } from "@/type/topic";
+import { cachedTopic } from "@/type/topic";
 import React, { FC } from "react";
 import TopicsSelect from "./TopicsSelect";
 import { auth } from "@clerk/nextjs";
@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TopicFollowContainerProps {
-  topics: TopicDetails[];
+  topics: cachedTopic[];
   isFollowed: boolean;
 }
 
@@ -18,7 +18,6 @@ const TopicFollowContainer: FC<TopicFollowContainerProps> = ({
   if (!userId) {
     redirect("/sign-in");
   }
-  
   return (
     <div>
         {topics.map((topic, key) => {

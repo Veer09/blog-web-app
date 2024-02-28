@@ -1,4 +1,4 @@
-import { UserDetails } from "@/type/user";
+import { UserDetails, cachedUser } from "@/type/user";
 import { Dialog, DialogTrigger, DialogContent } from "./ui/dialog";
 import { Separator } from "./ui/separator";
 import React, { FC } from "react";
@@ -11,11 +11,12 @@ import {
 } from "./ui/card";
 import UserFollowContainer from "./UserFollowContainer";
 import UserFollowList from "./UserFollowList";
-import { getUnfollowedUsers, getUserFollowingDetails } from "@/lib/user";
+import { getUserFollowings } from "@/lib/user";
+
 
 interface UserFollowProps {
   title: string;
-  users: UserDetails[];
+  users: cachedUser[];
   followed: boolean;
 }
 
@@ -40,9 +41,7 @@ const UserFollow: FC<UserFollowProps> = async ({ title, users, followed }) => {
               <DialogContent>
                 <UserFollowList
                   users={
-                    !followed
-                      ? await getUnfollowedUsers(undefined)
-                      : await getUserFollowingDetails(undefined)
+                    await getUserFollowings(undefined)
                   }
                   isFollowed={followed}
                 />

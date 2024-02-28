@@ -8,8 +8,7 @@ generator client {
 }
 
 model Topic {
-    id    String @id @default(cuid())
-    name  String @unique
+    name  String @id @unique
     users User[]
     blogs Blog[]
 }

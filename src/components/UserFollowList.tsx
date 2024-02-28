@@ -1,4 +1,4 @@
-import { UserDetails } from "@/type/user";
+import { UserDetails, cachedUser } from "@/type/user";
 import React, { FC } from "react";
 import UserSelect from "./UserSelect";
 import { auth, clerkClient } from "@clerk/nextjs";
@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface UserFollowListProps {
-  users: UserDetails[];
+  users: cachedUser[];
   isFollowed: boolean;
 }
 

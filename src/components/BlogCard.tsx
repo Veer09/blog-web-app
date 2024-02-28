@@ -1,11 +1,12 @@
 "use client";
+import { cachedBlog } from "@/type/blog";
 import { useUser } from "@clerk/nextjs";
 import { Blog } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import React, { FC } from "react";
 
 interface BlogCardprops {
-  blog: Blog;
+  blog: cachedBlog;
 }
 
 const BlogCard: FC<BlogCardprops> = ({ blog }) => {
@@ -18,7 +19,7 @@ const BlogCard: FC<BlogCardprops> = ({ blog }) => {
           <p className=" text-sm text-slate-600">{blog.description}</p>
         </div>
         <p className=" text-xs">
-          {"Published At" + " : " + blog.createdAt.toDateString()}
+          {"Published At" + " : " + blog.createdAt}
         </p>
       </div>
       {blog.coverImage ? (

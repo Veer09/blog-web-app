@@ -1,4 +1,3 @@
-import { getUnfollowedTopics, getUserTopicDetail } from "@/lib/user";
 import React, { FC } from "react";
 import {
   Card,
@@ -11,11 +10,12 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import TopicFollowContainer from "@/components/TopicFollowContainer";
 import TopicList from "@/components/TopicFollowList";
-import { TopicDetails } from "@/type/topic";
+import { cachedTopic } from "@/type/topic";
+import { getUserTopics } from "@/lib/user";
 
 interface TopicFollowProps {
   title: string;
-  topics: TopicDetails[];
+  topics: cachedTopic[];
   followed: boolean;
 }
 
@@ -36,21 +36,19 @@ const TopicFollow: FC<TopicFollowProps> = async ({
           <TopicFollowContainer topics={topics} isFollowed={followed} />
         </CardContent>
         <CardFooter>
+          {topics.length < 7 ? null : (
             <Dialog>
               <DialogTrigger className=" underline underline-offset-2 font-extrabold">
                 Show More Topics
               </DialogTrigger>
               <DialogContent>
                 <TopicList
-                  topics={
-                    !followed
-                      ? await getUnfollowedTopics(undefined)
-                      : await getUserTopicDetail(undefined)
-                  }
+                  topics={await getUserTopics(undefined)}
                   isFollowed={followed}
                 />
               </DialogContent>
             </Dialog>
+          )}
         </CardFooter>
       </Card>
     </div>

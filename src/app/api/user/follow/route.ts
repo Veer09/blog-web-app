@@ -1,3 +1,4 @@
+import { redis } from "@/lib/redis";
 import { UserFollowSchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
@@ -13,16 +14,8 @@ export const POST = async (req: NextRequest) => {
       return NextResponse.json({ error: "Invalid followerId" }, { status: 400 });
     if (followerId.data === userId)     
         return NextResponse.json({ error: "User cannot follow itself" }, { status: 400 });
-    const isFollowed = await prisma.user.findFirst({
-        where: {
-            id: userId,
-            following: {
-                some: {
-                    id: followerId.data
-                }
-            }
-        }
-    })
+
+    const isFollowed = await redis.sismember(`user:${userId}:following`, followerId.data);
     if(isFollowed)
         return NextResponse.json({ error: "User already followed" }, { status: 400 });
     await prisma.user.update({
@@ -37,6 +30,8 @@ export const POST = async (req: NextRequest) => {
             }
         }
     });
+    await redis.sadd(`user:${followerId.data}:followers`, userId);
+    await redis.hincrby(`user:${followerId.data}`, "followers", 1);
     return NextResponse.json({ message: "User followed" }, { status: 200 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });

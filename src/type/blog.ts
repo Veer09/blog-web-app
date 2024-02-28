@@ -1,6 +1,4 @@
 import { OutputData } from "@editorjs/editorjs";
-import { Blog } from "@prisma/client";
-import { JsonValue } from "@prisma/client/runtime/library";
 import { z } from "zod";
 
 
@@ -13,8 +11,12 @@ export const blogUploadSchema = z.object({
     topics: z.array(z.string()).optional()
 });
 
-export const blogSchema = z.custom<Blog>()
+export const blogSchema = z.string()
 
-
-
-
+export type cachedBlog = {
+    id: string;
+    title: string;
+    description: string;
+    coverImage: string;
+    createdAt: string;
+}

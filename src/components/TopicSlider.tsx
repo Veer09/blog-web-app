@@ -5,13 +5,11 @@ import Link from "next/link";
 import { PlusIcon } from "lucide-react";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { usePathname } from "next/navigation";
+import { cachedTopic } from "@/type/topic";
 
 
 interface TopicSliderProps {
-    topics: {
-      id: string;
-      name: string;
-    }[] | null 
+    topics: cachedTopic[]; 
 }
 
 const TopicSlider: FC<TopicSliderProps> = ({ topics }) => {
@@ -30,9 +28,9 @@ const TopicSlider: FC<TopicSliderProps> = ({ topics }) => {
           <TabsTrigger value="following">
             <Link href="/dashboard/following">Following</Link>
           </TabsTrigger>
-          {topics.map((topic) => {
+          {topics.map((topic, key) => {
             return (
-              <TabsTrigger value={topic.name} key={topic.id}>
+              <TabsTrigger value={topic.name} key={key}>
                 <Link href={`/dashboard/${topic.name}`}>{topic.name}</Link>
               </TabsTrigger>
             );

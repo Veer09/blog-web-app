@@ -2,15 +2,15 @@
 import React, { FC, useContext, useState } from "react";
 import { Button } from "./ui/button";
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import { UserDetails, UserFollowSchema } from "@/type/user";
+import { UserFollowSchema, cachedUser } from "@/type/user";
 import axios, { AxiosError } from "axios";
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "./ui/use-toast";
 
 interface UserFollowButtonProps {
-  user: UserDetails & { isFollowed: boolean, name: string}, 
-  setUser: (user: UserDetails & { isFollowed: boolean, name: string}) => void
+  user: cachedUser & { isFollowed: boolean, name: string}, 
+  setUser: (user: cachedUser & { isFollowed: boolean, name: string}) => void
 }
 
 const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
@@ -24,10 +24,14 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
       return axios.post("/api/user/follow", {payload});
     },
     onMutate: () => {
-      setUser({...user, _count: { followers: user._count.followers + 1, blogs: user._count.blogs }, isFollowed: !user.isFollowed});
+      setUser({
+        ...user,
+        blogs: user.blogs,
+        followers: (parseInt(user.followers) + 1).toString(),
+        isFollowed: !user.isFollowed,
+      });
     },
     onError: (err) => {
-      setUser({...user, _count: { followers: user._count.followers + 1, blogs: user._count.blogs }, isFollowed: !user.isFollowed});
         if(err instanceof ZodError || err instanceof AxiosError){
             toast({ 
               title: "Incorrect Data",
@@ -35,6 +39,7 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
               variant: 'destructive'
             })
         }
+        router.refresh();
     },
   });
 
@@ -45,8 +50,12 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
       return axios.post('/api/user/unfollow', {payload})
     },
     onMutate: () => {
-      setUser({...user, _count: { followers: user._count.followers - 1, blogs: user._count.blogs}, isFollowed: !user.isFollowed});
-    },
+      setUser({
+        ...user,
+        blogs: user.blogs,
+        followers: (parseInt(user.followers) - 1).toString(),
+        isFollowed: !user.isFollowed,
+      });    },
     onError: (err) => {
       if(err instanceof ZodError || err instanceof AxiosError){
         toast({ 

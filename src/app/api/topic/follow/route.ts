@@ -2,45 +2,40 @@ import { TopicFollowSchema } from "@/type/topic";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { redis } from "@/lib/redis";
 
 export const POST = async (req: NextRequest) => {
   try {
     const { payload } = await req.json();
-    const topicId = TopicFollowSchema.parse(payload);
+    const topicName = TopicFollowSchema.safeParse(payload);
+    if (!topicName.success)
+      return NextResponse.json({ error: "Invalid topicName" }, { status: 400 });
 
     const { userId } = auth();
     if (!userId)
       return NextResponse.json({ error: "User Unauthorized" }, { status: 401 });
 
-    const alreadyFollowed = await prisma.user.findFirst({
+    const isFollowed = await redis.sismember(`user:${userId}:topics`, topicName.data);
+
+    if (isFollowed)
+      return NextResponse.json({ error: "Already Followed" }, { status: 400 });
+
+    await prisma.user.update({
       where: {
         id: userId,
-        topics: {
-          some: {
-            id: topicId
-          }
-        }
-      }
-    })
-
-    if (alreadyFollowed)
-      return NextResponse.json({ error: "Already Followed" }, { status: 400 });
-    
-    const followObj = await prisma.user.update({
-      where: {
-        id: userId
       },
       data: {
         topics: {
           connect: {
-            id: topicId
-          }
-        }
-      }
-    })
-    revalidateTag('followedTopics');
-    return NextResponse.json({ followObj });
+            name: topicName.data,
+          },
+        },
+      },
+    });
+
+    await redis.sadd(`user:${userId}:topics`, topicName.data);
+    await redis.hincrby(`topic:${topicName.data}`, "followers", 1);
+    return NextResponse.json({ message: "sucess" }, { status: 200 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }

@@ -1,10 +1,11 @@
 'use client'
 import React, { FC, useState } from "react";
 import TopicFollowButton from "./TopicFollowButton";
-import { TopicDetails } from "@/type/topic";
+import { cachedTopic } from "@/type/topic";
+
 
 interface TopoicSelectProps{
-  followObj: TopicDetails & { isFollowed: boolean}
+  followObj: cachedTopic & { isFollowed: boolean}
 }
 
 const TopicsSelect: FC<TopoicSelectProps> = ({ followObj }) => {
@@ -15,7 +16,7 @@ const TopicsSelect: FC<TopoicSelectProps> = ({ followObj }) => {
       <div>
         <p className=" font-bold text-lg">{followObj.name}</p>
         <p className=" text-slate-600">
-          Followers: {topic._count.users} | Blogs: {topic._count.blogs}{" "}
+          Followers: {topic.followers} | Blogs: {topic.blogs}{" "}
         </p>
       </div>
       <TopicFollowButton topic = {topic} setTopic = {setTopic}/>

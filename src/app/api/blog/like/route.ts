@@ -1,5 +1,7 @@
+import { redis } from "@/lib/redis";
 import { savedBySchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
@@ -39,6 +41,9 @@ export const POST = async (req: NextRequest) => {
         blog_id: blogId.data,
       },
     });
+    await redis.sadd(`user:${userId}:liked`, blogId.data);
+    await redis.hincrby(`blog:${blogId.data}`, "likes", 1);
+    revalidateTag(`blog:${blogId.data}`)
     return NextResponse.json({
       status: 200,
       data: {

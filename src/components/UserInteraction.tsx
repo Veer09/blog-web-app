@@ -7,7 +7,6 @@ import { savedBySchema } from "@/type/user";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { Comment } from "@prisma/client";
-import { User } from "@clerk/nextjs/server";
 import { useRouter } from "next/navigation";
 
 interface UserInteractionProps {
@@ -19,20 +18,15 @@ interface UserInteractionProps {
 }
 const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, comments, liked, likes }) => {
   const router = useRouter();
-  const [like, setLike] = useState({
-    likes: likes,
-    liked: liked
-  })
+  const [isSaved, setIsSaved] = useState(saved);
+  const [like, setLike] = useState({liked, likes});
   const { mutate: saveBlog } = useMutation({
     mutationFn: () => {
       const payload = savedBySchema.parse(blogId);
       return axios.post('/api/blog/save', { payload })
     },
-    onSuccess: () => {
-      toast({
-        title: "Blog saved successfully!!"
-      })
-      router.refresh();
+    onMutate: () => {
+      setIsSaved(true);
     },
     onError: (err) => {
       toast({
@@ -46,11 +40,8 @@ const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, comments, li
       const payload = savedBySchema.parse(blogId);
       return axios.post('/api/blog/unsave', { payload })
     },
-    onSuccess: () => {
-      toast({
-        title: "Blog unsaved successfully!!"
-      })
-      router.refresh();
+    onMutate: () => {
+      setIsSaved(false);
     },
     onError: (err) => {
       toast({
@@ -64,18 +55,13 @@ const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, comments, li
     mutationFn: () => {
       const payload = savedBySchema.parse(blogId);
       return axios.post('/api/blog/like', { payload })
-    },
+    },  
     onMutate: () => {
       setLike({
-        likes: likes + 1,
-        liked: true
-      })
-    },    
-    onSuccess: () => {
-      toast({
-        title: "Blog liked successfully!!"
-      })
-    },
+        liked: true,
+        likes: like.likes + 1
+      });
+    },  
     onError: (err) => {
       toast({
         variant: "destructive",
@@ -90,14 +76,9 @@ const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, comments, li
     },
     onMutate: () => {
       setLike({
-        likes: likes,
-        liked: false
-      })
-    }, 
-    onSuccess: () => {
-      toast({
-        title: "Blog unliked successfully!!"
-      })
+        liked: false,
+        likes: like.likes - 1
+      });
     },
     onError: (err) => {
       toast({
@@ -111,7 +92,7 @@ const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, comments, li
     <>
       {((!like.liked) ? <Heart className=" cursor-pointer" onClick={() => likeBlog()}/> : <Heart fill="red" className=" cursor-pointer" onClick={() => unlikeBlog()}/>)} {like.likes}
       <CommentSheet comments={comments} blogId={blogId}/>
-      {(saved) ? <BookCheck className=" cursor-pointer" onClick={() => unSaveBlog()}/> : <BookmarkPlus className=" cursor-pointer" onClick={() => saveBlog()}/>}
+      {(isSaved) ? <BookCheck className=" cursor-pointer" onClick={() => unSaveBlog()}/> : <BookmarkPlus className=" cursor-pointer" onClick={() => saveBlog()}/>}
     </>
   );
 };

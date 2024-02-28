@@ -4,7 +4,6 @@ import TopicFollow from "@/components/TopicFollow";
 import { unstable_noStore } from "next/cache";
 import UserFollow from "@/components/UserFollow";
 const page = async () => {
-  unstable_noStore();
   const unfollowedTopic = await getUnfollowedTopics(7);
   const unfollowedUsers = await getUnfollowedUsers(7);
   return (

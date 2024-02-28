@@ -3,7 +3,9 @@ import Link from 'next/link'
 import React, { FC } from 'react'
 
 interface TopicListProps{
-    topics: Topic[]
+    topics: {
+        name: string
+    }[]
 }
 const TopicList: FC<TopicListProps> = ({ topics }) => {
     return(

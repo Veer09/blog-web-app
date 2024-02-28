@@ -2,6 +2,7 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
 import prisma from "@/lib/db";
+import { redis } from "@/lib/redis";
 const webhookSecret = process.env.WEBHOOK_SECRET || ``;
 
 
@@ -32,6 +33,17 @@ export async function POST(request: Request) {
         id: payload.data.id as string,
       },
     });
+  }
+  if(payload.type === 'user.created'){
+    await redis.hset(`user:${payload.data.id}`, { 
+      id: payload.data.id,
+      firstName: payload.data.first_name,
+      lastName: payload.data.last_name,
+      imageUrl: payload.data.image_url,
+      blogs: 0,
+      followers: 0,
+    });
+    await redis.sadd(`users`, payload.data.id);
   }
   if(payload.type === 'user.deleted'){
     await prisma.user.delete({

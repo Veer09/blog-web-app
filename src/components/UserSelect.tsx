@@ -1,10 +1,10 @@
 "use client";
-import { UserDetails } from "@/type/user";
+import { cachedUser } from "@/type/user";
 import React, { FC, useState } from "react";
 import UserFollowButton from "./UserFollowButton";
 
 interface UserSelectProps {
-  followObj: UserDetails & { isFollowed: boolean; name: string };
+  followObj: cachedUser & { isFollowed: boolean; name: string };
 }
 const UserSelect: FC<UserSelectProps> = ({ followObj }) => {
   const [user, setUser] = useState(followObj);
@@ -14,7 +14,7 @@ const UserSelect: FC<UserSelectProps> = ({ followObj }) => {
       <div>
         <p className=" font-bold text-lg">{followObj.name}</p>
         <p className=" text-slate-600">
-          Followers: {user._count.followers} | Blogs: {user._count.blogs}{" "}
+          Followers: {user.followers} | Blogs: {user.blogs}{" "}
         </p>
       </div>
       <div>
