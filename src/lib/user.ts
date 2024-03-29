@@ -98,24 +98,20 @@ export const getSavedBlog = async () => {
   return blogData as cachedBlog[];
 };
 
-export const getFeedBlogs = async (count: number, index: number) => {
+export const getFeedBlogs = async (index: number) => {
+  const count = 5;
   const { userId } = auth();
-  if (!userId) return;
-  const feed: string[] = await redis.zrange(`user:${userId}:feed`, index, index + count -1, {
-    rev: true,
-  });
+  if (!userId) return [];
+
+  const feed: string[] = await redis.zrange(`user:${userId}:feed`, ( index - 1) * count, (index) * count - 1);
+
   if (feed.length === 0) return [];
   const redisPipe = redis.pipeline();
   feed.forEach((blog) => {
     redisPipe.hgetall(`blog:${blog}`);
-    redisPipe.zadd(`user:${userId}:feed`, {
-      score: Date.now(),
-      member: blog,
-    });
   })
   const blogData = await redisPipe.exec();
-  console.log(blogData);
-  return blogData.filter((blog: any, index) => !(index%2)) as cachedBlog[];
+  return blogData as cachedBlog[];
 };
 
 

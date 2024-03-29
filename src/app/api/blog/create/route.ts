@@ -3,6 +3,7 @@ import { blogSchema, blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs";
 import prisma from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
@@ -25,6 +26,7 @@ export const POST = async (req: NextRequest) => {
       topic.trim().charAt(0).toUpperCase() + topic.trim().slice(1).toLowerCase()
     );
   });
+
   try {
     const blogData = await prisma.blog.create({
       data: {
@@ -52,6 +54,9 @@ export const POST = async (req: NextRequest) => {
       redisPipe.hsetnx(`topic:${topic}`, "blogs", 1);
       redisPipe.hsetnx(`topic:${topic}`, "followers", 0);
 
+      //revalidate topic
+      revalidateTag(`topic:${topic}`);
+
       //Storing topic name in topics set
       redisPipe.sadd(`topics`, topic);
     });
@@ -67,7 +72,7 @@ export const POST = async (req: NextRequest) => {
 
     //Storing blog information in user's blog list
     redisPipe.lpush(`user:${userId}:blogs`, blogData.id);
-
+    redisPipe.hincrby(`user:${userId}`, "blogs", 1);
     //Storing blog in feed of user's followers
     userFollowers.forEach((follower) => {
       redisPipe.zadd(`user:${follower}:feed`, {
@@ -85,3 +90,4 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json({ err: err }, { status: 405 });
   }
 };
+

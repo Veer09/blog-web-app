@@ -74,7 +74,7 @@ export default function Editor({
         if(!blog.success){
           return;
         }
-        router.replace(`/blog/${blog.data}`);
+        router.push(`/blog/${blog.data}`);
     },
   });
   useEffect(() => {

@@ -95,7 +95,7 @@ const page: FC<Props> = async ({ params }) => {
                   {user.firstName + " " + (user.lastName ? user.lastName : "")}
                 </p>
               </div>
-              <p>{new String(blog.createdAt)}</p>
+              <p>{new Date(blog.createdAt).toDateString()}</p>
             </div>
           </div>
           <div>

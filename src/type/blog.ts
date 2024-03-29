@@ -18,5 +18,5 @@ export type cachedBlog = {
     title: string;
     description: string;
     coverImage: string;
-    createdAt: string;
+    createdAt: string | Date;
 }

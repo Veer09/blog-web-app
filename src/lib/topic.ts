@@ -1,21 +1,24 @@
-
-export const getBlogByTopic = async (topicName : string) => {
-  const blogs = await prisma.blog.findMany({
+import { unstable_cache } from "next/cache"
+import prisma from "./db"
+export const getBlogByTopic = async (topic: string) => {
+  return prisma.blog.findMany({
     where: {
       topics: {
         some: {
-          name: topicName
+          name: topic
         }
       }
     },
     select: {
       id: true,
       title: true,
-      createdAt: true,
       description: true,
       coverImage: true,
+      createdAt: true,
+    },
+    orderBy: {
+      createdAt: 'desc'
     }
   })
-  return blogs.map(blog => { return { ...blog, createdAt: blog.createdAt.toString()} })
 }
 

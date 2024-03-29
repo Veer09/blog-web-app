@@ -1,4 +1,4 @@
-import { unstable_noStore } from "next/cache";
+import { unstable_cache, unstable_noStore } from "next/cache";
 import prisma from "./db";
 import { auth } from "@clerk/nextjs";
 
