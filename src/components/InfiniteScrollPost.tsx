@@ -30,7 +30,7 @@ const InfiniteScrollPost: FC<InfiniteScrollPostProps> = ({ blogs }) => {
     queryKey: ["blogs"],
     queryFn: ({ pageParam = 1 }) => getPosts(pageParam),
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.length > 0 ? allPages.length + 1 : undefined;
+      return lastPage.length == 5 ? allPages.length + 1 : undefined;
     },
     initialData: {
       pages: [blogs],

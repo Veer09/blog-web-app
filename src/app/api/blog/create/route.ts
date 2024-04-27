@@ -42,7 +42,7 @@ export const POST = async (req: NextRequest) => {
               create: { name: topic },
             };
           }),
-        },
+        },    
       },
     });
     const userFollowers = await redis.smembers(`user:${userId}:followers`);

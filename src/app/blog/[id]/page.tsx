@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { redis } from "@/lib/redis";
 import { cachedUser } from "@/type/user";
+import Image from "next/image";
 
 interface Props {
   params: {
@@ -84,7 +85,7 @@ const page: FC<Props> = async ({ params }) => {
         </div>
         <div className="border-y-2 justify-between flex py-3 my-8 px-3 gap-8 items-center">
           <div className=" flex gap-8 justify-center items-center">
-            <img
+            <Image
               src={user.imageUrl}
               className=" w-12 h-12 rounded-[50%]"
               alt="User Image"
@@ -111,7 +112,7 @@ const page: FC<Props> = async ({ params }) => {
           </div>
         </div>
         {blog.coverImage ? (
-          <img
+          <Image
             src={blog.coverImage}
             className=" m-auto w-[80%] h-[300px] my-10"
             alt=""

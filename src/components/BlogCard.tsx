@@ -1,5 +1,6 @@
 "use client";
 import { cachedBlog } from "@/type/blog";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { FC } from "react";
 
@@ -21,7 +22,7 @@ const BlogCard: FC<BlogCardprops> = ({ blog }) => {
         </p>
       </div>
       {blog.coverImage ? (
-        <img src={blog.coverImage} className=" h-24 w-24" alt="" />
+        <Image src={blog.coverImage} className=" h-24 w-24" alt="" />
       ) : null}
     </div>
   );

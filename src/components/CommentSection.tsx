@@ -6,14 +6,14 @@ import {
 import { useUser } from "@clerk/nextjs";
 import { useMutation} from "@tanstack/react-query";
 import axios from "axios";
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useState } from "react";
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
 import { Textarea } from "./ui/textarea";
 import ShowPastComment from "./ShowPastComment";
 import { Comment } from "@prisma/client";
-import { User } from "@clerk/nextjs/server";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface CommentProps {
   comment: Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}};
@@ -77,7 +77,7 @@ const CommentSection: FC<CommentProps> = ({ comment, allComments }) => {
     <div>
       <div className=" flex justify-between items-center">
         <div className=" flex gap-4 my-4 items-center">
-          <img
+          <Image
             src={comment.user.imageUrl}
             className=" w-6 h-6 rounded-[50%]"
             alt=""
