@@ -1,11 +1,10 @@
-import React, { FC } from "react";
+import { CommentData } from "@/type/comment";
+import { FC } from "react";
 import CommentSection from "./CommentSection";
-import { Comment } from "@prisma/client";
-import { User } from "@clerk/nextjs/server";
 
 interface ShowPastCommentProps {
-  pastComments: Array<Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}}> | undefined;
-  baseComment: Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}}| undefined
+  pastComments: CommentData[] | undefined;
+  baseComment: CommentData | undefined
 }
 
 const ShowPastComment: FC<ShowPastCommentProps> = ({ pastComments, baseComment }) => {

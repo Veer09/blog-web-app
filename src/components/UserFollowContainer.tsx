@@ -1,10 +1,8 @@
-import { UserDetails, cachedUser } from "@/type/user";
-import { auth, clerkClient } from "@clerk/nextjs";
+import { cachedUser } from "@/type/user";
+import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import React, { FC } from "react";
+import { FC } from "react";
 import UserSelect from "./UserSelect";
-import { redis } from "@/lib/redis";
-import { User } from "@clerk/nextjs/server";
 
 interface UserFollowContainerProps {
   users: cachedUser[];

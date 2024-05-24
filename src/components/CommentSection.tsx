@@ -1,4 +1,5 @@
 import {
+  CommentData,
   commentDeleteSchema,
   replayCommentSchema,
 
@@ -16,8 +17,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 interface CommentProps {
-  comment: Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}};
-  allComments: Array<Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}}>;
+  comment: CommentData
+  allComments: CommentData[];
 }
 
 const CommentSection: FC<CommentProps> = ({ comment, allComments }) => {
@@ -33,6 +34,7 @@ const CommentSection: FC<CommentProps> = ({ comment, allComments }) => {
       const payloadObj = {
         comment: comment.id,
         userId: comment.user_id,
+        blogId: comment.blog_id,
       };
       const payload = commentDeleteSchema.parse(payloadObj);
       return axios.post("/api/comment/delete", { payload });
@@ -79,7 +81,9 @@ const CommentSection: FC<CommentProps> = ({ comment, allComments }) => {
         <div className=" flex gap-4 my-4 items-center">
           <Image
             src={comment.user.imageUrl}
-            className=" w-6 h-6 rounded-[50%]"
+            width={24}
+            height={24}
+            className="rounded-[50%]"
             alt=""
           />
           <div>

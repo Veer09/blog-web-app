@@ -11,26 +11,26 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import {
+  CommentData,
   commentUploadSchema,
 } from "@/type/comment";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { MessagesSquare } from "lucide-react";
+import { unstable_cache } from "next/cache";
 import { useRouter } from "next/navigation";
-import React, { FC, useState } from "react";
+import { FC, useState } from "react";
 import { ZodError } from "zod";
 import ShowPastComment from "./ShowPastComment";
-import { Comment } from "@prisma/client";
 
 interface CommentSheetProps {
-  comments: Array<Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}}>,
   blogId: string
 }
 
-const CommentSheet: FC<CommentSheetProps> = ({ comments, blogId }) => {
+const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
   const router = useRouter();
   const [comment, setComment] = useState<string>("");
-
+  const [comments, setComments] = useState<CommentData[]>([]);
   const { mutate: saveComment } = useMutation({
     mutationFn: () => {
       const commentObj = {
@@ -40,9 +40,10 @@ const CommentSheet: FC<CommentSheetProps> = ({ comments, blogId }) => {
       const payload = commentUploadSchema.parse(commentObj);
       return axios.post("/api/comment/create", payload);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setComment("");
-      router.refresh();
+      const res = await axios.get(`/api/blog/${blogId}/comments`);
+      setComments(res.data.comments);
     },
     onError: (err) => {
       if (err instanceof ZodError) {
@@ -53,11 +54,18 @@ const CommentSheet: FC<CommentSheetProps> = ({ comments, blogId }) => {
     },
   });
 
+  const showComment = async () => {
+    const res = await axios.get(`/api/blog/${blogId}/comments`);
+    setComments(res.data.comments);
+  }
+     
+
+
   return (
     <div>
       <Sheet>
         <SheetTrigger>
-          <MessagesSquare/>
+          <MessagesSquare onClick={showComment}/>
         </SheetTrigger>
         <SheetContent className="overflow-scroll">
           <SheetHeader>

@@ -16,7 +16,7 @@ const page = () => {
         Welcome To{" "}
         <span className=" border-b-2 border-dashed border-b-slate-500 text-[hsl(var(--primary))]">
           Blog
-        </span>{" "}
+        </span>{" "}    
         <br /> Where you can gain and share your knowledge{" "}
       </p>
       <p className=" text-lg font-semibold text-slate-500 py-3 leading-tight">

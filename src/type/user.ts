@@ -6,9 +6,9 @@ export const UserFollowSchema = z.string();
 
 export type cachedUser = {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstName: string | null;
+  lastName: string | null;
   imageUrl: string;
-  blogs: string;
-  followers: string;
+  blogs: number;
+  followers: number;
 }

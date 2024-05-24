@@ -1,4 +1,4 @@
-import { UserDetails, cachedUser } from "@/type/user";
+import { cachedUser } from "@/type/user";
 import React, { FC } from "react";
 import UserSelect from "./UserSelect";
 import { auth, clerkClient } from "@clerk/nextjs";

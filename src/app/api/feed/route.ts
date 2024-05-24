@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/db";
 import { getFeedBlogs } from "@/lib/user";
 
 export const GET = async (req: NextRequest) => {

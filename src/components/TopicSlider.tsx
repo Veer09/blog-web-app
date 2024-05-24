@@ -14,7 +14,7 @@ interface TopicSliderProps {
 
 const TopicSlider: FC<TopicSliderProps> = ({ topics }) => {
   const pathname = usePathname();
-  const currentTopic = decodeURI(pathname.split("/")[2]);
+  const currentTopic = decodeURI(pathname.split("/")[3]);
   if (!topics) return;
   return (
     <ScrollArea className=" w-[70%]">
@@ -25,13 +25,10 @@ const TopicSlider: FC<TopicSliderProps> = ({ topics }) => {
               <PlusIcon />
             </Link>
           </TabsTrigger>
-          <TabsTrigger value="following">
-            <Link href="/dashboard/following">Following</Link>
-          </TabsTrigger>
           {topics.map((topic, key) => {
             return (
               <TabsTrigger value={topic.name} key={key}>
-                <Link href={`/dashboard/${topic.name}`}>{topic.name}</Link>
+                <Link href={`/dashboard/topic/${topic.name}`}>{topic.name}</Link>
               </TabsTrigger>
             );
           })}

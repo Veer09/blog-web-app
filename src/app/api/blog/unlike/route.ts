@@ -1,3 +1,4 @@
+import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { savedBySchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
@@ -21,14 +22,6 @@ export const POST = async (req: NextRequest) => {
         data: "Unautherized!",
       });
     }
-
-    const isLiked = await redis.sismember(`user:${userId}:liked`, blogId.data);
-    if (!isLiked) {
-      return NextResponse.json({
-        status: 400,
-        data: "Blog isn't liked!",
-      });
-    }
     await prisma.like.delete({
       where: {
         user_id_blog_id: {
@@ -37,9 +30,8 @@ export const POST = async (req: NextRequest) => {
         },
       },
     });
-    await redis.srem(`user:${userId}:liked`, blogId.data);
     await redis.hincrby(`blog:${blogId.data}`, "likes", -1);
-    revalidateTag(`blog:${blogId.data}`);
+
     return NextResponse.json({
       status: 200,
       data: {

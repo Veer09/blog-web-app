@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import Navbar from "@/components/Navbar";
+import  Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
 import QueryProvider from "@/components/provider/QueryClientProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -22,10 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className=" overflow-x-hidden">
         <body className={cn(inter.className, "h-screen")}>
           <QueryProvider>
-            {children}
+              {children}
           </QueryProvider>
           <Toaster/>
         </body>

@@ -15,11 +15,6 @@ export const POST = async (req: NextRequest) => {
     if (!userId)
       return NextResponse.json({ error: "User Unauthorized" }, { status: 401 });
 
-    const isFollowed = await redis.sismember(`user:${userId}:topics`, topicName.data);
-
-    if (isFollowed)
-      return NextResponse.json({ error: "Already Followed" }, { status: 400 });
-
     await prisma.user.update({
       where: {
         id: userId,
@@ -33,7 +28,6 @@ export const POST = async (req: NextRequest) => {
       },
     });
 
-    await redis.sadd(`user:${userId}:topics`, topicName.data);
     await redis.hincrby(`topic:${topicName.data}`, "followers", 1);
     return NextResponse.json({ message: "sucess" }, { status: 200 });
   } catch (err: any) {

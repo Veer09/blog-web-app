@@ -1,3 +1,4 @@
+import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { savedBySchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
@@ -24,7 +25,6 @@ export const POST = async (req: NextRequest) => {
       },
     });
 
-    await redis.sadd(`user:${userId}:saved`, payload.data);
     return NextResponse.json("success");
   } catch (err: any) {
     return NextResponse.json(err.message);

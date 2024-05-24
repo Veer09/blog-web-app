@@ -1,4 +1,4 @@
-import { UserDetails, cachedUser } from "@/type/user";
+import { cachedUser } from "@/type/user";
 import { Dialog, DialogTrigger, DialogContent } from "./ui/dialog";
 import { Separator } from "./ui/separator";
 import React, { FC } from "react";

@@ -8,8 +8,11 @@ export const blogUploadSchema = z.object({
     title: z.string().max(100).min(3),
     description: z.string().max(1000).min(5),
     image: z.string().min(0),
-    topics: z.array(z.string()).optional()
+    topics: z.array(z.string())
 });
+
+
+
 
 export const blogSchema = z.string()
 

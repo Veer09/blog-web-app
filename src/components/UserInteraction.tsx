@@ -12,11 +12,10 @@ import { useRouter } from "next/navigation";
 interface UserInteractionProps {
   blogId: string;
   saved: boolean;
-  comments: Array<Comment & {user: {firstName: string | null, lastName: string | null, imageUrl: string}}>;
   liked: boolean;
   likes: number;
 }
-const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, comments, liked, likes }) => {
+const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, liked, likes }) => {
   const router = useRouter();
   const [isSaved, setIsSaved] = useState(saved);
   const [like, setLike] = useState({liked, likes});
@@ -91,7 +90,7 @@ const UserInteraction: FC<UserInteractionProps> = ({ blogId, saved, comments, li
   return (
     <>
       {((!like.liked) ? <Heart className=" cursor-pointer" onClick={() => likeBlog()}/> : <Heart fill="red" className=" cursor-pointer" onClick={() => unlikeBlog()}/>)} {like.likes}
-      <CommentSheet comments={comments} blogId={blogId}/>
+      <CommentSheet blogId={blogId}/>
       {(isSaved) ? <BookCheck className=" cursor-pointer" onClick={() => unSaveBlog()}/> : <BookmarkPlus className=" cursor-pointer" onClick={() => saveBlog()}/>}
     </>
   );

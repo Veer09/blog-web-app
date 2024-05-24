@@ -1,3 +1,4 @@
+import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { UserFollowSchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
@@ -14,9 +15,7 @@ export const POST = async (req: NextRequest) => {
             return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
         if (followerId.data === userId)     
             return NextResponse.json({ error: "User cannot unfollow itself" }, { status: 400 });
-        const isFollowed = await redis.sismember(`user:${userId}:following`, followerId.data);
-        if(!isFollowed)
-            return NextResponse.json({ error: "User isn't followed" }, { status: 400 });
+
         await prisma.user.update({
             where: {
                 id: userId
@@ -29,7 +28,6 @@ export const POST = async (req: NextRequest) => {
                 }
             }
         });
-        await redis.srem(`user:${followerId.data}:followers`, userId);
         await redis.hincrby(`user:${followerId.data}`, "followers", -1);
         return NextResponse.json({ message: "User followed" }, { status: 200 });
     }catch(err: any){

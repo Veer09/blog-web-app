@@ -19,6 +19,5 @@ export const bookSchema = z.object({
   topic: z.string(),
   chapters:z.array(z.custom<Chapter>()) 
 });
-//api/book -> POST -> Create Book with name, title and type
-//api/book -> PUT -> Add Chapter to Book
+
 export type Book = z.infer<typeof bookSchema>;

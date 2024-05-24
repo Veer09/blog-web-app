@@ -1,10 +1,5 @@
 import prisma from "@/lib/db";
-import {
-  bookSchema,
-  Chapter,
-  chapterListSchema,
-  chapterSchema,
-} from "@/type/book";
+import { Chapter, chapterListSchema } from "@/type/book";
 import { auth } from "@clerk/nextjs";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
@@ -32,7 +27,7 @@ const linkNewChapter = async (
             book_id: chapter.link.id,
             book_number: index + 1,
           },
-        })
+        });
       } else {
         //if parent is null then link with book
         await tx.bookInclude.create({
@@ -41,15 +36,19 @@ const linkNewChapter = async (
             child_id: chapter.link.id,
             child_number: index + 1,
           },
-        })
+        });
       }
     } else if (!chapter.link) {
-      //Create new Chapter 
-
+      //Create new Chapter
       const { id } = await tx.chapter.create({
         data: {
           title: chapter.name,
           user_id: userId,
+          blogs: {
+            connect: chapter.blogs.map((blog) => {
+              return { id: blog.id };
+            }) 
+          }
         },
       });
 
@@ -107,8 +106,8 @@ const executeTransaction = async (
   const tranaction = await prisma.$transaction(async (tx) => {
     await linkNewChapter(chapters, tx, parent, bookId, userId);
   });
-  return tranaction;
 };
+
 
 export const POST = async (
   req: NextRequest,
@@ -139,3 +138,8 @@ export const POST = async (
     return NextResponse.json({ error: e }, { status: 400 });
   }
 };
+
+
+
+
+
