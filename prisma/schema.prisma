@@ -78,7 +78,6 @@ model Book{
     chapters BookChapter[] 
     books BookInclude[] @relation("ParentBook")
     partOfBook BookInclude[] @relation("ChildBook")
-    partOfChapter SubBook[]
     @@unique([title, author_id])
 }
 
@@ -89,36 +88,16 @@ model BookInclude{
     child_id String
     child Book @relation("ChildBook",fields: [child_id], references: [id], onDelete: Cascade)
     child_number Int
+    @@unique([book_id, child_id])
 }
 
 model Chapter{
     id String @id @default(cuid())
     title String
     blogs Blog[]
-    chapter SubChapter[] @relation("Chapter")
-    subchapter SubChapter[] @relation("SubChapter")
     user_id String
     user User @relation(fields: [user_id], references: [id])
     book BookChapter[]
-    subBook SubBook[]
-}
-
-model SubBook{
-    id String @id @default(cuid())
-    chapter_id String
-    chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
-    book_id String
-    book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
-    book_number Int
-}
-
-model SubChapter{
-    id String @id @default(cuid())
-    chapter_id String
-    chapter Chapter @relation("Chapter",fields: [chapter_id], references: [id], onDelete: Cascade)
-    subchapter_id String
-    subchapter Chapter @relation("SubChapter",fields: [subchapter_id], references: [id], onDelete: Cascade)
-    subchapter_number Int
 }
 
 model BookChapter{
@@ -128,4 +107,5 @@ model BookChapter{
     chapter_id String
     chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
     chapter_number Int
+    @@unique([book_id, chapter_id])
 }

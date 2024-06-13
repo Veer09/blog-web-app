@@ -27,7 +27,7 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
       setUser({
         ...user,
         blogs: user.blogs,
-        followers: (parseInt(user.followers) + 1).toString(),
+        followers: user.followers + 1,
         isFollowed: !user.isFollowed,
       });
     },
@@ -53,7 +53,7 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
       setUser({
         ...user,
         blogs: user.blogs,
-        followers: (parseInt(user.followers) - 1).toString(),
+        followers: user.followers - 1 ,
         isFollowed: !user.isFollowed,
       });    },
     onError: (err) => {

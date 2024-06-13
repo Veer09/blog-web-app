@@ -4,7 +4,7 @@ import { setUser } from "@/lib/user";
 import { cachedUser } from "@/type/user";
 import { unstable_cache } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { comment } from "postcss";
+
 
 export const GET = async (
   req: NextRequest,

@@ -1,15 +1,19 @@
 import BlogCard from "@/components/BlogCard";
 import { Separator } from "@/components/ui/separator";
-import { getUserBlogs } from "@/lib/user";
+import { getUserBlogs, setUser, setUserBlogs } from "@/lib/user";
 import { cachedBlog } from "@/type/blog";
+import { auth } from "@clerk/nextjs";
 import { FC } from "react";
 
 const page: FC = async () => {
-  const blogs: cachedBlog[] | null = await getUserBlogs();
-  if (!blogs) return <p>There is no Blogs!!</p>;
+  let blogs: cachedBlog[] | null = await getUserBlogs();
+  if (!blogs) {
+    blogs = await setUserBlogs();
+    if (!blogs) return <div>no blogs</div>;
+  }
   return (
     <div className=" my-10 w-full flex items-center  justify-center">
-      <div className=" w-[50%]">
+      <div className=" w-[100%]">
         {blogs.map((blog, key) => {
           return (
             <div key={key}>

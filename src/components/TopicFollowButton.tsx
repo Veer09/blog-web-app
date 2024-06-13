@@ -1,11 +1,11 @@
 "use client";
-import React, { FC, useContext, useState } from "react";
-import { Button } from "./ui/button";
-import { QueryClient, useMutation } from "@tanstack/react-query";
 import { TopicFollowSchema, cachedTopic } from "@/type/topic";
+import { QueryClient, useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
+import { FC } from "react";
+import { ZodError } from "zod";
+import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
 
 interface TopicFollowButtonProps {
@@ -14,8 +14,6 @@ interface TopicFollowButtonProps {
 }
 
 const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
-  const router = useRouter();
-  const queryClient = new QueryClient();
 
   const { mutate: follow, isPending: followPending } = useMutation({
     mutationKey: ["follow"],

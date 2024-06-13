@@ -2,9 +2,10 @@ import { bookSchema } from "@/type/book";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { connect } from "http2";
 import { ZodError } from "zod";
 import { PrismaClientValidationError } from "@prisma/client/runtime/library";
+import { redis } from "@/lib/redis";
+
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
   try {
@@ -28,6 +29,13 @@ export const POST = async (req: NextRequest) => {
           },
         }
       },
+    });
+
+    await redis.hset(`book:${newBook.id}:meta`, {
+      title: newBook.title,
+      description: newBook.description,
+      topic: book.topic,
+      userId: newBook.author_id,
     });
 
     return NextResponse.json({ id: newBook.id }, { status: 200 });

@@ -1,11 +1,8 @@
 import BlogCard from "@/components/BlogCard";
-import React, { FC } from "react";
-import { getBlogByTopic } from "@/lib/topic";
-import { getFeedBlogs } from "@/lib/user";
-import { Separator } from "@/components/ui/separator";
-import { unstable_cache } from "next/cache";
-import { cachedBlog } from "@/type/blog";
 import InfiniteScrollPost from "@/components/InfiniteScrollPost";
+import { Separator } from "@/components/ui/separator";
+import { getFeedBlogs } from "@/lib/user";
+import { FC } from "react";
 
 interface Props {
   params: {

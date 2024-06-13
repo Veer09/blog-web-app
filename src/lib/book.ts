@@ -1,161 +1,75 @@
+import { BookMetaData, Chapter } from "@/type/book";
+import { auth } from "@clerk/nextjs";
 import prisma from "./db";
+import { redis } from "./redis";
 
 export type ChapterType = {
   title: string;
-  chapters: ChapterType[];
   description? : string;
   blogs: { title: string; id: string }[];
+  takenFrom?: string; 
+  chapterNumber: number;
 };
-export const getBook = async (bookId: string) => {
-  const book = await prisma.book.findFirst({
-    where: {
-      id: bookId,
-    },
-    select: {
-      title: true,
-      description: true,
-      chapters: {
-        select: {
-          chapter_id: true,
-          chapter_number: true,
-        },
-        orderBy: {
-          chapter_number: "asc",
-        },
-      },
-      books: {
-        select: {
-          child_id: true,
-          child_number: true,
-        },
-        orderBy: {
-          child_number: "asc",
-        },
-      },
-    },
-  });
-
+export const getFullBook = async (bookId: string) => {
+  const book: BookMetaData | null = await redis.hgetall(`book:${bookId}:meta`);
   if (!book) return null;
-  const result: ChapterType = {
-    title: book.title,
-    description: book.description,
-    blogs: [],
-    chapters: [],
-  };
-  let n = book.chapters.length,
-    m = book.books.length;
-  while (n > 0 && m > 0) {
-    if (book.chapters[0].chapter_number < book.books[0].child_number) {
-      const subChapter = await getChapter(book.chapters[0].chapter_id);
-      if (!subChapter) {
-        n--;
-        continue;
+  const chapters: ChapterType[] = [];
+  await getBook(bookId, chapters, false);
+  chapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
+  return { title: book.title, description: book.description, topic: book.topic, userId: book.userId  ,chapters };
+}
+export const getBook = async (bookId: string, chapters: ChapterType[], taken: boolean) => {
+
+  const book:Chapter[] | null = await redis.json.get(`book:${bookId}`);
+  const bookData: BookMetaData | null = await redis.hgetall(`book:${bookId}:meta`); 
+  if(!bookData) return null;
+  if(!book) return null;
+
+  for (const chapter of book) {
+    if(chapter.create){
+      const chapterData = {
+        title: chapter.title,
+        blogs: chapter.create.blogs,
+        takenFrom: taken ? bookData.title : undefined,
+        chapterNumber: chapter.chapterNumber
       }
-      result.chapters.push(subChapter);
-      n--;
-    } else {
-      const subBook = await getBook(book.books[0].child_id);
-      if (!subBook) {
-        m--;
-        continue;
+      chapters.push(chapterData);
+    }
+    else if(chapter.link){
+      if(chapter.link.type === "chapter"){
+        const cachedChapter: Chapter | null = await redis.json.get(`chapter:${chapter.link.id}`);
+        if(cachedChapter && cachedChapter.create){
+          const chapterData = {
+            title: cachedChapter.title,
+            blogs: cachedChapter.create.blogs,
+            takenFrom: taken ? bookData.title : undefined,
+            chapterNumber: chapter.chapterNumber
+          }
+          chapters.push(chapterData);
+        }
+      }else{
+        const cachedBook: Chapter[] | null = await redis.json.get(`book:${chapter.link.id}`);
+        if(cachedBook){
+          await getBook(chapter.link.id, chapters, true);
+        }
       }
-      result.chapters.push(subBook);
-      m--;
     }
   }
+}
 
-  if (n > 0) {
-    for (let i = 0; i < n; i++) {
-      const subChapter = await getChapter(book.chapters[i].chapter_id);
-      if (!subChapter) continue;
-      result.chapters.push(subChapter);
-    }
-  }
-
-  if (m > 0) {
-    for (let i = 0; i < m; i++) {
-      const subBook = await getBook(book.books[i].child_id);
-      if (!subBook) continue;
-      result.chapters.push(subBook);
-    }
-  }
-
-  return result;
-};
-
-export const getChapter = async (chapterId: string) => {
-  const chapter = await prisma.chapter.findFirst({
+export const isFollowBook = async (bookId: string) => {
+  const { userId } = auth();
+  if(!userId) return false;
+  const follow = await prisma.user.findFirst({
     where: {
-      id: chapterId,
-    },
-    select: {
-      title: true,
-      blogs: {
-        select: {
-          title: true,
-          id: true,
-        },
-      },
-      chapter: {
-        select: {
-          subchapter_id: true,
-          subchapter_number: true,
-        },
-        orderBy: {
-          subchapter_number: "asc",
-        },
-      },
-      subBook: {
-        select: {
-          book_id: true,
-          book_number: true,
-        },
-        orderBy: {
-          book_number: "asc",
-        },
-      },
-    },
-  });
-  if (!chapter) return null;
-  const result: ChapterType = {
-    title: chapter.title,
-    blogs: chapter.blogs,
-    chapters: [],
-  };
-  let n = chapter.chapter.length,
-    m = chapter.subBook.length;
-  while (n > 0 && m > 0) {
-    if (chapter.chapter[0].subchapter_number < chapter.subBook[0].book_number) {
-      const subChapter = await getChapter(chapter.chapter[0].subchapter_id);
-      if (!subChapter) {
-        n--;
-        continue;
+      id: userId,
+      followingBooks: {
+        some: {
+          id: bookId
+        }
       }
-      result.chapters.push(subChapter);
-      n--;
-    } else {
-      const subBook = await getBook(chapter.subBook[0].book_id);
-      if (!subBook) {
-        m--;
-        continue;
-      }
-      result.chapters.push(subBook);
-      m--;
     }
-  }
-  if (n > 0) {
-    for (let i = 0; i < n; i++) {
-      const subChapter = await getChapter(chapter.chapter[i].subchapter_id);
-      if (!subChapter) continue;
-      result.chapters.push(subChapter);
-    }
-  }
-  if (m > 0) {
-    for (let i = 0; i < m; i++) {
-      const subBook = await getBook(chapter.subBook[i].book_id);
-      if (!subBook) continue;
-      result.chapters.push(subBook);
-    }
-  }
-  return result;
-};
+  })
+  return follow ? true : false;
+}
+

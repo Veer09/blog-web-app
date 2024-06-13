@@ -1,27 +1,23 @@
-import { DialogContent } from "./ui/dialog";
-import { ScrollArea } from "./ui/scroll-area";
+import { Chapter, UpdateDetails } from "@/type/book";
 import axios from "axios";
 import { Search } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { Input } from "./ui/input";
+import { usePathname, useRouter } from "next/navigation";
 import { FC, useState } from "react";
-import { Button } from "./ui/button";
-import { DialogFooter } from "./ui/dialog";
-import { Chapter } from "@/type/book";
-import { set } from "zod";
+import { DialogContent } from "./ui/dialog";
+import { Input } from "./ui/input";
+import { ScrollArea } from "./ui/scroll-area";
+import { number, set } from "zod";
 
 interface DialogDetailsProps {
   type: DialogType;
   content: Chapter[];
-  chapterDetails?: { count: number; types: string[] };
   setContent: React.Dispatch<React.SetStateAction<Chapter[]>>;
-  setChapterDetails?: React.Dispatch<
-    React.SetStateAction<{ count: number; types: string[] }>
-  >;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   chapter?: Chapter;
   blogNo?: number;
+  updateDetails?: UpdateDetails[];
+  setUpdateDetails?: React.Dispatch<React.SetStateAction<UpdateDetails[]>>;
+  number?: number;
 }
 
 export enum DialogType {
@@ -32,12 +28,13 @@ export enum DialogType {
 const DialogDetails: FC<DialogDetailsProps> = ({
   type,
   content,
-  chapterDetails,
-  setChapterDetails,
   setContent,
   setDialogOpen,
   chapter,
   blogNo,
+  updateDetails,
+  setUpdateDetails,
+  number,
 }) => {
   interface Book {
     id: string;
@@ -72,84 +69,195 @@ const DialogDetails: FC<DialogDetailsProps> = ({
   const [blogs, setBlogs] = useState<Blog[]>([]);
 
   const saveContent = (index: number) => {
-    // chapter && chapterDetails create subchapter or blog
-    if (chapter && chapterDetails && setChapterDetails) {
-      // if type is not blog then create subchapter
-      if (type !== DialogType.Blog) {
-        setChapterDetails((chapter) => {
-          return {
-            count: chapter.count + 1,
-            types: [...chapter.types, type],
-          };
-        });
-
-        chapter.children.push({
-          name:
-            type === DialogType.Book
-              ? books[index].title
-              : chapters[index].title,
-          link:
-            type === DialogType.Book
-              ? {
-                  id: books[index].id,
-                  type: DialogType.Book,
-                  user_id: books[index].author_id,
-                }
-              : {
-                  id: chapters[index].id,
-                  type: DialogType.Chapter,
-                  user_id: chapters[index].user_id,
+    //For Update
+    if (updateDetails && setUpdateDetails && number !== undefined) {
+      //add blog to chapter
+      if (chapter && chapter.create && blogNo === undefined) {
+        //First Update
+        if (chapter.number === undefined) {
+          setUpdateDetails([
+            ...updateDetails,
+            {
+              number: number,
+              addBlog: {
+                chapter: chapter.link!.id,
+                id: [blogs[index].id],
+              },
+            },
+          ]);
+          chapter.number = updateDetails.length;
+        } else {
+          const newUpdateDetails = [...updateDetails];
+          //If already addBlog exists add to it
+          if (updateDetails[chapter.number].addBlog) {
+            newUpdateDetails[chapter.number].addBlog!.id.push(blogs[index].id);
+          }
+          //If customChapter exists add in blogs array
+          else if (updateDetails[chapter.number].customChapter) {
+            newUpdateDetails[chapter.number].customChapter!.create!.blogs.push({
+              id: blogs[index].id,
+              title: blogs[index].title,
+            });
+          }
+          //Updated for other thing so add new addBlog
+          else {
+            newUpdateDetails[chapter.number].addBlog = {
+              chapter: chapter.link!.id,
+              id: [blogs[index].id],
+            };
+          }
+          setUpdateDetails(newUpdateDetails);
+        }
+      } else if (chapter && chapter.create && blogNo !== undefined) {
+        if (chapter.number === undefined) {
+          setUpdateDetails([
+            ...updateDetails,
+            {
+              number: number,
+              updateBlog: {
+                chapter: chapter.link!.id,
+                ids: [
+                  {
+                    oldId: chapter.create.blogs[blogNo].id,
+                    newId: blogs[index].id,
+                  },
+                ],
+              },
+            },
+          ]);
+          chapter.number = updateDetails.length;
+        } else {
+          const newUpdateDetails = [...updateDetails];
+          if (updateDetails[chapter.number].updateBlog) {
+            newUpdateDetails[chapter.number].updateBlog!.ids.push({
+              oldId: chapter.create.blogs[blogNo].id,
+              newId: blogs[index].id,
+            });
+          } else if (updateDetails[chapter.number].customChapter) {
+            newUpdateDetails[chapter.number].customChapter!.create!.blogs[
+              blogNo
+            ] = {
+              id: blogs[index].id,
+              title: blogs[index].title,
+            };
+          } else {
+            newUpdateDetails[chapter.number].updateBlog = {
+              chapter: chapter.link!.id,
+              ids: [
+                {
+                  oldId: chapter.create.blogs[blogNo].id,
+                  newId: blogs[index].id,
                 },
-          blogs: [],
-          children: [],
-        });
-        setContent(content);
-      }
-      // if type is blog then create blog
-      else {
-        chapter.blogs.push({
-          name: blogs[index].title,
-          id: blogs[index].id,
-        });
-        setContent(content);
-      }
-    }
-    // chatpter edit chapter or blog
-    else if (chapter) {
-      if (type !== DialogType.Blog) {
-        chapter.name =
-          type === DialogType.Book ? books[index].title : chapters[index].title;
-        if (chapter.link) {
-          chapter.link.id =
-            type === DialogType.Book ? books[index].id : chapters[index].id;
-          chapter.link.user_id =
-            type === DialogType.Book
-              ? books[index].author_id
-              : chapters[index].user_id;
+              ],
+            };
+          }
+          setUpdateDetails(newUpdateDetails);
         }
-        setContent(content);
+      } else if (chapter && chapter.link) {
+        if (chapter.number === undefined) {
+          setUpdateDetails([
+            ...updateDetails,
+            {
+              number: number,
+              updateChapter: {
+                newId:
+                  type === DialogType.Book
+                    ? books[index].id
+                    : chapters[index].id,
+                oldId: chapter.link.id,
+                type: type === DialogType.Book ? "book" : "chapter",
+              },
+            },
+          ]);
+          chapter.number = updateDetails.length;
+        } else {
+          const newUpdateDetails = [...updateDetails];
+          if (updateDetails[chapter.number].updateChapter) {
+            newUpdateDetails[chapter.number].updateChapter!.newId =
+              type === DialogType.Book ? books[index].id : chapters[index].id;
+          } else if (updateDetails[chapter.number].customChapter) {
+            newUpdateDetails[chapter.number].customChapter!.link!.id =
+              type === DialogType.Book ? books[index].id : chapters[index].id;
+            newUpdateDetails[chapter.number].customChapter!.link!.user_id =
+              type === DialogType.Book
+                ? books[index].author_id
+                : chapters[index].user_id;
+            newUpdateDetails[chapter.number].customChapter!.title =
+              type === DialogType.Book
+                ? books[index].title
+                : chapters[index].title;
+          } else {
+            newUpdateDetails[chapter.number].updateChapter = {
+              newId:
+                type === DialogType.Book ? books[index].id : chapters[index].id,
+              oldId: chapter.link.id,
+              type: type === DialogType.Book ? "book" : "chapter",
+            };
+          }
+          setUpdateDetails(newUpdateDetails);
+        }
       } else {
-        if (blogNo !== undefined) {
-          chapter.blogs[blogNo] = {
-            name: blogs[index].title,
-            id: blogs[index].id,
-          };
-        }
-        setContent(content);
+        setUpdateDetails([
+          ...updateDetails,
+          {
+            number: number,
+            customChapter: {
+              link: {
+                id:
+                  type === DialogType.Book
+                    ? books[index].id
+                    : chapters[index].id,
+                type: type === DialogType.Book ? "book" : "chapter",
+                user_id:
+                  type === DialogType.Book
+                    ? books[index].author_id
+                    : chapters[index].user_id,
+              },
+              title:
+                type === DialogType.Book
+                  ? books[index].title
+                  : chapters[index].title,
+              chapterNumber: content.length + 1,
+            },
+          },
+        ]);
       }
     }
-    // create new chapter
-    else if (chapterDetails && setChapterDetails) {
-      setChapterDetails((chapter) => {
-        return {
-          count: chapter.count + 1,
-          types: [...chapter.types, type],
-        };
+
+    //add blog to chapter
+    if (chapter && chapter.create && blogNo === undefined) {
+      chapter.create.blogs.push({
+        title: blogs[index].title,
+        id: blogs[index].id,
       });
+      setContent(content);
+    }
+    //blog edit of created chapter
+    else if (chapter && chapter.create && blogNo !== undefined) {
+      chapter.create.blogs[blogNo] = {
+        title: blogs[index].title,
+        id: blogs[index].id,
+      };
+      setContent(content);
+    }
+    //edit of linked chapter or book
+    else if (chapter && chapter.link) {
+      if (type !== DialogType.Blog) {
+        chapter.title =
+          type === DialogType.Book ? books[index].title : chapters[index].title;
+        chapter.link.id =
+          type === DialogType.Book ? books[index].id : chapters[index].id;
+        chapter.link.user_id =
+          type === DialogType.Book
+            ? books[index].author_id
+            : chapters[index].user_id;
+      }
+      setContent(content);
+    } else {
       setContent([
         ...content,
         {
-          name:
+          title:
             type === DialogType.Book
               ? books[index].title
               : chapters[index].title,
@@ -165,11 +273,12 @@ const DialogDetails: FC<DialogDetailsProps> = ({
                   type: DialogType.Chapter,
                   user_id: chapters[index].user_id,
                 },
-          blogs: [],
-          children: [],
+          chapterNumber: content.length + 1,
+          number: updateDetails?.length,
         },
       ]);
     }
+
     setDialogOpen(false);
     setSearch("");
     router.push(pathname);

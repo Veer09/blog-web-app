@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 require("dotenv").config();
 const nextConfig = {
@@ -13,6 +15,11 @@ const nextConfig = {
         hostname: "img.clerk.com",
       },
     ],
+  },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false, os: false, path: false};
+
+    return config;
   },
 };
 

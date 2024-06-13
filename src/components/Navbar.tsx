@@ -119,11 +119,11 @@ function Navbar({ children }: { children: React.ReactNode }) {
                 Created Books
               </Link>
               <Link
-                href="#"
+                href="/me/blogs"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <LineChart className="h-4 w-4" />
-                Analytics
+                Created Blogs
               </Link>
             </nav>
           </div>

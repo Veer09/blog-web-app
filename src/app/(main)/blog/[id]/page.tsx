@@ -56,7 +56,7 @@ const page: FC<Props> = async ({ params }) => {
   const liked = await isBlogLiked(blog.id);
   return (
     <div className=" flex flex-col items-center my-20 w-[80vw]">
-      <div className=" w-[60%]">
+      <div className=" w-[90%]">
         <div className=" flex justify-between">
           <div>
             <p className=" text-4xl text-slate-900 font-bold">{blog.title}</p>

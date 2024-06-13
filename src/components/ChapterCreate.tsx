@@ -1,90 +1,97 @@
-import { BookOpenIcon, File, FileEditIcon, PlusIcon } from "lucide-react";
-import React, { FC, useEffect, useRef, useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Chapter } from "@/type/book";
-import { Dialog, DialogTrigger } from "./ui/dialog";
-import DialogDetails, { DialogType } from "./DialogDetails";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+  BookOpenIcon,
+  File,
+  FileEditIcon,
+  PlusIcon,
+  X
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import React, { FC, useRef, useState } from "react";
+import DialogDetails, { DialogType } from "./DialogDetails";
+import { Button } from "./ui/button";
+import { Dialog, DialogTrigger } from "./ui/dialog";
+import { Input } from "./ui/input";
 
 interface ChapterCreateProps {
-  type: string;
+  type?: ChapterType;
   content: Chapter[];
   setContent: React.Dispatch<React.SetStateAction<Chapter[]>>;
-  indexArray: number[];
+  index: number;
   blogNo?: number;
+  error?: boolean;
+}
+
+export enum ChapterType {
+  Link = "link",
+  Blog = "blog",
+  Create = "create",
 }
 
 const ChapterCreate: FC<ChapterCreateProps> = ({
   type,
   content,
   setContent,
-  indexArray,
+  index,
   blogNo,
+  error,
 }) => {
-  const getChapter = (content: Chapter[]) => {
-    let obj = content;
-    indexArray.slice(0, -1).forEach((index) => {
-      obj = obj[index].children;
-    });
-    return obj[indexArray[indexArray.length - 1]];
-  };
-  // console.log(content)
   const handleCreateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-    chapter.current.name = e.target.value;
-    setContent(content);
+    data[index].title = e.target.value;
+    setContent(data);
   };
 
-  const [chapterDetails, setChapterDetails] = useState({
-    count: 0,
-    types: [] as string[],
-  });
+  const removeItem = () => {
+    if (type !== ChapterType.Blog) {
+      data.splice(index, 1);
+    } else if (data[index].create && blogNo !== undefined) {
+      data[index].create.blogs.splice(blogNo, 1);
+    }
+    setContent(data);
+  };
 
-  const chapter = useRef(getChapter(content));
-  const [name, setName] = useState("");
+  const data = [...content]
   const [editdialogOpen, seteditDialogOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<DialogType>();
   const router = useRouter();
   const pathname = usePathname();
   return (
     <div className="flex ml-4 items-center gap-2">
-      {/* <BookOpenIcon className="h-6 w-6" />
-      <h2 className="font-semibold text-lg">Chapter 1: The Beginning</h2>
-      <Button className="rounded-full ml-auto" size="icon" variant="outline">
-        <FileEditIcon className="h-4 w-4" />
-        <span className="sr-only">Edit chapter</span>
-      </Button>
-      <Button className="rounded-full" size="icon" variant="outline">
-        <PlusIcon className="h-4 w-4" />
-        <span className="sr-only">Add subchapter</span>
-      </Button> */}
       <div className="grid gap-2 w-full">
         <div className="flex items-center gap-2">
-         {type !== DialogType.Blog && <BookOpenIcon className="h-6 w-6" />}
-         {type === DialogType.Blog && <File className="h-6 w-6" />}
-         <Input
-            className="min-w-0 flex-1"
+          {type !== ChapterType.Blog && (
+            <>
+              <BookOpenIcon className="h-6 w-6" />
+              <Input
+                className="w-12 text-center"
+                type="number"
+                value={data[index].chapterNumber}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  data[index].chapterNumber = parseInt(e.target.value);
+                  setContent(data);
+                }}
+              />
+            </>
+          )}
+          {type === ChapterType.Blog && <File className="h-6 w-6" />}
+
+          <Input
+            className={`min-w-0 flex-1 ${error ? "border-red-500" : ""}`}
             placeholder="Chapter title"
             type="text"
             onChange={handleCreateChange}
-            value={(type === "create" ? name : (type === DialogType.Blog && blogNo !== undefined) ? chapter.current.blogs[blogNo].name : chapter.current.name) as string}
+            value={
+              (type === ChapterType.Blog &&
+                data[index].create?.blogs[blogNo!].title) ||
+              (type === ChapterType.Create && name) ||
+              data[index].title
+            }
             disabled={
-              type === DialogType.Book ||
-              type === DialogType.Chapter ||
-              type === DialogType.Blog
+              data[index].link !== undefined || type === ChapterType.Blog
             }
           />
-          {type !== "create" && (
+
+          {(data[index].link || type === ChapterType.Blog) && (
             <Dialog
               open={editdialogOpen}
               onOpenChange={() => seteditDialogOpen(!editdialogOpen)}
@@ -97,16 +104,19 @@ const ChapterCreate: FC<ChapterCreateProps> = ({
               </DialogTrigger>
               {/* edit dialog */}
               <DialogDetails
-                type={type as DialogType}
-                content={content}
+                type={
+                  (data[index].link?.type as DialogType) || DialogType.Blog
+                }
+                content={data}
                 setContent={setContent}
                 setDialogOpen={seteditDialogOpen}
-                chapter={chapter.current}
+                chapter={data[index]}
                 blogNo={blogNo}
               />
             </Dialog>
           )}
-          {type === "create" && (
+
+          {data[index].create && type !== ChapterType.Blog && (
             <Dialog
               open={dialogOpen}
               onOpenChange={() => {
@@ -114,132 +124,52 @@ const ChapterCreate: FC<ChapterCreateProps> = ({
                 router.push(pathname);
               }}
             >
-              <DropdownMenu>
-                <DropdownMenuTrigger className="rounded-full ml-auto w-8 h-8 flex justify-center items-center">
+              <DialogTrigger asChild>
+                <Button className="rounded-full" size="icon" variant="outline">
                   <PlusIcon className="h-4 w-4" />
-                  <span className="sr-only">Add subchapter/Blog</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>Select Chapter Type</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setChapterDetails((chapter) => {
-                        return {
-                          count: chapter.count + 1,
-                          types: [...chapter.types, "create"],
-                        };
-                      });
-                      chapter.current.children = [
-                        ...chapter.current.children,
-                        { name: "", children: [], blogs: [] },
-                      ];
-                    }}
-                  >
-                    Create New Chapter
-                  </DropdownMenuItem>
-                  <DialogTrigger asChild>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setDialogType(DialogType.Chapter);
-                        setDialogOpen(true);
-                      }}
-                    >
-                      Merge Existing Chapter
-                    </DropdownMenuItem>
-                  </DialogTrigger>
-                  <DialogTrigger
-                    asChild
-                    onClick={() => {
-                      setDialogType(DialogType.Book);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    <DropdownMenuItem>Merge Existing Book</DropdownMenuItem>
-                  </DialogTrigger>
-                  <DialogTrigger
-                    asChild
-                    onClick={() => {
-                      setDialogType(DialogType.Blog);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    <DropdownMenuItem>Add Blog</DropdownMenuItem>
-                  </DialogTrigger>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {/* subchapter create dialog */}
+                  <span className="sr-only">Add Blog</span>
+                </Button>
+              </DialogTrigger>
+              {/* blog add dialog */}
               <DialogDetails
-                type={dialogType as DialogType}
-                content={content}
-                chapterDetails={chapterDetails}
+                type={DialogType.Blog}
+                content={data}
                 setContent={setContent}
-                setChapterDetails={setChapterDetails}
                 setDialogOpen={setDialogOpen}
-                chapter={chapter.current}
+                chapter={data[index]}
               />
             </Dialog>
           )}
+          <div>
+            <Button
+              className="rounded-full"
+              size="icon"
+              variant="outline"
+              onClick={removeItem}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Remove Chapter</span>
+            </Button>
+          </div>
         </div>
-        
-        {type !== DialogType.Blog && chapter.current.children.map((subchapter, index) => (
-          <ChapterCreate
-            key={index}
-            type={chapterDetails.types[index]}
-            content={content}
-            setContent={setContent}
-            indexArray={[...indexArray, index]}
-          />
-        ))}
-        {type !== DialogType.Blog && chapter.current.blogs.map((blog, index) => (
-          <ChapterCreate
-            key={index}
-            type={DialogType.Blog}
-            content={content}
-            setContent={setContent}
-            indexArray={[...indexArray]}
-            blogNo={index}
-          />
-        ))}
-        {/* <div className="grid gap-2 ml-8">
-          <div className="flex items-center gap-2">
-          <BookOpenIcon className="h-6 w-6" />
-          <Input
-          className="min-w-0 flex-1"
-          defaultValue="About this book"
-          placeholder="Chapter title"
-          type="text"
-          />
-          <Button
-          className="rounded-full ml-auto"
-          size="icon"
-          variant="outline"
-          >
-          <FileEditIcon className="h-4 w-4" />
-                  <span className="sr-only">Edit chapter</span>
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <BookOpenIcon className="h-6 w-6" />
-                <Input
-                  className="min-w-0 flex-1"
-                  defaultValue="How to use this book"
-                  placeholder="Chapter title"
-                  type="text"
-                />
-                <Button
-                  className="rounded-full ml-auto"
-                  size="icon"
-                  variant="outline"
-                >
-                  <FileEditIcon className="h-4 w-4" />
-                  <span className="sr-only">Edit chapter</span>
-                </Button>
-              </div>
-            </div> */}
+
+        {type !== ChapterType.Blog &&
+          data[index].create &&
+          data[index].create.blogs.map((blog, temp) => (
+            <ChapterCreate
+              key={temp}
+              type={ChapterType.Blog}
+              content={content}
+              setContent={setContent}
+              index={index}
+              blogNo={temp}
+            />
+          ))}
       </div>
     </div>
   );
 };
 
 export default ChapterCreate;
+
+

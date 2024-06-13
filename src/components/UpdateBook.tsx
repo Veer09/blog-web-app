@@ -1,13 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { FC, useState } from "react";
-
-import ChapterCreate, { ChapterType } from "@/components/ChapterCreate";
+import { CustomError } from "@/type/book";
+import { ChapterType } from "@/components/ChapterCreate";
 import DialogDetails, { DialogType } from "@/components/DialogDetails";
-import {
-  Dialog,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,33 +13,58 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Chapter, chapterListSchema } from "@/type/book";
-import axios from "axios";
 import {
-  Package2Icon,
-  PlusIcon
-} from "lucide-react";
+  Chapter,
+  updateBookSchema,
+  UpdateDetails,
+} from "@/type/book";
+import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
+import { Package2Icon, PlusIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import ChapterUpdate from "./ChapterUpdate";
+import { toast } from "./ui/use-toast";
 
+interface UpdateBookProps {
+  chapters: Chapter[];
+  id: string;
+}
 
-
-const Page: FC<{ params: { id: string } }> = ({params}) => {
-
-  const saveContent = async () => {
-    try {
-      const payload = chapterListSchema.safeParse(content);
-      if(!payload.success) return;
-      const response = await axios.post(`/api/book/${params.id}`, payload.data);
-      
-    } catch (error) {
-      console.error(error);
-    }
-  }
+const UpdateBook: FC<UpdateBookProps> = ({ chapters, id }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [content, setContent] = useState<Chapter[]>([]);
+  const [content, setContent] = useState<Chapter[]>(chapters);
+  const [updateDetails, setUpdateDetails] = useState<UpdateDetails[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState("");
+  const [errIndex, setErrIndex] = useState<number>(-1);
+
+
+  const { mutate: updateBook } = useMutation({
+    mutationFn: async () => {
+      const payload = updateBookSchema.safeParse({
+        content: content,
+        updateDetails: updateDetails,
+      });
+      console.log(payload); 
+      if (!payload.success) throw new Error("Invalid Payload");
+      return await axios.put(`/api/book/${id}`, payload.data);
+    },
+    onError: (error) => {
+      if(error instanceof AxiosError){
+        if(error.response?.data.index){
+          setErrIndex(error.response.data.index);
+          toast({
+            title: "Error",
+            description: error.response.data.error,
+            variant: "destructive",
+          });
+        }
+      }
+
+    },
+  });
+
   return (
     <div className="w-full flex justify-center">
       <div className="grid items-start gap-4 p-4 border rounded-lg min-h-screen w-[70%]">
@@ -57,7 +79,14 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
               <span className="sr-only">Home</span>
             </Button>
             <h1 className="font-semibold text-lg md:text-2xl">Chapters</h1>
-            <Button size="sm" onClick={saveContent}>Save</Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                updateBook();
+              }}
+            >
+              Save
+            </Button>
             <Dialog
               open={dialogOpen}
               onOpenChange={() => {
@@ -75,13 +104,30 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {
-                      setContent([...content, {
-                        create: {
-                          blogs: []
-                        },
-                        title: "",
-                        chapterNumber: content.length + 1,
-                      }]);
+                      setContent([
+                        ...content,
+                        {
+                          create: {
+                            blogs: [],
+                          },
+                          title: "",
+                          chapterNumber: content.length + 1,
+                          number: updateDetails.length
+                        }
+                      ]);
+                      setUpdateDetails([
+                        ...updateDetails,
+                        {
+                          number: content.length,
+                          customChapter: {
+                            create: {
+                              blogs: []
+                            },
+                            title: "",
+                            chapterNumber: content.length + 1
+                          },
+                        }
+                      ])
                     }}
                   >
                     Create New Chapter
@@ -112,6 +158,9 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
                 content={content}
                 setContent={setContent}
                 setDialogOpen={setDialogOpen}
+                updateDetails={updateDetails}
+                setUpdateDetails={setUpdateDetails}
+                number={content.length}
               />
             </Dialog>
           </div>
@@ -120,12 +169,18 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
               <h1 className=" text-center">No Chapter Added</h1>
             ) : (
               content.map((_, index: number) => (
-                <ChapterCreate
+                <ChapterUpdate
                   key={index}
                   index={index}
                   content={content}
                   setContent={setContent}
-                  type={content[index].create ? ChapterType.Create : ChapterType.Link}
+                  type={
+                    content[index].create ? ChapterType.Create : ChapterType.Link
+                  }
+                  error = {errIndex === index}
+                  setError = {setErrIndex}
+                  updateDetails={updateDetails}
+                  setUpdateDetails={setUpdateDetails}
                 />
               ))
             )}
@@ -136,7 +191,4 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
   );
 };
 
-export default Page;
-
-
-
+export default UpdateBook;
