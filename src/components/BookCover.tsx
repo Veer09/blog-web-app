@@ -12,7 +12,7 @@ export const BookCover: FC<BookCoverProps> = ({ title, description, id}) => {
     const router = useRouter();
     return (
       <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-w-[300px]" onClick={() => {
-        router.push(`/book/${id}`);
+        router.replace(`/book/${id}/0/0`);
       }} >
         <div className="relative aspect-square cursor-pointer">
           <img
