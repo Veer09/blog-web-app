@@ -47,15 +47,15 @@ const ChapterUpdate: FC<ChapterUpdateProps> = ({
 
   const removeItem = () => {
     if (type !== ChapterType.Blog) {
-      if(data[index].number !== undefined){
+      if(data[index] && data[index].number !== undefined){
         //Already Updated so remove all from it and add removeChapter
-        if(!updateDetails[data[index].number].customChapter){
+        if(!updateDetails[data[index].number!]?.customChapter){
           const newUpdateDetails = [...updateDetails];
-          newUpdateDetails[data[index].number] = {
+          newUpdateDetails[data[index].number!] = {
             number: -1,
             removeChapter: {
               id: data[index].link!.id,
-              chapterNumber: data[index].chapterNumber,
+              chapterNumber: data[index]?.chapterNumber,
               type: data[index].link!.type === "book" ? "book" : "chapter",
             }
           }
@@ -64,7 +64,7 @@ const ChapterUpdate: FC<ChapterUpdateProps> = ({
         //Custom Chapter so remove from updateDetails
         else{
           const newUpdateDetails = [...updateDetails]
-          newUpdateDetails.splice(data[index].number, 1);
+          newUpdateDetails.splice(data[index]!.number!, 1);
           setUpdateDetails(newUpdateDetails);
         }
       }
@@ -74,29 +74,29 @@ const ChapterUpdate: FC<ChapterUpdateProps> = ({
           number: -1,
           removeChapter: {
             id: data[index].link!.id,
-            chapterNumber: data[index].chapterNumber,
+            chapterNumber: data[index]?.chapterNumber,
             type: data[index].link!.type === "book" ? "book" : "chapter",
           }
         }])
       }
       data.splice(index, 1);
     } else if (data[index].create && blogNo !== undefined) {
-      if(data[index].number !== undefined){
+      if(data[index] && data[index].number !== undefined){
         const newUpdateDetails = [...updateDetails];
         //Already have removeBlog so add to it
-        if(newUpdateDetails[data[index].number].removeBlog){
-          newUpdateDetails[data[index].number].removeBlog!.id.push(data[index].create.blogs[blogNo].id,);
+        if(newUpdateDetails[data[index].number!]?.removeBlog){
+          newUpdateDetails[data[index].number!]?.removeBlog?.id.push(data[index]!.create!.blogs[blogNo].id,);
         }
         //Customchapter so remove that blog from blogs
-        else if(newUpdateDetails[data[index].number].customChapter){
-          newUpdateDetails[data[index].number].customChapter!.create!.blogs.splice(blogNo, 1);
+        else if(newUpdateDetails[data[index].number!]?.customChapter){
+          newUpdateDetails[data[index].number!]?.customChapter?.create?.blogs.splice(blogNo, 1);
         }
         //Already Updated for other thing so add removeBlog
         else{
-          newUpdateDetails[data[index].number] = {
+          newUpdateDetails[data[index].number!] = {
             number: content.length,
             removeBlog:{
-              id: [data[index].create.blogs[blogNo].id],
+              id: [data[index]!.create!.blogs[blogNo].id],
               chapter: data[index].link!.id
             }
           }
@@ -108,13 +108,13 @@ const ChapterUpdate: FC<ChapterUpdateProps> = ({
         setUpdateDetails([...updateDetails, {
           number: index,
           removeBlog: {
-            id: [data[index].create.blogs[blogNo].id],
+            id: [data[index]!.create!.blogs[blogNo].id],
             chapter: data[index].link!.id
           }
         }])
         data[index].number = updateDetails.length;
       }
-      data[index].create.blogs.splice(blogNo, 1);
+      data[index]!.create!.blogs.splice(blogNo, 1);
     }
     if(error && setError){
       setError(-1)
@@ -161,10 +161,10 @@ const ChapterUpdate: FC<ChapterUpdateProps> = ({
                     setContent(data);
                   } else {
                     //Already has updateChapterNumber so update it
-                    if (updateDetails[data[index].number].updateChapterNumber) {
+                    if (updateDetails[data[index].number!].updateChapterNumber) {
                       const newUpdateDetails = [...updateDetails];
                       newUpdateDetails[
-                        data[index].number
+                        data[index].number!
                       ].updateChapterNumber!.chapterNumber = parseInt(
                         e.target.value
                       );
@@ -172,19 +172,19 @@ const ChapterUpdate: FC<ChapterUpdateProps> = ({
                     } 
                     //Already has customChapter so update chapterNumber in it
                     else if (
-                      updateDetails[data[index].number].customChapter
+                      updateDetails[data[index].number!].customChapter
                     ) {
                       const newUpdateDetails = [...updateDetails];
                       newUpdateDetails[
-                        data[index].number
+                        data[index].number!
                       ].customChapter!.chapterNumber = parseInt(e.target.value);
                       setUpdateDetails(newUpdateDetails);
                     }
                     //Updated for other thing so add updateChapterNumber
                     else{
                       const newUpdateDetails = [...updateDetails];
-                      newUpdateDetails[data[index].number] = {
-                        ...newUpdateDetails[data[index].number],
+                      newUpdateDetails[data[index].number!] = {
+                        ...newUpdateDetails[data[index].number!],
                         updateChapterNumber: {
                           chapterNumber: parseInt(e.target.value),
                           id: data[index].link!.id,
@@ -292,7 +292,7 @@ const ChapterUpdate: FC<ChapterUpdateProps> = ({
 
         {type !== ChapterType.Blog &&
           data[index].create &&
-          data[index].create.blogs.map((blog, temp) => (
+          data[index].create!.blogs!.map((blog, temp) => (
             <ChapterUpdate
               key={temp}
               type={ChapterType.Blog}

@@ -6,6 +6,7 @@ import { PlusIcon } from "lucide-react";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { usePathname } from "next/navigation";
 import { cachedTopic } from "@/type/topic";
+import { Underdog } from "next/font/google";
 
 
 interface TopicSliderProps {
@@ -19,11 +20,16 @@ const TopicSlider: FC<TopicSliderProps> = ({ topics }) => {
   if (!topics) return;
   return (
     <ScrollArea className=" w-[70%]">
-      <Tabs value={currentTopic} >
+      <Tabs value={currentTopic != 'undefined' ? currentTopic : "following"} >
         <TabsList>
           <TabsTrigger value="add">
             <Link href="/me/suggestions">
               <PlusIcon />
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value="following">
+            <Link href="/dashboard/following">
+              Following
             </Link>
           </TabsTrigger>
           {topics.map((topic, key) => {

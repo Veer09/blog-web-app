@@ -7,10 +7,7 @@ export const POST = async (req: NextRequest, { params } : {params : {id: string}
     const { userId } = auth();
 
     if(!userId){
-        return {
-            status: 401,
-            json: {error: "Unauthorized"}
-        }
+        return NextResponse.json({message: "Unauthorized"}, {status: 401})
     }
 
     await prisma.book.update({

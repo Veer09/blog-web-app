@@ -1,5 +1,5 @@
 import TopicSlider from '../../../../components/TopicSlider'
-import { getUserTopics } from '../../../..//lib/user'
+import { getUserTopics } from '../../../../lib/user'
 import React, { ReactNode } from 'react'
 import BlogBookSlider from '@/components/BlogBookSlider';
 

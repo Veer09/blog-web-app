@@ -7,7 +7,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  AlbumIcon,
   Bell,
+  BookPlus,
+  FilePlus2,
   Home,
   LineChart,
   Menu,
@@ -17,7 +20,7 @@ import {
   Plus,
   Search,
   ShoppingCart,
-  Users,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 
@@ -79,26 +82,15 @@ function Navbar({ children }: { children: React.ReactNode }) {
           <div className="flex-1 my-8">
             <nav className="grid gap-4 items-start px-2 text-sm font-medium lg:px-4">
               <Link
-                href="/dashboard/following"
+                href="/dashboard/following/"
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                  pathname === "/dashboard/following"
+                  pathname.includes("/dashboard/topic") || pathname === "/dashboard/following"
                     ? "text-primary bg-muted"
                     : "text-muted-foreground"
                 }`}
               >
                 <Home className="h-4 w-4" />
                 Home Feed
-              </Link>
-              <Link
-                href="/dashboard/topic/"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                  pathname.includes("/dashboard/topic")
-                    ? "text-primary bg-muted"
-                    : "text-muted-foreground"
-                }`}
-              >
-                <ShoppingCart className="h-4 w-4" />
-                Topicwise Feed
               </Link>
               <Link
                 href="#"
@@ -108,21 +100,21 @@ function Navbar({ children }: { children: React.ReactNode }) {
                     : "text-muted-foreground"
                 }`}
               >
-                <Package className="h-4 w-4" />
-                Following Books
+                <AlbumIcon className="h-4 w-4" />
+                Followed Books
               </Link>
               <Link
                 href="/dashboard/created-books"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
-                <Users className="h-4 w-4" />
+                <BookPlus className="h-4 w-4" />
                 Created Books
               </Link>
               <Link
                 href="/me/blogs"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
-                <LineChart className="h-4 w-4" />
+                <FilePlus2 className="h-4 w-4" />
                 Created Blogs
               </Link>
             </nav>

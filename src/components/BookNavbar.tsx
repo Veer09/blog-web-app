@@ -5,9 +5,16 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChapterType } from "@/lib/book";
-import { BookIcon, ChevronRightIcon, MenuIcon, Search } from "lucide-react";
+import {
+  ArrowLeftCircle,
+  ArrowRightCircle,
+  BookIcon,
+  ChevronRightIcon,
+  MenuIcon,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { FC, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -26,6 +33,7 @@ interface BookNavbarProps {
 const BookNavbar: FC<BookNavbarProps> = ({ book, children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
   return (
     <div
       className={`grid min-h-screen w-full ${
@@ -58,6 +66,7 @@ const BookNavbar: FC<BookNavbarProps> = ({ book, children }) => {
               {book.chapters.map((chapter, index) => {
                 return (
                   <Collapsible
+                    key={index}
                     className="space-y-1"
                     defaultOpen={parseInt(pathname.split("/")[3]) === index}
                   >
@@ -71,6 +80,7 @@ const BookNavbar: FC<BookNavbarProps> = ({ book, children }) => {
                       {chapter.blogs.map((blog, key) => {
                         return (
                           <Link
+                            key={key}
                             className={`block rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors ${
                               parseInt(pathname.split("/")[4]) === key &&
                               "bg-gray-200"
@@ -92,7 +102,7 @@ const BookNavbar: FC<BookNavbarProps> = ({ book, children }) => {
         </div>
       </div>
       <div
-        className={`shrink-0 border-r bg-gray-100 dark:border-gray-800 dark:bg-gray-900  ${
+        className={`shrink-0 border-r bg-muted/40 dark:border-gray-800 dark:bg-gray-900  ${
           !isSidebarOpen ? "block" : "hidden"
         } flex justify-center py-5`}
       >
@@ -119,6 +129,13 @@ const BookNavbar: FC<BookNavbarProps> = ({ book, children }) => {
                 />
               </div>
             </form>
+          </div>
+          <div
+            onClick={() => router.replace("/dashboard")}
+            className=" cursor-pointer"
+          >
+            <span className="sr-only">Go to Dashboard</span>
+            <ArrowLeftCircle className="h-8 w-8" />
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

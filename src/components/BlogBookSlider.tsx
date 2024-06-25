@@ -9,6 +9,7 @@ const BlogBookSlider = () => {
     const pathname = usePathname()
     const currentTopic = decodeURI(pathname.split('/')[3])
     const currentSection = pathname.split('/')[4]
+    if( currentSection !== 'blogs' && currentSection !== 'books' ) return null;
   return (
     <Tabs value={currentSection} defaultValue='blogs'>
         <TabsList>

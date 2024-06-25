@@ -44,8 +44,8 @@ const ChapterCreate: FC<ChapterCreateProps> = ({
   const removeItem = () => {
     if (type !== ChapterType.Blog) {
       data.splice(index, 1);
-    } else if (data[index].create && blogNo !== undefined) {
-      data[index].create.blogs.splice(blogNo, 1);
+    } else if (data[index].create !== undefined && blogNo !== undefined) {
+      data[index]?.create?.blogs?.splice(blogNo, 1);
     }
     setContent(data);
   };
@@ -155,7 +155,7 @@ const ChapterCreate: FC<ChapterCreateProps> = ({
 
         {type !== ChapterType.Blog &&
           data[index].create &&
-          data[index].create.blogs.map((blog, temp) => (
+          data[index]?.create?.blogs?.map((blog, temp) => (
             <ChapterCreate
               key={temp}
               type={ChapterType.Blog}
