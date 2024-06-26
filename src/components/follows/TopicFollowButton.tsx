@@ -1,12 +1,11 @@
 "use client";
 import { TopicFollowSchema, cachedTopic } from "@/type/topic";
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { ZodError } from "zod";
-import { Button } from "./ui/button";
-import { toast } from "./ui/use-toast";
+import { Button } from "../ui/button";
+import { toast } from "../ui/use-toast";
 
 interface TopicFollowButtonProps {
   topic: cachedTopic & { isFollowed: boolean };

@@ -1,5 +1,6 @@
-'use client'
-import { redirect, useRouter } from "next/navigation"
+
+import Image from "next/image"
+import Link from "next/link"
 import { FC } from "react"
 
 interface BookCoverProps {
@@ -9,13 +10,10 @@ interface BookCoverProps {
 }
 
 export const BookCover: FC<BookCoverProps> = ({ title, description, id}) => {
-    const router = useRouter();
     return (
-      <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-w-[300px]" onClick={() => {
-        router.replace(`/book/${id}/0/0`);
-      }} >
+      <Link href={`book/${id}/0/0`} className="bg-white rounded-lg shadow-md overflow-hidden w-full max-w-[300px]" >
         <div className="relative aspect-square cursor-pointer">
-          <img
+          <Image
             alt="Book Cover"
             className="object-cover w-full h-full"
             src="/placeholder.png"
@@ -35,6 +33,6 @@ export const BookCover: FC<BookCoverProps> = ({ title, description, id}) => {
             </h6>
           </div>
         </div>
-      </div>
+      </Link>
     )
   }

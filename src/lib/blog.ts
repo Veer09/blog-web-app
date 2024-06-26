@@ -36,3 +36,15 @@ export const getBlog = async (blogId: string) => {
   });
   return blog;
 }
+
+export const getMostLikedBlogs = async () => {
+  const blogs = await prisma.blog.findMany({
+    orderBy: {
+      like: {
+        _count: 'desc'
+      }
+    },
+    take: 3
+  });
+  return blogs;
+}

@@ -1,5 +1,5 @@
-import BlogPage from "@/components/BlogPage";
-import BookNavbar from "@/components/BookNavbar";
+import BlogPage from "@/components/blog-view/BlogPage";
+import BookNavbar from "@/components/book/BookNavbar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFullBook } from "@/lib/book";
 import { notFound } from "next/navigation";

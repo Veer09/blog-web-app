@@ -10,7 +10,7 @@ interface Props {
 }
 
 const Page: FC<Props> = async ({ params }) => {
-  const Editor = dynamic(() => import("@/components/Editor"), {
+  const Editor = dynamic(() => import("@/components/blog-create/Editor"), {
     ssr: false,
   });
   const blog = await getBlog(params.id);

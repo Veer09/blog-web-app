@@ -1,16 +1,14 @@
-import React, { FC } from "react";
-import TopicFollow from "@/components/TopicFollow";
-import { unstable_noStore } from "next/cache";
-import UserFollow from "@/components/UserFollow";
+import ItemFollow from "@/components/follows/ItemFollow";
 import { getUserFollowings, getUserTopics } from "@/lib/user";
+import { FC } from "react";
 
 const page: FC = async () => {
   const followedTopics = await getUserTopics(7);
   const following = await getUserFollowings(7);
   return (
     <div className=" my-10">
-      <TopicFollow title="Topics you follow" topics={followedTopics} followed={true}/>
-      <UserFollow title="People you follow" users={following} followed={true}/>
+      <ItemFollow title="Topics you follow" data={followedTopics} followed={true}/>
+      <ItemFollow title="People you follow" data={following} followed={true}/>
     </div>
   );
 };

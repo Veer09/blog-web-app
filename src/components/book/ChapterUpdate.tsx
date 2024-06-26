@@ -3,9 +3,9 @@ import { BookOpenIcon, File, FileEditIcon, PlusIcon, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React, { FC, useEffect, useRef, useState } from "react";
 import DialogDetails, { DialogType } from "./DialogDetails";
-import { Button } from "./ui/button";
-import { Dialog, DialogTrigger } from "./ui/dialog";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Dialog, DialogTrigger } from "../ui/dialog";
+import { Input } from "../ui/input";
 import { set } from "zod";
 
 interface ChapterUpdateProps {

@@ -3,10 +3,9 @@ import axios from "axios";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { FC, useState } from "react";
-import { DialogContent } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { ScrollArea } from "./ui/scroll-area";
-import { number, set } from "zod";
+import { DialogContent } from "../ui/dialog";
+import { Input } from "../ui/input";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface DialogDetailsProps {
   type: DialogType;

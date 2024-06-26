@@ -1,11 +1,11 @@
 import React, { FC } from "react";
 import { OutputData } from "@editorjs/editorjs";
-import BlogView from "@/components/BlogView";
+import BlogView from "@/components/blog-view/BlogView";
 import { auth } from "@clerk/nextjs";
 import { findBlogById } from "@/lib/blog";
-import TopicList from "@/components/TopicList";
+import TopicList from "@/components/blog-view/TopicList";
 import { Separator } from "@/components/ui/separator";
-import UserInteraction from "@/components/UserInteraction";
+import UserInteraction from "@/components/blog-view/UserInteraction";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";

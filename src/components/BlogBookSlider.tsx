@@ -1,9 +1,7 @@
 "use client"
-import React from 'react'
-import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
-import { PlusIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
 
 const BlogBookSlider = () => {
     const pathname = usePathname()

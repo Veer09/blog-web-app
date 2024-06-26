@@ -1,11 +1,10 @@
 "use client"
-import React, { FC } from 'react'
-import { Button } from './ui/button'
-import { TopicFollowSchema } from '@/type/topic'
 import { useMutation } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
+import { FC } from 'react'
 import { ZodError } from 'zod'
-import { toast } from './ui/use-toast'
+import { Button } from '../ui/button'
+import { toast } from '../ui/use-toast'
 
 interface BookFollowButtonProps {
     isFollowed: boolean

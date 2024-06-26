@@ -2,8 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { FC, useState } from "react";
 import { CustomError } from "@/type/book";
-import { ChapterType } from "@/components/ChapterCreate";
-import DialogDetails, { DialogType } from "@/components/DialogDetails";
+import { ChapterType } from "@/components/book/ChapterCreate";
+import DialogDetails, { DialogType } from "@/components/book/DialogDetails";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -23,7 +23,7 @@ import axios, { AxiosError } from "axios";
 import { Package2Icon, PlusIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import ChapterUpdate from "./ChapterUpdate";
-import { toast } from "./ui/use-toast";
+import { toast } from "../ui/use-toast";
 
 interface UpdateBookProps {
   chapters: Chapter[];

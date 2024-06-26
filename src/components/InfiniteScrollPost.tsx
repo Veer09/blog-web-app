@@ -1,7 +1,7 @@
 "use client";
 import { cachedBlog } from "@/type/blog";
 import React, { FC } from "react";
-import BlogCard from "./BlogCard";
+import BlogCard from "./blog-view/BlogCard";
 import { Separator } from "./ui/separator";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";

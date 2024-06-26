@@ -20,7 +20,7 @@ import {
   Plus,
   Search,
   ShoppingCart,
-  Users
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -37,9 +37,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { bookSchema } from "@/type/book";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { auth, UserButton, useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { usePathname, useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 function Navbar({ children }: { children: React.ReactNode }) {
@@ -48,6 +48,7 @@ function Navbar({ children }: { children: React.ReactNode }) {
   const [description, setDescription] = useState("");
   const [topic, setTopic] = useState("");
   const router = useRouter();
+  const { isSignedIn } = useUser();
   const bookCreate = async () => {
     const payload = bookSchema.safeParse({
       name,
@@ -64,7 +65,6 @@ function Navbar({ children }: { children: React.ReactNode }) {
     }
   };
   const { user } = useUser();
-  if (!user) return;
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -84,7 +84,8 @@ function Navbar({ children }: { children: React.ReactNode }) {
               <Link
                 href="/dashboard/following/"
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                  pathname.includes("/dashboard/topic") || pathname === "/dashboard/following"
+                  pathname.includes("/dashboard/topic") ||
+                  pathname === "/dashboard/following"
                     ? "text-primary bg-muted"
                     : "text-muted-foreground"
                 }`}
@@ -134,7 +135,12 @@ function Navbar({ children }: { children: React.ReactNode }) {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <DialogTrigger>Create Book</DialogTrigger>
+                    <DialogTrigger onClick={() => {
+                      if(!isSignedIn) {
+                        router.push("/sign-in");
+                        return;
+                      };
+                    }}>Create Book</DialogTrigger>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -244,7 +250,7 @@ function Navbar({ children }: { children: React.ReactNode }) {
               </div>
             </form>
 
-            {user.id ? (
+            {user ? (
               <UserButton afterSignOutUrl="/sign-in">
                 <UserButton.UserProfileLink
                   label="Blogs"
@@ -252,7 +258,11 @@ function Navbar({ children }: { children: React.ReactNode }) {
                   labelIcon={<PenSquare width={16} height={16} />}
                 />
               </UserButton>
-            ) : null}
+            ) : (
+              <Link href="/sign-in">
+                <Button>Login</Button>
+              </Link>
+            )}
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

@@ -1,4 +1,4 @@
-import BlogCardSkeleton from '@/components/BlogCardSkeleton';
+import BlogCardSkeleton from '@/components/blog-view/BlogCardSkeleton';
 import React from 'react'
 
 const loading = () => {

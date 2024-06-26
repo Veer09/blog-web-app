@@ -17,11 +17,11 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { MessagesSquare } from "lucide-react";
-import { unstable_cache } from "next/cache";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { ZodError } from "zod";
 import ShowPastComment from "./ShowPastComment";
+import { useUser } from "@clerk/nextjs";
 
 interface CommentSheetProps {
   blogId: string
@@ -31,6 +31,7 @@ const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
   const router = useRouter();
   const [comment, setComment] = useState<string>("");
   const [comments, setComments] = useState<CommentData[]>([]);
+  const { isSignedIn } = useUser();
   const { mutate: saveComment } = useMutation({
     mutationFn: () => {
       const commentObj = {
@@ -76,7 +77,10 @@ const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
-              <Button className=" my-3" onClick={() => saveComment()}>
+              <Button className=" my-3" onClick={() => {
+                if(!isSignedIn) return router.push("/sign-in")
+                saveComment()
+              }}>
                 Submit
               </Button>
             </SheetDescription>

@@ -1,4 +1,4 @@
-import BlogCard from "@/components/BlogCard";
+import BlogCard from "@/components/blog-view/BlogCard";
 import { Separator } from "@/components/ui/separator";
 import { getBlogByTopic } from "@/lib/topic";
 import React from "react";

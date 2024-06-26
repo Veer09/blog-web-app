@@ -1,9 +1,9 @@
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cachedTopic } from "@/type/topic";
-import React, { FC } from "react";
-import TopicsSelect from "./TopicsSelect";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { FC } from "react";
+import ItemSelect from "./ItemSelect";
 
 interface TopicFollowListProps {
   topics: cachedTopic[];
@@ -23,7 +23,7 @@ const TopicFollowList: FC<TopicFollowListProps> = ({ topics, isFollowed}) => {
             ...topic,
             isFollowed,
           };
-          return <TopicsSelect key={key} followObj={followObj} />;
+          return <ItemSelect key={key} followObj={followObj} />;
         })}
       </ScrollArea>
     </div>

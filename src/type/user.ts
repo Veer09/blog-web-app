@@ -12,3 +12,4 @@ export type cachedUser = {
   blogs: number;
   followers: number;
 }
+

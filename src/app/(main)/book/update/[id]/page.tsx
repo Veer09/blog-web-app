@@ -1,4 +1,4 @@
-import UpdateBook from '@/components/UpdateBook';
+import UpdateBook from '@/components/book/UpdateBook';
 import { redis } from '@/lib/redis'
 import { Chapter } from '@/type/book';
 import { notFound } from 'next/navigation';

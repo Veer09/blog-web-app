@@ -1,6 +1,5 @@
-import { Topic } from '@prisma/client'
 import Link from 'next/link'
-import React, { FC } from 'react'
+import { FC } from 'react'
 
 interface TopicListProps{
     topics: {

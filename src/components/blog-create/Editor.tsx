@@ -15,12 +15,12 @@ import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ZodError } from "zod";
-import { EDITOR_TOOLS } from "../lib/tools";
-import TopicSearch from "./TopicSearch";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { toast } from "./ui/use-toast";
+import { EDITOR_TOOLS } from "../../lib/tools";
+import TopicSearch from "../TopicSearch";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { toast } from "../ui/use-toast";
 
 export default function Editor({
   holder,

@@ -1,12 +1,12 @@
 "use client";
-import React, { FC, useContext, useState } from "react";
-import { Button } from "./ui/button";
-import { QueryClient, useMutation } from "@tanstack/react-query";
 import { UserFollowSchema, cachedUser } from "@/type/user";
+import { QueryClient, useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
-import { toast } from "./ui/use-toast";
+import { FC } from "react";
+import { ZodError } from "zod";
+import { Button } from "../ui/button";
+import { toast } from "../ui/use-toast";
 
 interface UserFollowButtonProps {
   user: cachedUser & { isFollowed: boolean, name: string}, 

@@ -1,8 +1,8 @@
 'use client'
-import React, { FC } from "react";
-import parse from 'html-react-parser'
-import edjsHTML from "editorjs-html";
 import { OutputData } from "@editorjs/editorjs";
+import edjsHTML from "editorjs-html";
+import parse from 'html-react-parser';
+import { FC } from "react";
 interface BlogViewProps{
     content: OutputData
 }

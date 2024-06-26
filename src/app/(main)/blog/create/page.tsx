@@ -1,9 +1,14 @@
 "use client";
-import { OutputData } from "@editorjs/editorjs";
+import { useUser } from "@clerk/nextjs";
 import dynamic from "next/dynamic";
-import React, { FC, useState } from "react";
+import { redirect } from "next/navigation";
+import { FC } from "react";
 const Page: FC = () => {
-  const Editor = dynamic(() => import("@/components/Editor"), {
+
+  const { user } = useUser() 
+  if(!user) redirect("/sign-in");
+
+  const Editor = dynamic(() => import("@/components/blog-create/Editor"), {
     ssr: false,
   });
   

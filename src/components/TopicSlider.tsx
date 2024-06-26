@@ -1,12 +1,11 @@
 "use client"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import React, { FC } from "react";
-import Link from "next/link";
-import { PlusIcon } from "lucide-react";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
-import { usePathname } from "next/navigation";
 import { cachedTopic } from "@/type/topic";
-import { Underdog } from "next/font/google";
+import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { FC } from "react";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 
 interface TopicSliderProps {

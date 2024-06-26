@@ -1,11 +1,14 @@
-import BlogCard from "@/components/BlogCard";
+import BlogCard from "@/components/blog-view/BlogCard";
 import { Separator } from "@/components/ui/separator";
-import { getUserBlogs, setUser, setUserBlogs } from "@/lib/user";
+import { getUserBlogs, setUserBlogs } from "@/lib/user";
 import { cachedBlog } from "@/type/blog";
 import { auth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 import { FC } from "react";
 
 const page: FC = async () => {
+  const { userId } = auth();
+  if(!userId) redirect("/sign-in");
   let blogs: cachedBlog[] | null = await getUserBlogs();
   if (!blogs) {
     blogs = await setUserBlogs();

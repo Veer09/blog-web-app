@@ -1,4 +1,4 @@
-import BlogCard from '@/components/BlogCard';
+import BlogCard from '@/components/blog-view/BlogCard';
 import { getSavedBlog } from '@/lib/user'
 import React, { FC } from 'react'
 

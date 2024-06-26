@@ -2,19 +2,17 @@ import {
   CommentData,
   commentDeleteSchema,
   replayCommentSchema,
-
 } from "@/type/comment";
 import { useUser } from "@clerk/nextjs";
-import { useMutation} from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import React, { FC, useState } from "react";
-import { Button } from "./ui/button";
-import { toast } from "./ui/use-toast";
-import { Textarea } from "./ui/textarea";
-import ShowPastComment from "./ShowPastComment";
-import { Comment } from "@prisma/client";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { toast } from "../ui/use-toast";
+import ShowPastComment from "./ShowPastComment";
 
 interface CommentProps {
   comment: CommentData

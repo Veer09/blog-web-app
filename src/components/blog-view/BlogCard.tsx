@@ -2,7 +2,7 @@
 import { cachedBlog } from "@/type/blog";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { FC } from "react";
+import { FC } from "react";
 
 interface BlogCardprops {
   blog: cachedBlog;

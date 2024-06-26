@@ -9,9 +9,9 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import React, { FC, useRef, useState } from "react";
 import DialogDetails, { DialogType } from "./DialogDetails";
-import { Button } from "./ui/button";
-import { Dialog, DialogTrigger } from "./ui/dialog";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Dialog, DialogTrigger } from "../ui/dialog";
+import { Input } from "../ui/input";
 
 interface ChapterCreateProps {
   type?: ChapterType;

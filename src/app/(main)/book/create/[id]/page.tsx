@@ -2,8 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { FC, useState } from "react";
 
-import ChapterCreate, { ChapterType } from "@/components/ChapterCreate";
-import DialogDetails, { DialogType } from "@/components/DialogDetails";
+import ChapterCreate, { ChapterType } from "@/components/book/ChapterCreate";
+import DialogDetails, { DialogType } from "@/components/book/DialogDetails";
 import {
   Dialog,
   DialogTrigger,

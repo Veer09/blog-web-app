@@ -1,9 +1,9 @@
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cachedUser } from "@/type/user";
-import React, { FC } from "react";
-import UserSelect from "./UserSelect";
 import { auth, clerkClient } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { FC } from "react";
+import ItemSelect from "./ItemSelect";
 
 interface UserFollowListProps {
   users: cachedUser[];
@@ -25,7 +25,7 @@ const UserFollowList: FC<UserFollowListProps> = ({ users, isFollowed}) => {
             name: clerkData.firstName + " " + clerkData.lastName,
             isFollowed,
           };
-          return <UserSelect key={key} followObj={followObj} />;
+          return <ItemSelect key={key} followObj={followObj} />;
         })}
       </ScrollArea>
     </div>
