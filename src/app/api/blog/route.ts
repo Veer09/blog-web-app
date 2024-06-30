@@ -1,9 +1,8 @@
-import { redis } from "@/lib/redis";
+import prisma from "@/lib/db";
+import { qstashClient } from "@/lib/qstash";
 import { blogSchema, blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs";
-import prisma from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
@@ -38,44 +37,16 @@ export const POST = async (req: NextRequest) => {
         },
       },
     });
-    const userFollowers = await redis.smembers(`user:${userId}:followers`);
-    const redisPipe = redis.pipeline();
-
-    //Create topic if not exists
-    topics.forEach(async (topic) => {
-      redisPipe.hsetnx(`topic:${topic}`, "name", topic);
-      redisPipe.hsetnx(`topic:${topic}`, "blogs", 1);
-      redisPipe.hsetnx(`topic:${topic}`, "followers", 0);
-
-      //revalidate topic
-      revalidateTag(`topic:${topic}`);
-
-      //Storing topic name in topics set
-      redisPipe.sadd(`topics`, topic);
-    });
-
-    //Storing blog data
-    redisPipe.hset(`blog:${blogData.id}`, {
-      id: blogData.id,
-      title: blogData.title,
-      description: blogData.description,
-      coverImage: blogData.coverImage,
-      createdAt: blogData.createdAt,
-    });
-
-    //Storing blog information in user's blog list
-    redisPipe.lpush(`user:${userId}:blogs`, blogData.id);
-    redisPipe.hincrby(`user:${userId}`, "blogs", 1);
-    //Storing blog in feed of user's followers
-    userFollowers.forEach((follower) => {
-      redisPipe.zadd(`user:${follower}:feed`, {
-        score: Date.now(),
-        member: blogData.id,
-      });
-    });
-
-    await redisPipe.exec();
-
+    
+    const publishUrl = req.url.split("/").slice(0, 3).join("/");
+    await qstashClient.publishJSON({
+      url: `https://abc.requestcatcher.com/api/qstash/publish-post`,
+      body: {
+        userId,
+        blogData,
+        topics
+      }
+    })
     const response = blogSchema.parse(blogData.id);
     return NextResponse.json(response, { status: 200 });
   } catch (err) {

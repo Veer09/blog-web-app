@@ -13,3 +13,7 @@ export type cachedUser = {
   followers: number;
 }
 
+export const UserFollowAddSchema = z.object({
+  userId: z.string(),
+  followerId: z.string()
+})

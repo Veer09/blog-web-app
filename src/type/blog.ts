@@ -1,4 +1,5 @@
 import { OutputData } from "@editorjs/editorjs";
+import { Blog } from "@prisma/client";
 import { z } from "zod";
 
 
@@ -12,7 +13,13 @@ export const blogUploadSchema = z.object({
 });
 
 
-
+export const blogPublishSchema = z.object({
+    userId: z.string(),
+    topics: z.array(z.object({
+        name: z.string()
+    })),
+    blogData: z.custom<Blog>()
+})
 
 export const blogSchema = z.string()
 
