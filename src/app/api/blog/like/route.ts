@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { savedBySchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
@@ -11,12 +12,9 @@ export const POST = async (req: NextRequest) => {
     const blogId = savedBySchema.parse(payload);
 
     const { userId } = auth();
-    if (!userId) {
-      return NextResponse.json({
-        status: 401,
-        data: "Unautherized!",
-      });
-    }
+    if (!userId)
+      throw new ApiError("Unauthorized!!", ErrorTypes.Enum.unauthorized);
+
     const isLiked = await prisma.like.findUnique({
       where: {
         user_id_blog_id: {
@@ -25,19 +23,16 @@ export const POST = async (req: NextRequest) => {
         },
       },
     });
-    if (isLiked) {
-      return NextResponse.json({
-        status: 400,
-        data: "Blog already liked!",
-      });
-    }
+    if (isLiked)
+      throw new ApiError("Blog already liked!!", ErrorTypes.Enum.bad_request);
+
     await prisma.like.create({
       data: {
         user_id: userId,
         blog_id: blogId,
       },
     });
-    
+
     await redis.hincrby(`blog:${blogId}`, "likes", 1);
 
     return NextResponse.json({
@@ -46,10 +41,7 @@ export const POST = async (req: NextRequest) => {
         message: "Blog liked successfully!!",
       },
     });
-  } catch (err: any) {
-    return NextResponse.json({
-      status: 500,
-      data: "Internal Server Error!",
-    });
+  } catch (err) {
+    handleApiError(err);
   }
 };

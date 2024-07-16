@@ -21,6 +21,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { toast } from "../ui/use-toast";
+import { handleClientError } from "@/lib/error";
 
 export default function Editor({
   holder,
@@ -60,17 +61,7 @@ export default function Editor({
       return axios.post("/api/blog", payload);
     },
     onError: (error) => {
-      if (error instanceof ZodError || error instanceof AxiosError) {
-        toast({
-          variant: "destructive",
-          title: error.message,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Something went wrong",
-        });
-      }
+      handleClientError(error);
     },
     onSuccess: (res) => {
       const response = res.data;
@@ -95,17 +86,7 @@ export default function Editor({
       return axios.put(`/api/blog/${id}`, payload);
     },
     onError: (error) => {
-      if (error instanceof ZodError || error instanceof AxiosError) {
-        toast({
-          variant: "destructive",
-          title: error.message,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Something went wrong",
-        });
-      }
+      handleClientError(error);
     },
     onSuccess: (res) => {
       const response = res.data;
@@ -138,11 +119,11 @@ export default function Editor({
   const saveData = () => {
     if (!ref.current) return;
     ref.current.save().then(async (data) => {
-      if(!id){
-        uplaod(data)
-      }else{
-        update(data)
-      };
+      if (!id) {
+        uplaod(data);
+      } else {
+        update(data);
+      }
     });
   };
 
@@ -187,10 +168,7 @@ export default function Editor({
                 />
               </div>
               <div className=" flex my-4 w-[50%] ">
-                <TopicSearch
-                  topics={topics}
-                  setTopics={setTopics}
-                />
+                <TopicSearch topics={topics} setTopics={setTopics} />
               </div>
             </div>
             <div className=" flex gap-3 justify-center">

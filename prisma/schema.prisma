@@ -75,6 +75,7 @@ model Book{
     topic Topic? @relation(fields: [topic_name], references: [name], onDelete: SetNull)
     author_id String
     author User @relation("BookCreate", fields: [author_id], references: [id], onDelete: Cascade)
+    coverImage String?
     followers User[] @relation("BookFollows")
     chapters BookChapter[] 
     books BookInclude[] @relation("ParentBook")

@@ -3,17 +3,20 @@ import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 
 export const POST = async (req: NextRequest) => {
   try {
     const { payload } = await req.json();
-    const topicName = TopicFollowSchema.safeParse(payload);
-    if (!topicName.success)
-      return NextResponse.json({ error: "Invalid topicName" }, { status: 400 });
+    const topicName = TopicFollowSchema.parse(payload);
 
     const { userId } = auth();
-    if (!userId)
-      return NextResponse.json({ error: "User Unauthorized" }, { status: 401 });
+    if (!userId) {
+      throw new ApiError(
+        "Unauthorized!! Login first to access",
+        ErrorTypes.Enum.unauthorized
+      );
+    }
 
     await prisma.user.update({
       where: {
@@ -22,15 +25,15 @@ export const POST = async (req: NextRequest) => {
       data: {
         topics: {
           connect: {
-            name: topicName.data,
+            name: topicName,
           },
         },
       },
     });
 
-    await redis.hincrby(`topic:${topicName.data}`, "followers", 1);
+    await redis.hincrby(`topic:${topicName}`, "followers", 1);
     return NextResponse.json({ message: "sucess" }, { status: 200 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    handleApiError(err);
   }
 };

@@ -1,13 +1,13 @@
 "use client";
-import { toast } from "@/components/ui/use-toast";
+import { handleClientError } from "@/lib/error";
 import { savedBySchema } from "@/type/user";
+import { useUser } from "@clerk/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { BookCheck, BookmarkPlus, Heart } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import CommentSheet from "../comment/CommentSheet";
-import { useUser } from "@clerk/nextjs";
 
 interface UserInteractionProps {
   blogId: string;
@@ -34,10 +34,7 @@ const UserInteraction: FC<UserInteractionProps> = ({
       setIsSaved(true);
     },
     onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: err.message,
-      });
+      handleClientError(err);
     },
   });
   const { mutate: unSaveBlog } = useMutation({
@@ -49,10 +46,7 @@ const UserInteraction: FC<UserInteractionProps> = ({
       setIsSaved(false);
     },
     onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: err.message,
-      });
+      handleClientError(err);
     },
   });
 
@@ -68,10 +62,7 @@ const UserInteraction: FC<UserInteractionProps> = ({
       });
     },
     onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: err.message,
-      });
+      handleClientError(err);
     },
   });
   const { mutate: unlikeBlog } = useMutation({
@@ -86,10 +77,7 @@ const UserInteraction: FC<UserInteractionProps> = ({
       });
     },
     onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: err.message,
-      });
+      handleClientError(err);
     },
   });
 

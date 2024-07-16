@@ -13,17 +13,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Chapter,
-  updateBookSchema,
-  UpdateDetails,
-} from "@/type/book";
+import { Chapter, updateBookSchema, UpdateDetails } from "@/type/book";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { Package2Icon, PlusIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import ChapterUpdate from "./ChapterUpdate";
 import { toast } from "../ui/use-toast";
+import { handleClientError } from "@/lib/error";
 
 interface UpdateBookProps {
   chapters: Chapter[];
@@ -39,29 +36,19 @@ const UpdateBook: FC<UpdateBookProps> = ({ chapters, id }) => {
   const [dialogType, setDialogType] = useState("");
   const [errIndex, setErrIndex] = useState<number>(-1);
 
-
   const { mutate: updateBook } = useMutation({
     mutationFn: async () => {
-      const payload = updateBookSchema.safeParse({
+      const payload = updateBookSchema.parse({
         content: content,
         updateDetails: updateDetails,
       });
-      console.log(payload); 
-      if (!payload.success) throw new Error("Invalid Payload");
-      return await axios.put(`/api/book/${id}`, payload.data);
+      return await axios.put(`/api/book/${id}`, payload);
     },
-    onError: (error) => {
-      if(error instanceof AxiosError){
-        if(error.response?.data.index){
-          setErrIndex(error.response.data.index);
-          toast({
-            title: "Error",
-            description: error.response.data.error,
-            variant: "destructive",
-          });
-        }
+    onError: (error: any) => {
+      handleClientError(error);
+      if (error.response?.data.index) {
+        setErrIndex(error.response.data.index);
       }
-
     },
   });
 
@@ -112,8 +99,8 @@ const UpdateBook: FC<UpdateBookProps> = ({ chapters, id }) => {
                           },
                           title: "",
                           chapterNumber: content.length + 1,
-                          number: updateDetails.length
-                        }
+                          number: updateDetails.length,
+                        },
                       ]);
                       setUpdateDetails([
                         ...updateDetails,
@@ -121,13 +108,13 @@ const UpdateBook: FC<UpdateBookProps> = ({ chapters, id }) => {
                           number: content.length,
                           customChapter: {
                             create: {
-                              blogs: []
+                              blogs: [],
                             },
                             title: "",
-                            chapterNumber: content.length + 1
+                            chapterNumber: content.length + 1,
                           },
-                        }
-                      ])
+                        },
+                      ]);
                     }}
                   >
                     Create New Chapter
@@ -175,10 +162,12 @@ const UpdateBook: FC<UpdateBookProps> = ({ chapters, id }) => {
                   content={content}
                   setContent={setContent}
                   type={
-                    content[index].create ? ChapterType.Create : ChapterType.Link
+                    content[index].create
+                      ? ChapterType.Create
+                      : ChapterType.Link
                   }
-                  error = {errIndex === index}
-                  setError = {setErrIndex}
+                  error={errIndex === index}
+                  setError={setErrIndex}
                   updateDetails={updateDetails}
                   setUpdateDetails={setUpdateDetails}
                 />

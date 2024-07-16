@@ -1,8 +1,8 @@
 import prisma from "@/lib/db";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs";
-import exp from "constants";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,7 +10,7 @@ export const PUT = async (
   req: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const payload  = await req.json();
+  const payload = await req.json();
   try {
     const blog = blogUploadSchema.parse(payload);
     const topics = blog.topics.map((topic) => {
@@ -21,11 +21,16 @@ export const PUT = async (
       };
     });
     const { userId } = auth();
-    if(!userId) { return NextResponse.json({ message: "Unauthorized" }, { status: 400 }); }
+    if (!userId) {
+      throw new ApiError(
+        "Unauthorized!! Login first to access",
+        ErrorTypes.Enum.unauthorized
+      );
+    }
     const update = await prisma.blog.update({
       where: {
         id: params.id,
-        user_id: userId
+        user_id: userId,
       },
       data: {
         content: JSON.parse(JSON.stringify(blog.content)),
@@ -42,18 +47,14 @@ export const PUT = async (
     revalidateTag(`blog:${update.id}`);
 
     const redisPipe = redis.pipeline();
-    
+
     //Create topic if not exists
     topics.forEach(async (topic) => {
       redisPipe.hsetnx(`topic:${topic.name}`, "name", topic.name);
       redisPipe.hsetnx(`topic:${topic.name}`, "blogs", 1);
       redisPipe.hsetnx(`topic:${topic.name}`, "followers", 0);
-
       //revalidate topic
       revalidateTag(`topic:${topic.name}`);
-
-      //Storing topic name in topics set
-      redisPipe.sadd(`topics`, topic.name);
     });
 
     //Storing blog data
@@ -66,40 +67,43 @@ export const PUT = async (
 
     await redisPipe.exec();
 
-    return NextResponse.json({ message: "Success"})
-  } catch (e) {
-    console.log(e)
-    return NextResponse.json({ message: "Something went wrong" }, { status: 400 });
+    return NextResponse.json({ message: "Success" });
+  } catch (err) {
+    handleApiError(err);
   }
 };
 
-
-export const DELETE = async (req: NextRequest,
-  { params }: { params: { id: string }}
+export const DELETE = async (
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) => {
   const { userId } = auth();
-  if(!userId) { return NextResponse.json({ message: "Unauthorized" }, { status: 400 }); }
+  if (!userId) {
+    throw new ApiError(
+      "Unauthorized!! Login first to access",
+      ErrorTypes.Enum.unauthorized
+    );
+  }
   try {
     const blog = await prisma.blog.delete({
       where: {
         id: params.id,
-        user_id: userId
+        user_id: userId,
       },
       select: {
         id: true,
         topics: {
           select: {
-            name: true
-          }
+            name: true,
+          },
         },
         user: {
           select: {
-            followers: true
-          }
-        }
-      }
+            followers: true,
+          },
+        },
+      },
     });
-
 
     //revalidate blog
     revalidateTag(`blog:${blog.id}`);
@@ -109,12 +113,11 @@ export const DELETE = async (req: NextRequest,
     //Delete blog data
     redisPipe.del(`blog:${blog.id}`);
 
-    //Remove blog from user's blog list
-    redisPipe.lrem(`user:${userId}:blogs`, 0, blog.id);
+    //Delete blog from user list
+    redisPipe.lrem(`user:${userId}:blogs`, 1, blog.id);
 
     //reduce blog count from user
     redisPipe.hincrby(`user:${userId}`, "blogs", -1);
-
 
     //reduce blog count from topic
     blog.topics.forEach(async (topic) => {
@@ -127,10 +130,8 @@ export const DELETE = async (req: NextRequest,
       redisPipe.zrem(`user:${follower}:feed`, blog.id);
     });
 
-    
     return NextResponse.json({ message: "Success" });
-  } catch (e) {
-    console.log(e)
-    return NextResponse.json({ message: "Something went wrong" }, { status: 400 });
+  } catch (err) {
+    handleApiError(err);
   }
-}
+};

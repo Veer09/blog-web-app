@@ -1,13 +1,12 @@
-import { auth, clerkClient, useUser } from "@clerk/nextjs";
-import { redis } from "./redis";
 import { cachedBlog } from "@/type/blog";
-import { cachedUser } from "@/type/user";
 import { cachedTopic } from "@/type/topic";
+import { cachedUser } from "@/type/user";
+import { auth, clerkClient } from "@clerk/nextjs";
 import prisma from "./db";
+import { redis } from "./redis";
+import { cachedBook } from "@/type/book";
 
-export const getUserFollowings = async (count: number | undefined) => {
-  const { userId } = auth();
-  if (!userId) return [];
+export const getUserFollowings = async (userId: string, count: number | undefined) => {
   const followings = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -16,8 +15,8 @@ export const getUserFollowings = async (count: number | undefined) => {
       following: true,
     },
   });
-
   if (!followings) return [];
+  if (followings.following.length === 0) return [];
   if (!count) count = followings.following.length;
   if (count > followings.following.length) count = followings.following.length;
   const redisPipe = redis.pipeline();
@@ -37,9 +36,7 @@ export const getUserFollowings = async (count: number | undefined) => {
   return followingDatas as cachedUser[];
 };
 
-export const getUnfollowedUsers = async (count: number | undefined) => {
-  const { userId } = auth();
-  if (!userId) return [];
+export const getUnfollowedUsers = async (userId: string, count: number | undefined) => {
   const followings = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -48,9 +45,9 @@ export const getUnfollowedUsers = async (count: number | undefined) => {
       following: true,
     },
   });
+  if(!followings) return [];
   let ids: string[] = [];
-  if (!followings) ids = [];
-  else ids = followings.following.map((user) => user.id);
+  ids = followings.following.map((user) => user.id);
   ids.push(userId);
   const unfollowed = await prisma.user.findMany({
     where: {
@@ -84,9 +81,7 @@ export const getUnfollowedUsers = async (count: number | undefined) => {
   return unfollowedUserDatas as cachedUser[];
 };
 
-export const getUserTopics = async (count: number | undefined) => {
-  const { userId } = auth();
-  if (!userId) return [];
+export const getUserTopics = async (userId: string, count: number | undefined) => {
   const topics = await prisma.user
     .findUnique({
       where: {
@@ -97,8 +92,8 @@ export const getUserTopics = async (count: number | undefined) => {
       },
     })
     .then((data) => data?.topics);
-
   if (!topics) return [];
+  if(topics.length === 0) return [];
   if (!count) count = topics.length;
   if (count > topics.length) count = topics.length;
   const redisPipe = redis.pipeline();
@@ -121,9 +116,8 @@ export const getUserTopics = async (count: number | undefined) => {
   return topicDatas as cachedTopic[];
 };
 
-export const getUnfollowedTopics = async (count: number | undefined) => {
-  const { userId } = auth();
-  if (!userId) return [];
+export const getUnfollowedTopics = async (userId: string, index: number) => {
+  let count = 7;
   const following = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -143,12 +137,12 @@ export const getUnfollowedTopics = async (count: number | undefined) => {
         },
       },
     },
+    skip: (index - 1) * count,
+    take: count,
   });
   if (unfollowed.length === 0) return [];
   const redisPipe = redis.pipeline();
-  if (!count) count = unfollowed.length;
-  if (count > unfollowed.length) count = unfollowed.length;
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < unfollowed.length; i++) {
     redisPipe.hgetall(`topic:${unfollowed[i]}`);
   }
   const unfollowedTopics = await redisPipe.exec();
@@ -164,16 +158,14 @@ export const getUnfollowedTopics = async (count: number | undefined) => {
   return unfollowedTopicDatas as cachedTopic[];
 };
 
-export const getUserBlogs = async () => {
-  const { userId } = auth();
-  if (!userId) return null;
-  const blogs: string[] | null = await redis.lrange(
+export const getUserBlogs = async (userId: string) => {
+  const blogs: string[] = await redis.lrange(
     `user:${userId}:blogs`,
     0,
     -1
   );
   if (blogs.length === 0){
-    const blogData = await setUserBlogs();
+    const blogData = await setUserBlogs(userId);
     return blogData;
   };
   const redisPipe = redis.pipeline();
@@ -189,12 +181,10 @@ export const getUserBlogs = async () => {
     }
     return blog;
   }))
-  return blogDatas as cachedBlog[];
+  return blogDatas.filter(blog => blog !== null) as cachedBlog[];
 };
 
-export const getSavedBlog = async () => {
-  const { userId } = auth();
-  if (!userId) return null;
+export const getSavedBlog = async (userId: string) => {
   const blogs = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -207,7 +197,8 @@ export const getSavedBlog = async () => {
       },
     },
   });
-  if (!blogs) return null;
+  if (!blogs) return [];
+  if (blogs.saved_blog.length === 0) return [];
   const redisPipe = redis.pipeline();
   blogs.saved_blog.forEach((blog) => {
     redisPipe.hgetall(`blog:${blog}`);
@@ -253,10 +244,53 @@ export const isBlogSaved = async (blogId: string) => {
   return saved ? true : false;
 };
 
-export const getFeedBlogs = async (index: number) => {
+export const getUserReadingHistory = async (userId: string) => {
+  const blogs = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      reading_history: true,
+    },
+  });
+
+  if(!blogs) return [];
+  if(blogs.reading_history.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  blogs.reading_history.forEach((blog) => {
+    redisPipe.hgetall(`blog:${blog.id}`);
+  });
+  const blogData: any = await redisPipe.exec();
+  const blogDatas = await Promise.all(
+    blogData.map(async (blog: cachedBlog | null, index: number) => {
+      if (!blog) {
+        const blog = await setBlog(blogs.reading_history[index].id);
+        return blog;
+      }
+      return blog;
+    })
+  );
+  return blogDatas as cachedBlog[];
+}
+
+export const setBlogRead = async (blogId: string, userId: string | null) => {
+  if(!userId) return ;
+  await prisma.user.update({
+    where: {
+      id: userId,
+  },
+    data: {
+      reading_history: {
+        connect: {
+          id: blogId
+        }
+      }
+    }
+  });
+}
+
+export const getFeedBlogs = async (userId: string, index: number) => {
   const count = 5;
-  const { userId } = auth();
-  if (!userId) return [];
 
   const feed: string[] = await redis.zrange(
     `user:${userId}:feed`,
@@ -273,11 +307,7 @@ export const getFeedBlogs = async (index: number) => {
   return blogData as cachedBlog[];
 };
 
-//Change
-export const getCreatedBooks = async () => {
-  const { userId } = auth();
-  if (!userId) return null;
-
+export const getCreatedBooks = async (userId: string) => {
   const books = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -286,16 +316,51 @@ export const getCreatedBooks = async () => {
       createdBooks: {
         select: {
           id: true,
-          title: true,
-          description: true,
-          topic_name: true,
         },
       },
     },
   });
-  if (!books) return null;
-  return books.createdBooks;
+  if (!books) return [];
+  if (books.createdBooks.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  books.createdBooks.forEach((book) => {
+    redisPipe.hgetall(`book:${book.id}`);
+  });
+  const bookData: any = await redisPipe.exec();
+  const bookDatas = await Promise.all(
+    bookData.map(async (book: any, index: number) => {
+      if (!book) {
+        const book = await setBook(books.createdBooks[index].id);
+        return book;
+      }
+      return book;
+    })
+  );
+  return bookDatas as cachedBook[];
 };
+
+export const setBook = async (bookId: string) => {
+  const book = await prisma.book.findUnique({
+    where: {
+      id: bookId,
+    },
+    select: {
+      topic_name: true,
+      title: true,
+      description: true,
+      author_id: true
+    }
+  })
+  if(!book) return null;
+  const bookData = {
+    id: bookId,
+    title: book.title,
+    description: book.description,
+    topic: book.topic_name,
+    userId: book.author_id
+  }
+  return bookData;
+}
 
 export const setUser = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -388,9 +453,7 @@ const setTopic = async (topicName: string) => {
   return topicData;
 };
 
-export const setUserBlogs = async () => {
-  const { userId } = auth();
-  if (!userId) return null;
+export const setUserBlogs = async (userId: string) => {
   const blogs = await prisma.blog.findMany({
     where: {
       user_id: userId,
@@ -399,7 +462,7 @@ export const setUserBlogs = async () => {
       id: true,
     },
   });
-  if (blogs.length == 0) return null;
+  if (blogs.length == 0) return [];
   const blogIds = blogs.map((blog) => blog.id);
   await redis.lset(`user:${userId}:blogs`, 0, blogIds);
   const redisPipe = redis.pipeline();
@@ -407,5 +470,31 @@ export const setUserBlogs = async () => {
     redisPipe.hgetall(`blog:${id}`);
   });
   const blogData: any = await redisPipe.exec();
-  return blogData as cachedBlog[];
+  const blogDatas = await Promise.all(
+    blogData.map(async (blog: cachedBlog | null, index: number) => {
+      if (!blog) {
+        const blog = await setBlog(blogIds[index]);
+        return blog;
+      }
+      return blog;
+    })
+  );
+  return blogDatas as cachedBlog[];
 };
+
+export const getUserFollowedBooks = async (userId: string) => {
+  const books = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      followingBooks: {
+        select: {
+          id: true
+        }
+      }
+    },
+  });
+  if (!books) return [];
+  return books.followingBooks;
+}

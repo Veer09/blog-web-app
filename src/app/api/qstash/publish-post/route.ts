@@ -1,3 +1,4 @@
+import { handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { blogPublishSchema } from "@/type/blog";
 import { revalidateTag } from "next/cache";
@@ -9,7 +10,7 @@ export const POST = async (req: NextRequest) => {
     const { userId, topics, blogData } = blogPublishSchema.parse(body);
     const userFollowers = await redis.smembers(`user:${userId}:followers`);
     const redisPipe = redis.pipeline();
-    console.log(blogData, topics, userId, userFollowers);
+
     //Create topic if not exists
     topics.forEach(async (topic) => {
       redisPipe.hsetnx(`topic:${topic}`, "name", topic);
@@ -44,8 +45,11 @@ export const POST = async (req: NextRequest) => {
     });
 
     await redisPipe.exec();
-    return NextResponse.json({message: "Published Successfully!!"}, {status: 200})
+    return NextResponse.json(
+      { message: "Published Successfully!!" },
+      { status: 200 }
+    );
   } catch (err) {
-    console.log(err);
+    handleApiError(err);
   }
 };

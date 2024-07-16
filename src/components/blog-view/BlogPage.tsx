@@ -1,20 +1,20 @@
-import React, { FC } from "react";
-import { OutputData } from "@editorjs/editorjs";
 import BlogView from "@/components/blog-view/BlogView";
-import { auth } from "@clerk/nextjs";
-import { findBlogById } from "@/lib/blog";
 import TopicList from "@/components/blog-view/TopicList";
-import { Separator } from "@/components/ui/separator";
 import UserInteraction from "@/components/blog-view/UserInteraction";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { notFound } from "next/navigation";
-import { unstable_cache } from "next/cache";
+import { Separator } from "@/components/ui/separator";
+import { findBlogById } from "@/lib/blog";
 import { redis } from "@/lib/redis";
+import { isBlogLiked, isBlogSaved, setBlog, setBlogRead, setUser } from "@/lib/user";
+import { cn } from "@/lib/utils";
 import { cachedUser } from "@/type/user";
+import { auth } from "@clerk/nextjs";
+import { OutputData } from "@editorjs/editorjs";
+import { unstable_cache } from "next/cache";
 import Image from "next/image";
-import { isBlogLiked, isBlogSaved, setBlog, setUser } from "@/lib/user";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { FC } from "react";
 
 interface Props {
   id: string;
@@ -52,6 +52,7 @@ const BlogPage: FC<Props> = async ({ id }) => {
   const { userId } = auth();
   const saved = await isBlogSaved(blog.id);
   const liked = await isBlogLiked(blog.id);
+  await setBlogRead(blog.id, userId);
   return (
     <div className=" flex flex-col items-center my-20">
       <div className=" w-[90%]">

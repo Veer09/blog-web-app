@@ -16,28 +16,28 @@ function FollowNav() {
       <NavigationMenu defaultValue="suggestions">
         <NavigationMenuList className=" gap-2">
           <NavigationMenuItem>
-            <Link href="/me/following" passHref>
+            <Link href="/me/following" legacyBehavior  passHref>
               <NavigationMenuLink active={path === '/me/following'} href="/me/following"  className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink' , ' font-extrabold')}>
                 Following 
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem value="suggestions">
-            <Link href="/me/suggestions" passHref>
+            <Link href="/me/suggestions" legacyBehavior  passHref>
               <NavigationMenuLink active={path === '/me/suggestions'} href="/me/suggestions" className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink', ' font-extrabold')}>
                 Suggestions 
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Link href="/me/reading-history" passHref>
+            <Link href="/me/reading-history" legacyBehavior  passHref>
               <NavigationMenuLink active={path === '/me/reading-history'} className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink', ' font-extrabold')}>
                 Reading History 
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem> 
           <NavigationMenuItem>
-            <Link href="/me/saved" passHref>
+            <Link href="/me/saved" legacyBehavior passHref>
               <NavigationMenuLink active={path === '/me/saved'} className={cn(navigationMenuTriggerStyle(), 'NavigationMenuLink', ' font-extrabold')}>
                 Saved  
               </NavigationMenuLink>

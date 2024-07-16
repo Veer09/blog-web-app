@@ -1,12 +1,5 @@
 "use client";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlbumIcon,
   Bell,
   BookPlus,
@@ -17,53 +10,26 @@ import {
   Package,
   Package2,
   PenSquare,
-  Plus,
   Search,
   ShoppingCart,
-  Users,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { bookSchema } from "@/type/book";
-import { auth, UserButton, useUser } from "@clerk/nextjs";
-import axios from "axios";
-import { redirect, usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { UserButton, useUser } from "@clerk/nextjs";
+import { usePathname, useRouter } from "next/navigation";
+import CreateSelection from "./CreateSelection";
+import { ScrollArea } from "./ui/scroll-area";
 
 function Navbar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [topic, setTopic] = useState("");
   const router = useRouter();
   const { isSignedIn } = useUser();
-  const bookCreate = async () => {
-    const payload = bookSchema.safeParse({
-      name,
-      description,
-      topic,
-      chapters: [],
-    });
 
-    if (payload.success) {
-      const response = await axios.post("/api/book", payload.data);
-      if (response.status === 200) {
-        router.push("/book/create/" + response.data.id);
-      }
-    }
-  };
   const { user } = useUser();
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -106,14 +72,22 @@ function Navbar({ children }: { children: React.ReactNode }) {
               </Link>
               <Link
                 href="/dashboard/created-books"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                  pathname === "/dashboard/created-books"
+                    ? "text-primary bg-muted"
+                    : "text-muted-foreground"
+                }`}
               >
                 <BookPlus className="h-4 w-4" />
                 Created Books
               </Link>
               <Link
                 href="/me/blogs"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                  pathname === "/me/blogs"
+                    ? "text-primary bg-muted"
+                    : "text-muted-foreground"
+                }`}
               >
                 <FilePlus2 className="h-4 w-4" />
                 Created Blogs
@@ -121,59 +95,7 @@ function Navbar({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
           <div className=" my-10 flex justify-center">
-            <Dialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Plus
-                    color="#ffffff"
-                    className=" bg-slate-900 w-10 h-10 p-2 rounded-lg"
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <Link href="/blog/create">Create Blog</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <DialogTrigger onClick={() => {
-                      if(!isSignedIn) {
-                        router.push("/sign-in");
-                        return;
-                      };
-                    }}>Create Book</DialogTrigger>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DialogContent>
-                <DialogTitle>Create Book</DialogTitle>
-                <DialogDescription>
-                  <Input
-                    type="text"
-                    placeholder="Enter Book Name"
-                    className="appearance-none bg-background pl-4 shadow-none my-2"
-                    onChange={(e) => setName(e.target.value)}
-                    value={name}
-                  />
-                  <Input
-                    type="text"
-                    placeholder="Enter Book Description"
-                    className="appearance-none bg-background pl-4 shadow-none my-2"
-                    onChange={(e) => setDescription(e.target.value)}
-                    value={description}
-                  />
-                  <Input
-                    type="text"
-                    placeholder="Enter Book Topic"
-                    className="appearance-none bg-background pl-4 shadow-none my-2"
-                    onChange={(e) => setTopic(e.target.value)}
-                    value={topic}
-                  />
-                </DialogDescription>
-                <DialogFooter>
-                  <Button onClick={bookCreate}>Save</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <CreateSelection/>
           </div>
         </div>
       </div>
@@ -265,8 +187,8 @@ function Navbar({ children }: { children: React.ReactNode }) {
             )}
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
+        <main className="flex overflow-y-scroll flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+          <ScrollArea className="h-[calc(100vh-56px)]">{children}</ScrollArea>
         </main>
       </div>
     </div>

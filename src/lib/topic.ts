@@ -5,7 +5,7 @@ import { setBlog } from "./user";
 
 export const getBlogByTopic = async (topic: string) => {
   const blogs = await redis.lrange(`topic:${topic}:blogs`, 0, -1);
-  if (blogs.length === 0) return null;
+  if (blogs.length === 0) return [];
   const redisPipe = redis.pipeline();
   blogs.forEach((blog) => {
     redisPipe.hgetall(`blog:${blog}`);
@@ -21,8 +21,7 @@ export const getBlogByTopic = async (topic: string) => {
       return blog;
     }
   ));
-  
-  return blogDatas as cachedBlog[];
+  return blogDatas.filter(blog => blog !== undefined) as cachedBlog[];
 };
 
 export const setBlogsByTopic = async (topic: string) => {

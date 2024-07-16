@@ -1,4 +1,4 @@
-import { number, z } from "zod";
+import { number, string, z } from "zod";
 
 export const chapterSchema = z.object({
   //If Chapter is Linked 
@@ -52,6 +52,14 @@ export const bookSchema = z.object({
 export type Book = z.infer<typeof bookSchema>;
 
 
+
+export const serverForm = z.object({
+  name: z.string(),
+  description: z.string(),
+  topic: z.string(),
+  url: z.optional(z.string())
+})
+
 export const updateSchema = z.object({
   number: z.number(),
   customChapter: z.optional(z.custom<Chapter>()) ,
@@ -94,3 +102,4 @@ export const updateBookSchema = z.object({
   content: z.array(z.custom<Chapter>()),
   updateDetails: z.array(z.custom<UpdateDetails>()),
 })
+

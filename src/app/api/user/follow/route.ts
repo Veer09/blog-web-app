@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { qstashClient } from "@/lib/qstash";
 import { redis } from "@/lib/redis";
 import { UserFollowSchema } from "@/type/user";
@@ -8,38 +9,43 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
   try {
     const { payload } = await req.json();
-    const followerId = UserFollowSchema.safeParse(payload);
+    const followerId = UserFollowSchema.parse(payload);
     const { userId } = auth();
-    if (!userId)
-      return NextResponse.json({ error: "User Unauthorized" }, { status: 401 });
-    if(!followerId.success)
-      return NextResponse.json({ error: "Invalid followerId" }, { status: 400 });
-    if (followerId.data === userId)     
-        return NextResponse.json({ error: "User cannot follow itself" }, { status: 400 });
+    if (!userId) {
+      throw new ApiError(
+        "Unauthorized!! Login first to access",
+        ErrorTypes.Enum.unauthorized
+      );
+    }
 
+    if (followerId === userId)
+      throw new ApiError(
+        "User can't follow it's self",
+        ErrorTypes.Enum.bad_request
+      );
     await prisma.user.update({
-        where: {
-            id: userId
+      where: {
+        id: userId,
+      },
+      data: {
+        following: {
+          connect: {
+            id: followerId,
+          },
         },
-        data: {
-            following: {
-                connect: {
-                    id: followerId.data
-                }
-            }
-        }
+      },
     });
-    await redis.hincrby(`user:${followerId.data}`, "followers", 1);
+    await redis.hincrby(`user:${followerId}`, "followers", 1);
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
       url: `https://abc.requestcatcher.com/api/qstash/publish-post`,
       body: {
         userId,
-        followerId: followerId.data
-      }
-    })
+        followerId: followerId,
+      },
+    });
     return NextResponse.json({ message: "User followed" }, { status: 200 });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    handleApiError(err);
   }
 };

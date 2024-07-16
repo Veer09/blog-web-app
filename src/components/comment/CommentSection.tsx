@@ -13,6 +13,7 @@ import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { toast } from "../ui/use-toast";
 import ShowPastComment from "./ShowPastComment";
+import { handleClientError } from "@/lib/error";
 
 interface CommentProps {
   comment: CommentData
@@ -41,10 +42,7 @@ const CommentSection: FC<CommentProps> = ({ comment, allComments }) => {
       router.refresh();
     },
     onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: err.message,
-      });
+      handleClientError(err);
     },
   });
 
@@ -64,10 +62,7 @@ const CommentSection: FC<CommentProps> = ({ comment, allComments }) => {
       router.refresh();
     },
     onError: (error) => {
-      toast({
-        variant: 'destructive',
-        title: error.message
-      })
+      handleClientError(error);
     }
   });
 

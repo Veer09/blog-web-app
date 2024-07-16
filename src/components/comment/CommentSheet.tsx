@@ -22,6 +22,7 @@ import { FC, useState } from "react";
 import { ZodError } from "zod";
 import ShowPastComment from "./ShowPastComment";
 import { useUser } from "@clerk/nextjs";
+import { handleClientError } from "@/lib/error";
 
 interface CommentSheetProps {
   blogId: string
@@ -43,15 +44,9 @@ const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
     },
     onSuccess: async () => {
       setComment("");
-      const res = await axios.get(`/api/blog/${blogId}/comments`);
-      setComments(res.data.comments);
     },
     onError: (err) => {
-      if (err instanceof ZodError) {
-        toast({
-          title: err.message,
-        });
-      }
+      handleClientError(err);
     },
   });
 

@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { qstashClient } from "@/lib/qstash";
 import { blogSchema, blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs";
@@ -10,9 +11,9 @@ export const POST = async (req: NextRequest) => {
   try {
     const blog = blogUploadSchema.parse(body);
     const { userId } = auth();
-    if (!userId) {
-      return NextResponse.json("Unauthorized", { status: 400 });
-    }
+    if (!userId)
+      throw new ApiError("Unauthorizesd!!", ErrorTypes.Enum.unauthorized);
+
     const topics = blog.topics.map((topic) => {
       return (
         topic.trim().charAt(0).toUpperCase() +
@@ -37,20 +38,19 @@ export const POST = async (req: NextRequest) => {
         },
       },
     });
-    
+
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
       url: `https://abc.requestcatcher.com/api/qstash/publish-post`,
       body: {
         userId,
         blogData,
-        topics
-      }
-    })
+        topics,
+      },
+    });
     const response = blogSchema.parse(blogData.id);
     return NextResponse.json(response, { status: 200 });
   } catch (err) {
-    console.log(err);
-    return NextResponse.json({ err: err }, { status: 405 });
+    handleApiError(err);
   }
 };

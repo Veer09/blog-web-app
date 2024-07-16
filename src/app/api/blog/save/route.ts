@@ -1,15 +1,16 @@
 import prisma from "@/lib/db";
-import { redis } from "@/lib/redis";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { savedBySchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
-  const payload = savedBySchema.safeParse(body.payload);
-  if (!payload.success) return NextResponse.json("Invalid Request!");
+  const payload = savedBySchema.parse(body);
+
   const { userId } = auth();
-  if (!userId) return NextResponse.json("Unautherized!");
+  if (!userId)
+    throw new ApiError("Unauthorized!!", ErrorTypes.Enum.unauthorized);
 
   try {
     await prisma.user.update({
@@ -19,7 +20,7 @@ export const POST = async (req: NextRequest) => {
       data: {
         saved_blog: {
           connect: {
-            id: payload.data,
+            id: payload,
           },
         },
       },
@@ -27,6 +28,6 @@ export const POST = async (req: NextRequest) => {
 
     return NextResponse.json("success");
   } catch (err: any) {
-    return NextResponse.json(err.message);
+    handleApiError(err);
   }
 };

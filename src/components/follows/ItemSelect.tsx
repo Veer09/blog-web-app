@@ -7,7 +7,7 @@ import TopicFollowButton from "./TopicFollowButton";
 
 
 interface ItemSelectProps {
-  followObj: cachedUser & { isFollowed: boolean; name: string } | cachedTopic & { isFollowed: boolean };
+  followObj: cachedUser & { isFollowed: boolean; name: string}  | cachedTopic & { isFollowed: boolean };
 }
 
 const isUser = (data: any): data is cachedUser => {

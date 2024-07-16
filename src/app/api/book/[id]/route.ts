@@ -1,16 +1,17 @@
-import prisma from '@/lib/db'
+import prisma from "@/lib/db";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import {
   cachedBook,
   Chapter,
   chapterListSchema,
+  CustomError,
   updateBookSchema,
   UpdateDetails,
 } from "@/type/book";
 import { auth } from "@clerk/nextjs";
 import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 import { NextRequest, NextResponse } from "next/server";
-import { CustomError } from "@/type/book";
 
 const createBook = async (
   bookId: string,
@@ -37,9 +38,10 @@ const createBook = async (
             },
           });
           if (isRecursive)
-            return NextResponse.json(
-              { error: "Recursive book inclusion" },
-              { status: 400 }
+            throw new ApiError(
+              "Recusrsive Book Inclusion",
+              ErrorTypes.Enum.bad_request,
+              i
             );
           await tx.bookInclude.create({
             data: {
@@ -85,9 +87,12 @@ export const POST = async (
   try {
     const chapters = chapterListSchema.parse(body);
     const { userId } = auth();
-
-    if (!userId)
-      return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
+    if (!userId) {
+      throw new ApiError(
+        "Unauthorized!! Login first to access",
+        ErrorTypes.Enum.unauthorized
+      );
+    }
 
     //check request is send from the same user and book exists
     const validRequest = await prisma.book.findFirst({
@@ -97,18 +102,19 @@ export const POST = async (
       },
     });
     if (!validRequest)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new ApiError(
+        "You haven't writed this book!!",
+        ErrorTypes.Enum.forbidden
+      );
 
     await createBook(params.id, chapters, userId);
 
     await redis.json.set(`book:${params.id}`, "$", chapters);
     return NextResponse.json({ success: true });
-  } catch (e: any) {
-    console.log(e);
-    return NextResponse.json({ error: e }, { status: 400 });
+  } catch (err) {
+    handleApiError(err);
   }
 };
-
 
 const updateBook = async (
   bookId: string,
@@ -166,8 +172,9 @@ const updateBook = async (
                 },
               });
               if (isRecursive)
-                throw new CustomError(
-                  "Recursive book inclusion",
+                throw new ApiError(
+                  "Recursive book inclusion!!",
+                  ErrorTypes.Enum.recusrsive_book_error,
                   update.number
                 );
               await tx.bookInclude.create({
@@ -260,7 +267,11 @@ const updateBook = async (
               },
             });
             if (isRecursive)
-              throw new CustomError("Recursive book inclusion", i);
+              throw new ApiError(
+                "Reacursive book inclusion!!",
+                ErrorTypes.Enum.recusrsive_book_error,
+                i
+              );
             await tx.bookInclude.update({
               where: {
                 book_id_child_id: {
@@ -285,13 +296,8 @@ const updateBook = async (
             },
           });
         }
-      } catch (e) {
-        if (e instanceof CustomError) {
-          throw e;
-        }
-        else if(e instanceof PrismaClientValidationError){
-          throw new CustomError(e.message, update.number);
-        }
+      } catch (err) {
+        handleApiError(err);
       }
     }
   });
@@ -306,8 +312,12 @@ export const PUT = async (
     const { content, updateDetails } = updateBookSchema.parse(body);
     const { userId } = auth();
 
-    if (!userId)
-      return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
+    if (!userId) {
+      throw new ApiError(
+        "Unauthorized!! Login first to access",
+        ErrorTypes.Enum.unauthorized
+      );
+    }
 
     const validRequest = await prisma.book.findFirst({
       where: {
@@ -316,15 +326,16 @@ export const PUT = async (
       },
     });
     if (!validRequest)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new ApiError(
+        "You haven't writed this book!!",
+        ErrorTypes.Enum.bad_request
+      );
 
     await updateBook(params.id, updateDetails, userId);
     const cache: cachedBook[] = content;
     await redis.json.set(`book:${params.id}`, "$", cache);
     return NextResponse.json({ success: true });
-  } catch (e: any) {
-    if(e instanceof CustomError){
-      return NextResponse.json({ error: e.message, index: e.index }, { status: 400 });
-    }
+  } catch (err) {
+    handleApiError(err);
   }
 };

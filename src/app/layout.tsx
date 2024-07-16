@@ -22,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en" className=" overflow-x-hidden">
+      <html lang="en" className=" overflow-hidden">
         <body className={cn(inter.className, "h-screen")}>
           <QueryProvider>
               {children}

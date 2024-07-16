@@ -1,13 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { FC, useState } from "react";
-
 import ChapterCreate, { ChapterType } from "@/components/book/ChapterCreate";
 import DialogDetails, { DialogType } from "@/components/book/DialogDetails";
-import {
-  Dialog,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,28 +11,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/use-toast";
+import { handleClientError } from "@/lib/error";
 import { Chapter, chapterListSchema } from "@/type/book";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import {
-  Package2Icon,
-  PlusIcon
-} from "lucide-react";
+import { Package2Icon, PlusIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { FC, useState } from "react";
 
+const Page: FC<{ params: { id: string } }> = ({ params }) => {
 
-
-const Page: FC<{ params: { id: string } }> = ({params}) => {
-
-  const saveContent = async () => {
-    try {
-      const payload = chapterListSchema.safeParse(content);
-      if(!payload.success) return;
-      const response = await axios.post(`/api/book/${params.id}`, payload.data);
-      
-    } catch (error) {
-      console.error(error);
+  const { mutate: saveContent } = useMutation({
+    mutationFn: async () => {
+      const payload = chapterListSchema.parse(content);
+      return await axios.post(`/api/book/${params.id}`, payload);
+    },
+    onError: (error) => {
+      handleClientError(error);
+    },
+    onSuccess: () => {
+      toast({
+        description: "Book created successfully!!"
+      })
     }
-  }
+  })
+
   const router = useRouter();
   const pathname = usePathname();
   const [content, setContent] = useState<Chapter[]>([]);
@@ -57,7 +56,9 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
               <span className="sr-only">Home</span>
             </Button>
             <h1 className="font-semibold text-lg md:text-2xl">Chapters</h1>
-            <Button size="sm" onClick={saveContent}>Save</Button>
+            <Button size="sm" onClick={() => saveContent()}>
+              Save
+            </Button>
             <Dialog
               open={dialogOpen}
               onOpenChange={() => {
@@ -75,13 +76,16 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {
-                      setContent([...content, {
-                        create: {
-                          blogs: []
+                      setContent([
+                        ...content,
+                        {
+                          create: {
+                            blogs: [],
+                          },
+                          title: "",
+                          chapterNumber: content.length + 1,
                         },
-                        title: "",
-                        chapterNumber: content.length + 1,
-                      }]);
+                      ]);
                     }}
                   >
                     Create New Chapter
@@ -125,7 +129,11 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
                   index={index}
                   content={content}
                   setContent={setContent}
-                  type={content[index].create ? ChapterType.Create : ChapterType.Link}
+                  type={
+                    content[index].create
+                      ? ChapterType.Create
+                      : ChapterType.Link
+                  }
                 />
               ))
             )}
@@ -137,6 +145,3 @@ const Page: FC<{ params: { id: string } }> = ({params}) => {
 };
 
 export default Page;
-
-
-

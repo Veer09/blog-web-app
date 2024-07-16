@@ -1,11 +1,10 @@
 "use client";
+import { handleClientError } from "@/lib/error";
 import { TopicFollowSchema, cachedTopic } from "@/type/topic";
 import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { FC } from "react";
-import { ZodError } from "zod";
 import { Button } from "../ui/button";
-import { toast } from "../ui/use-toast";
 
 interface TopicFollowButtonProps {
   topic: cachedTopic & { isFollowed: boolean };
@@ -13,7 +12,6 @@ interface TopicFollowButtonProps {
 }
 
 const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
-
   const { mutate: follow, isPending: followPending } = useMutation({
     mutationKey: ["follow"],
     mutationFn: (id: string) => {
@@ -24,7 +22,7 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers)+ 1).toString(),
+        followers: (parseInt(topic.followers) + 1).toString(),
         isFollowed: !topic.isFollowed,
       });
     },
@@ -32,16 +30,10 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers)- 1).toString(),
+        followers: (parseInt(topic.followers) - 1).toString(),
         isFollowed: !topic.isFollowed,
       });
-      if (err instanceof ZodError || err instanceof AxiosError) {
-        toast({
-          title: "Incorrect Data",
-          description: err.message,
-          variant: "destructive",
-        });
-      }
+      handleClientError(err);
     },
   });
 
@@ -55,7 +47,7 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers)- 1).toString(),
+        followers: (parseInt(topic.followers) - 1).toString(),
         isFollowed: !topic.isFollowed,
       });
     },
@@ -63,17 +55,10 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers)+ 1).toString(),
+        followers: (parseInt(topic.followers) + 1).toString(),
         isFollowed: !topic.isFollowed,
       });
-      if (err instanceof ZodError || err instanceof AxiosError) {
-        toast({
-          title: "Incorrect Data",
-          description: err.message,
-          variant: "destructive",
-        });
-      }
-      
+      handleClientError(err);
     },
   });
   return (

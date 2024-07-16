@@ -1,16 +1,15 @@
 "use client";
+import { handleClientError } from "@/lib/error";
 import { UserFollowSchema, cachedUser } from "@/type/user";
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { ZodError } from "zod";
 import { Button } from "../ui/button";
-import { toast } from "../ui/use-toast";
 
 interface UserFollowButtonProps {
-  user: cachedUser & { isFollowed: boolean, name: string}, 
-  setUser: (user: cachedUser & { isFollowed: boolean, name: string}) => void
+  user: cachedUser & { isFollowed: boolean; name: string };
+  setUser: (user: cachedUser & { isFollowed: boolean; name: string }) => void;
 }
 
 const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
@@ -18,10 +17,10 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
   const queryClient = new QueryClient();
 
   const { mutate: follow, isPending: followPending } = useMutation({
-    mutationKey: ['follow'],
+    mutationKey: ["follow"],
     mutationFn: (id: string) => {
       const payload = UserFollowSchema.parse(id);
-      return axios.post("/api/user/follow", {payload});
+      return axios.post("/api/user/follow", { payload });
     },
     onMutate: () => {
       setUser({
@@ -32,47 +31,37 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
       });
     },
     onError: (err) => {
-        if(err instanceof ZodError || err instanceof AxiosError){
-            toast({ 
-              title: "Incorrect Data",
-              description: err.message,
-              variant: 'destructive'
-            })
-        }
-        router.refresh();
+      handleClientError(err);
+      router.refresh();
     },
   });
 
   const { mutate: unfollow, isPending: unfollowPending } = useMutation({
-    mutationKey: ['follow'],
+    mutationKey: ["follow"],
     mutationFn: (id: string) => {
-      const payload = UserFollowSchema.parse(id)
-      return axios.post('/api/user/unfollow', {payload})
+      const payload = UserFollowSchema.parse(id);
+      return axios.post("/api/user/unfollow", { payload });
     },
     onMutate: () => {
       setUser({
         ...user,
         blogs: user.blogs,
-        followers: user.followers - 1 ,
+        followers: user.followers - 1,
         isFollowed: !user.isFollowed,
-      });    },
+      });
+    },
     onError: (err) => {
-      if(err instanceof ZodError || err instanceof AxiosError){
-        toast({ 
-          title: "Incorrect Data",
-          description: err.message,
-          variant: 'destructive'
-        })
-      }
-      router.refresh()
-    }
-
-  })
+      handleClientError(err);
+      router.refresh();
+    },
+  });
   return (
     <Button
       variant={user.isFollowed ? "outline" : "default"}
-      onClick={(user.isFollowed) ? () => unfollow(user.id) : () => follow(user.id) }
-      disabled={(followPending || unfollowPending) ? true : false}
+      onClick={
+        user.isFollowed ? () => unfollow(user.id) : () => follow(user.id)
+      }
+      disabled={followPending || unfollowPending ? true : false}
     >
       {user.isFollowed ? "Following" : "Follow"}
     </Button>

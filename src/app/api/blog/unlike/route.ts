@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { savedBySchema } from "@/type/user";
 import { auth } from "@clerk/nextjs";
@@ -8,29 +9,21 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
   try {
     const { payload } = await req.json();
-    const blogId = savedBySchema.safeParse(payload);
-    if (!blogId.success) {
-      return NextResponse.json({
-        status: 400,
-        data: "Invalid Request!",
-      });
-    }
+    const blogId = savedBySchema.parse(payload);
+
     const { userId } = auth();
-    if (!userId) {
-      return NextResponse.json({
-        status: 401,
-        data: "Unautherized!",
-      });
-    }
+    if (!userId)
+      throw new ApiError("Unauthorized!!", ErrorTypes.Enum.unauthorized);
+
     await prisma.like.delete({
       where: {
         user_id_blog_id: {
           user_id: userId,
-          blog_id: blogId.data,
+          blog_id: blogId,
         },
       },
     });
-    await redis.hincrby(`blog:${blogId.data}`, "likes", -1);
+    await redis.hincrby(`blog:${blogId}`, "likes", -1);
 
     return NextResponse.json({
       status: 200,
@@ -39,10 +32,6 @@ export const POST = async (req: NextRequest) => {
       },
     });
   } catch (err: any) {
-    console.log(err);
-    return NextResponse.json({
-      status: 500,
-      data: "Internal Server Error!",
-    });
+    handleApiError(err);
   }
 };
