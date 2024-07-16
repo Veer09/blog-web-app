@@ -41,7 +41,7 @@ export const POST = async (req: NextRequest) => {
 
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
-      url: `https://abc.requestcatcher.com/api/qstash/publish-post`,
+      url: `${publishUrl}/api/qstash/publish-post`,
       body: {
         userId,
         blogData,

@@ -38,7 +38,7 @@ export const POST = async (req: NextRequest) => {
     await redis.hincrby(`user:${followerId}`, "followers", 1);
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
-      url: `https://abc.requestcatcher.com/api/qstash/publish-post`,
+      url: `${publishUrl}/api/qstash/follow-user`,
       body: {
         userId,
         followerId: followerId,
