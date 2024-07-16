@@ -1,9 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { FC, useState } from "react";
-import { CustomError } from "@/type/book";
 import { ChapterType } from "@/components/book/ChapterCreate";
 import DialogDetails, { DialogType } from "@/components/book/DialogDetails";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -13,14 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { handleClientError } from "@/lib/error";
 import { Chapter, updateBookSchema, UpdateDetails } from "@/type/book";
 import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { Package2Icon, PlusIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { FC, useState } from "react";
 import ChapterUpdate from "./ChapterUpdate";
-import { toast } from "../ui/use-toast";
-import { handleClientError } from "@/lib/error";
 
 interface UpdateBookProps {
   chapters: Chapter[];

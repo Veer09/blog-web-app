@@ -24,9 +24,9 @@ const page = async () => {
     );
   return (
     <div className=" grid grid-cols-5 gap-4">
-      {books.map((book) => {
+      {books.map((book, key) => {
         return (
-          <div key={book.id}>
+          <div key={key}>
             <BookCover
               title={book.title}
               description={book.description}

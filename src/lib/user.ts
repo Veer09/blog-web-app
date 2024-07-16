@@ -4,7 +4,7 @@ import { cachedUser } from "@/type/user";
 import { auth, clerkClient } from "@clerk/nextjs";
 import prisma from "./db";
 import { redis } from "./redis";
-import { cachedBook } from "@/type/book";
+import { BookMetaData, cachedBook } from "@/type/book";
 
 export const getUserFollowings = async (userId: string, count: number | undefined) => {
   const followings = await prisma.user.findUnique({
@@ -336,7 +336,7 @@ export const getCreatedBooks = async (userId: string) => {
       return book;
     })
   );
-  return bookDatas as cachedBook[];
+  return bookDatas as BookMetaData[];
 };
 
 export const setBook = async (bookId: string) => {

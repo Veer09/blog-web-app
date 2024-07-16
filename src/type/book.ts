@@ -1,4 +1,4 @@
-import { number, string, z } from "zod";
+import { z } from "zod";
 
 export const chapterSchema = z.object({
   //If Chapter is Linked 
@@ -25,16 +25,9 @@ export type cachedBook = Omit<Chapter, "number">
 
 export const chapterListSchema = z.array(z.custom<Chapter>());
 
-export class CustomError extends Error {
-  index: number;
-  constructor(message: string, index: number) {
-    super(message);
-    this.name = "CustomError";
-    this.index = index;
-  }
-}
 
 export type BookMetaData = {
+  id: string
   title: string;
   description: string;
   topic: string;

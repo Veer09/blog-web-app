@@ -5,12 +5,10 @@ import {
   cachedBook,
   Chapter,
   chapterListSchema,
-  CustomError,
   updateBookSchema,
-  UpdateDetails,
+  UpdateDetails
 } from "@/type/book";
 import { auth } from "@clerk/nextjs";
-import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 import { NextRequest, NextResponse } from "next/server";
 
 const createBook = async (

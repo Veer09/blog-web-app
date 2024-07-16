@@ -36,6 +36,8 @@ export const POST = async (req: NextRequest) => {
       description: newBook.description,
       topic: book.topic,
       userId: newBook.author_id,
+      id: newBook.id,
+      followers: 0
     });
 
     return NextResponse.json({ id: newBook.id }, { status: 200 });
