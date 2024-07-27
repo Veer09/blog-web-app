@@ -8,7 +8,7 @@ import {
   updateBookSchema,
   UpdateDetails
 } from "@/type/book";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const createBook = async (
@@ -110,7 +110,8 @@ export const POST = async (
     await redis.json.set(`book:${params.id}`, "$", chapters);
     return NextResponse.json({ success: true });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };
 
@@ -295,7 +296,8 @@ const updateBook = async (
           });
         }
       } catch (err) {
-        handleApiError(err);
+            const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
       }
     }
   });
@@ -334,6 +336,7 @@ export const PUT = async (
     await redis.json.set(`book:${params.id}`, "$", cache);
     return NextResponse.json({ success: true });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

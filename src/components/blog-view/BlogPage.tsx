@@ -8,7 +8,7 @@ import { redis } from "@/lib/redis";
 import { isBlogLiked, isBlogSaved, setBlog, setBlogRead, setUser } from "@/lib/user";
 import { cn } from "@/lib/utils";
 import { cachedUser } from "@/type/user";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { OutputData } from "@editorjs/editorjs";
 import { unstable_cache } from "next/cache";
 import Image from "next/image";

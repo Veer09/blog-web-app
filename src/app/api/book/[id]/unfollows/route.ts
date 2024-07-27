@@ -1,7 +1,7 @@
 import prisma from "@/lib/db";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (
@@ -33,6 +33,7 @@ export const POST = async (
     await redis.hincrby(`book:${params.id}:meta`, "followers", -1);
     return NextResponse.json({ message: "Unfollowed" }, { status: 200 });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

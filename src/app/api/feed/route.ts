@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFeedBlogs } from "@/lib/user";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 
 export const GET = async (req: NextRequest) => {
@@ -19,6 +19,7 @@ export const GET = async (req: NextRequest) => {
     const blogs = await getFeedBlogs(userId, parseInt(index));
     return NextResponse.json(blogs);
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

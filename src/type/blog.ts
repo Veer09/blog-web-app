@@ -12,6 +12,14 @@ export const blogUploadSchema = z.object({
     topics: z.array(z.string())
 });
 
+export const blogDraftSchema = z.object({
+    name: z.string(),
+    content: z.custom<OutputData>()
+})
+
+export const saveDraftSchema = z.object({
+    content: z.custom<OutputData>()
+})
 
 export const blogPublishSchema = z.object({
     userId: z.string(),
@@ -29,4 +37,8 @@ export type cachedBlog = {
     description: string;
     coverImage: string;
     createdAt: string | Date;
+    likes: number;
+    autherId: string;
+    autherName: string;
+    topics: string[];
 }

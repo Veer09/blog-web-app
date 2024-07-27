@@ -22,7 +22,7 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers) + 1).toString(),
+        followers: topic.followers + 1,
         isFollowed: !topic.isFollowed,
       });
     },
@@ -30,7 +30,7 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers) - 1).toString(),
+        followers: topic.followers - 1,
         isFollowed: !topic.isFollowed,
       });
       handleClientError(err);
@@ -47,7 +47,7 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers) - 1).toString(),
+        followers: topic.followers - 1,
         isFollowed: !topic.isFollowed,
       });
     },
@@ -55,7 +55,7 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       setTopic({
         ...topic,
         blogs: topic.blogs,
-        followers: (parseInt(topic.followers) + 1).toString(),
+        followers: topic.followers + 1,
         isFollowed: !topic.isFollowed,
       });
       handleClientError(err);

@@ -30,6 +30,7 @@ export const POST = async (req: NextRequest) => {
     await newPipeline.exec();
     return NextResponse.json({ message: "User followed" }, { status: 200 });
   } catch (err: any) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

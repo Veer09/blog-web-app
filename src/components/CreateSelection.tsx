@@ -22,10 +22,9 @@ const CreateSelection = () => {
       }}
     >
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger className="bg-primary text-primary-foreground rounded-[--radius]"> 
           <Plus
-            color="#ffffff"
-            className=" bg-slate-900 w-10 h-10 p-2 rounded-lg"
+            className="w-10 h-10 p-2"
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent>

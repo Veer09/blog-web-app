@@ -2,7 +2,7 @@ import prisma from "@/lib/db";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { serverForm } from "@/type/book";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
@@ -37,11 +37,12 @@ export const POST = async (req: NextRequest) => {
       topic: book.topic,
       userId: newBook.author_id,
       id: newBook.id,
-      followers: 0
+      followers: 0,
     });
 
     return NextResponse.json({ id: newBook.id }, { status: 200 });
   } catch (err) {
-    handleApiError(err);
+    const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });
   }
 };

@@ -1,12 +1,38 @@
 import { cachedBlog } from "@/type/blog";
 import { cachedTopic } from "@/type/topic";
 import { cachedUser } from "@/type/user";
-import { auth, clerkClient } from "@clerk/nextjs";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import prisma from "./db";
 import { redis } from "./redis";
 import { BookMetaData, cachedBook } from "@/type/book";
+import { notFound } from "next/navigation";
 
-export const getUserFollowings = async (userId: string, count: number | undefined) => {
+export const getUserFollowings = async (
+  userId: string,
+  index: number
+) => {
+  const count = 7;
+  const followings = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      following: {
+        take: count,
+        skip: (index - 1) * count
+      },
+    },
+  });
+  if (!followings) return [];
+  const ids = followings.following.map((following) => following.id);
+  return await getCachedUsers(ids);
+};
+
+export const getUnfollowedUsers = async (
+  userId: string,
+  index: number
+) => {
+  const count = 7;
   const followings = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -16,36 +42,6 @@ export const getUserFollowings = async (userId: string, count: number | undefine
     },
   });
   if (!followings) return [];
-  if (followings.following.length === 0) return [];
-  if (!count) count = followings.following.length;
-  if (count > followings.following.length) count = followings.following.length;
-  const redisPipe = redis.pipeline();
-  followings.following.forEach((following) => {
-    redisPipe.hgetall(`user:${following}`);
-  });
-  const followingData = await redisPipe.exec();
-  const followingDatas = await Promise.all(
-    followingData.map(async (user, index) => {
-      if (!user) {
-        const user = await setUser(followings.following[index].id);
-        return user;
-      }
-      return user;
-    })
-  );
-  return followingDatas as cachedUser[];
-};
-
-export const getUnfollowedUsers = async (userId: string, count: number | undefined) => {
-  const followings = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      following: true,
-    },
-  });
-  if(!followings) return [];
   let ids: string[] = [];
   ids = followings.following.map((user) => user.id);
   ids.push(userId);
@@ -53,67 +49,39 @@ export const getUnfollowedUsers = async (userId: string, count: number | undefin
     where: {
       NOT: {
         id: {
-          in: ids,
+          in: ids
         },
       },
     },
     select: {
       id: true,
     },
+    skip: (index - 1) * count,
+    take:count
   });
-  if (unfollowed.length === 0) return [];
-  const redisPipe = redis.pipeline();
-  if (!count) count = unfollowed.length;
-  if (count > unfollowed.length) count = unfollowed.length;
-  for (let i = 0; i < count; i++) {
-    redisPipe.hgetall(`user:${unfollowed[i].id}`);
-  }
-  const unfollowedUsers = await redisPipe.exec();
-  const unfollowedUserDatas = await Promise.all(
-    unfollowedUsers.map(async (user, index) => {
-      if (!user) {
-        const user = await setUser(unfollowed[index].id);
-        return user;
-      }
-      return user;
-    })
-  );
-  return unfollowedUserDatas as cachedUser[];
+  return await getCachedUsers(unfollowed.map((user) => user.id));
 };
 
-export const getUserTopics = async (userId: string, count: number | undefined) => {
+export const getUserTopics = async (
+  userId: string,
+  index: number 
+) => {
+  const count = 7;
   const topics = await prisma.user
     .findUnique({
       where: {
         id: userId,
       },
       select: {
-        topics: true,
+        topics: {
+          take: count,
+          skip: (index - 1) * count
+        },
       },
     })
     .then((data) => data?.topics);
   if (!topics) return [];
-  if(topics.length === 0) return [];
-  if (!count) count = topics.length;
-  if (count > topics.length) count = topics.length;
-  const redisPipe = redis.pipeline();
-  if (!count) count = topics.length;
-  if (count > topics.length) count = topics.length;
-
-  for (let i = 0; i < count; i++) {
-    redisPipe.hgetall(`topic:${topics[i].name}`);
-  }
-  const topicData: any = await redisPipe.exec();
-  const topicDatas = await Promise.all(
-    topicData.map(async (topic: cachedTopic | null, index: number) => {
-      if (!topic) {
-        const topic = await setTopic(topics[index].name);
-        return topic;
-      }
-      return topic;
-    })
-  );
-  return topicDatas as cachedTopic[];
+  return await getCachedTopics(topics.map((topic) => topic.name));
 };
 
 export const getUnfollowedTopics = async (userId: string, index: number) => {
@@ -140,48 +108,16 @@ export const getUnfollowedTopics = async (userId: string, index: number) => {
     skip: (index - 1) * count,
     take: count,
   });
-  if (unfollowed.length === 0) return [];
-  const redisPipe = redis.pipeline();
-  for (let i = 0; i < unfollowed.length; i++) {
-    redisPipe.hgetall(`topic:${unfollowed[i]}`);
-  }
-  const unfollowedTopics = await redisPipe.exec();
-  const unfollowedTopicDatas = await Promise.all(
-    unfollowedTopics.map(async (topic, index) => {
-      if (!topic) {
-        const topic = await setTopic(unfollowed[index].name);
-        return topic;
-      }
-      return topic;
-    })
-  );
-  return unfollowedTopicDatas as cachedTopic[];
+  return await getCachedTopics(unfollowed.map((topic) => topic.name));
 };
 
 export const getUserBlogs = async (userId: string) => {
-  const blogs: string[] = await redis.lrange(
-    `user:${userId}:blogs`,
-    0,
-    -1
-  );
-  if (blogs.length === 0){
+  const blogs: string[] = await redis.lrange(`user:${userId}:blogs`, 0, -1);
+  if (blogs.length === 0) {
     const blogData = await setUserBlogs(userId);
     return blogData;
-  };
-  const redisPipe = redis.pipeline();
-  blogs.forEach((blog) => {
-    redisPipe.hgetall(`blog:${blog}`);
-  });
-  const blogData: any = await redisPipe.exec();
-  const blogDatas = await Promise.all(blogData.map(async (blog: cachedBlog | null, index : number) => {
-    if(!blog){
-      const blog = await setBlog(blogs[index]);
-      if(!blog) await redis.lrem(`user:${userId}:blogs`, 0, blogs[index]);
-      else return blog;
-    }
-    return blog;
-  }))
-  return blogDatas.filter(blog => blog !== null) as cachedBlog[];
+  }
+  return await getCachedBlogs(blogs);
 };
 
 export const getSavedBlog = async (userId: string) => {
@@ -198,23 +134,28 @@ export const getSavedBlog = async (userId: string) => {
     },
   });
   if (!blogs) return [];
-  if (blogs.saved_blog.length === 0) return [];
-  const redisPipe = redis.pipeline();
-  blogs.saved_blog.forEach((blog) => {
-    redisPipe.hgetall(`blog:${blog}`);
-  });
-  const blogData: any = await redisPipe.exec();
-  const blogDatas = await Promise.all(
-    blogData.map(async (blog: cachedBlog | null, index: number) => {
-      if (!blog) {
-        const blog = await setBlog(blogs.saved_blog[index].id);
-        return blog;
-      }
-      return blog;
-    })
-  );
-  return blogDatas as cachedBlog[];
+  return await getCachedBlogs(blogs.saved_blog.map((blog) => blog.id));
 };
+
+export const getDraftBlogs = async (userId: string) => {
+  const drafts = await prisma.draft.findMany({
+    where: {
+      user_id: userId,
+    },
+  })
+  return drafts;
+}
+
+export const findDraftById = async (draftId: string, userId: string) => {
+  const draft = await prisma.draft.findUnique({
+    where: {
+      id: draftId,
+      user_id: userId
+    }
+  })
+  if(!draft) notFound();
+  return draft;
+}
 
 export const isBlogLiked = async (blogId: string) => {
   const { userId } = auth();
@@ -254,40 +195,25 @@ export const getUserReadingHistory = async (userId: string) => {
     },
   });
 
-  if(!blogs) return [];
-  if(blogs.reading_history.length === 0) return [];
-  const redisPipe = redis.pipeline();
-  blogs.reading_history.forEach((blog) => {
-    redisPipe.hgetall(`blog:${blog.id}`);
-  });
-  const blogData: any = await redisPipe.exec();
-  const blogDatas = await Promise.all(
-    blogData.map(async (blog: cachedBlog | null, index: number) => {
-      if (!blog) {
-        const blog = await setBlog(blogs.reading_history[index].id);
-        return blog;
-      }
-      return blog;
-    })
-  );
-  return blogDatas as cachedBlog[];
-}
+  if (!blogs) return [];
+  return await getCachedBlogs(blogs.reading_history.map((blog) => blog.id));
+};
 
 export const setBlogRead = async (blogId: string, userId: string | null) => {
-  if(!userId) return ;
+  if (!userId) return;
   await prisma.user.update({
     where: {
       id: userId,
-  },
+    },
     data: {
       reading_history: {
         connect: {
-          id: blogId
-        }
-      }
-    }
+          id: blogId,
+        },
+      },
+    },
   });
-}
+};
 
 export const getFeedBlogs = async (userId: string, index: number) => {
   const count = 5;
@@ -298,13 +224,7 @@ export const getFeedBlogs = async (userId: string, index: number) => {
     index * count - 1
   );
 
-  if (feed.length === 0) return [];
-  const redisPipe = redis.pipeline();
-  feed.forEach((blog) => {
-    redisPipe.hgetall(`blog:${blog}`);
-  });
-  const blogData = await redisPipe.exec();
-  return blogData as cachedBlog[];
+  return await getCachedBlogs(feed);
 };
 
 export const getCreatedBooks = async (userId: string) => {
@@ -321,22 +241,27 @@ export const getCreatedBooks = async (userId: string) => {
     },
   });
   if (!books) return [];
-  if (books.createdBooks.length === 0) return [];
-  const redisPipe = redis.pipeline();
-  books.createdBooks.forEach((book) => {
-    redisPipe.hgetall(`book:${book.id}`);
+  return await getCachedBooks(books.createdBooks.map((book) => book.id));
+};
+
+
+export const getUserFollowedBooks = async (userId: string) => {
+  const books = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      followingBooks: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
-  const bookData: any = await redisPipe.exec();
-  const bookDatas = await Promise.all(
-    bookData.map(async (book: any, index: number) => {
-      if (!book) {
-        const book = await setBook(books.createdBooks[index].id);
-        return book;
-      }
-      return book;
-    })
-  );
-  return bookDatas as BookMetaData[];
+  if(!books) return [];
+  const bookIds = books.followingBooks.map((book) => book.id);
+  const book = await getCachedBooks(bookIds);
+  return book;
 };
 
 export const setBook = async (bookId: string) => {
@@ -348,19 +273,25 @@ export const setBook = async (bookId: string) => {
       topic_name: true,
       title: true,
       description: true,
-      author_id: true
-    }
-  })
-  if(!book) return null;
+      author_id: true,
+      _count: {
+        select: {
+          followers: true
+        }
+      }
+    },
+  });
+  if (!book) return null;
   const bookData = {
     id: bookId,
     title: book.title,
     description: book.description,
-    topic: book.topic_name,
-    userId: book.author_id
-  }
+    topic: book.topic_name!,
+    userId: book.author_id,
+    followers: book._count.followers
+  };
   return bookData;
-}
+};
 
 export const setUser = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -404,6 +335,7 @@ export const setBlog = async (blogId: string) => {
           like: true,
         },
       },
+      topics: true,
       coverImage: true,
       createdAt: true,
       description: true,
@@ -414,14 +346,16 @@ export const setBlog = async (blogId: string) => {
   if (!blog) return null;
   const { like } = blog._count;
   const { coverImage, createdAt, description, title, user_id } = blog;
-  const blogData = {
+  const blogData: cachedBlog = {
     id: blogId,
     title,
     description,
     coverImage,
     createdAt,
     likes: like,
-    user_id,
+    autherId: user_id,
+    autherName: "",
+    topics: blog.topics.map((topic) => topic.name),
   };
   await redis.hmset(`blog:${blogId}`, blogData);
   return blogData;
@@ -465,36 +399,123 @@ export const setUserBlogs = async (userId: string) => {
   if (blogs.length == 0) return [];
   const blogIds = blogs.map((blog) => blog.id);
   await redis.lset(`user:${userId}:blogs`, 0, blogIds);
-  const redisPipe = redis.pipeline();
-  blogIds.forEach((id) => {
-    redisPipe.hgetall(`blog:${id}`);
-  });
-  const blogData: any = await redisPipe.exec();
-  const blogDatas = await Promise.all(
-    blogData.map(async (blog: cachedBlog | null, index: number) => {
-      if (!blog) {
-        const blog = await setBlog(blogIds[index]);
-        return blog;
-      }
-      return blog;
-    })
-  );
-  return blogDatas as cachedBlog[];
+  return await getCachedBlogs(blogIds);
 };
 
-export const getUserFollowedBooks = async (userId: string) => {
-  const books = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      followingBooks: {
-        select: {
-          id: true
-        }
-      }
-    },
+
+export const getCachedUser = async (userId: string) => {
+  let user: cachedUser | null = await redis.hgetall(`user${userId}`);
+  if (!user) {
+    user = await setUser(userId);
+    if (!user) notFound();
+  }
+  return user;
+};
+
+
+export const getCachedUsers = async (userIds: string[]) => {
+  if (userIds.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  userIds.forEach((userId) => {
+    redisPipe.hgetall(`user:${userId}`);
   });
-  if (!books) return [];
-  return books.followingBooks;
-}
+  const users: (cachedUser | null)[] = await redisPipe.exec();
+  const userDatas: cachedUser[] = await Promise.all(
+    users.map(async (user, index) => {
+      let u = user;
+      if (!u) {
+        u = await setUser(userIds[index]);
+        if (!u) notFound();
+      }
+      return u;
+    })
+  );
+  return userDatas;
+};
+
+export const getCachedTopic = async (topicId: string) => {
+  let topic: cachedTopic | null = await redis.hgetall(`topic:${topicId}`);
+  if (!topic) {
+    topic = await setTopic(topicId);
+    if (!topic) return notFound();
+  }
+  return topic;
+};
+
+export const getCachedTopics = async (topicIds: string[]) => {
+  if (topicIds.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  topicIds.forEach((topicId) => {
+    redisPipe.hgetall(`topic:${topicId}`);
+  });
+  const topics: (cachedTopic | null)[] = await redisPipe.exec();
+  const topicDatas: cachedTopic[] = await Promise.all(
+    topics.map(async (topic, index) => {
+      let t = topic;
+      if (!t) {
+        t = await setTopic(topicIds[index]);
+        if (!t) notFound();
+      }
+      return t;
+    })
+  );
+  return topicDatas;
+};
+
+export const getCachedBook = async (bookId: string) => {
+  let book = await redis.hgetall(`book:${bookId}`);
+  if (!book) {
+    book = await setBook(bookId);
+    if (!book) notFound();
+  }
+  return book;
+};
+
+export const getCachedBooks = async (bookIds: string[]) => {
+  if (bookIds.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  bookIds.forEach((bookId) => {
+    redisPipe.hgetall(`book:${bookId}`);
+  });
+  const books: (BookMetaData | null)[] = await redisPipe.exec();
+  const bookDatas: BookMetaData[] = await Promise.all(
+    books.map(async (book, index) => {
+      let b = book;
+      if (!b) {
+        b = await setBook(bookIds[index]);
+        if (!b) notFound();
+      }
+      return b;
+    })
+  );
+  return bookDatas;
+};
+
+export const getCachedBlog = async (blogId: string) => {
+  let blog: cachedBlog | null = await redis.hgetall(`blog:${blogId}`);
+  if (!blog) {
+    blog = await setBlog(blogId);
+    if (!blog) notFound();
+  }
+  return blog;
+};
+
+export const getCachedBlogs = async (blogIds: string[]) => {
+  if (blogIds.length === 0) return [];
+  const redisPipe = redis.pipeline();
+  blogIds.forEach((blogId) => {
+    redisPipe.hgetall(`blog:${blogId}`);
+  });
+  const blogs: (cachedBlog | null)[] = await redisPipe.exec();
+  const blogDatas = await Promise.all(blogs.map(async (blog, index) => {
+    let b = blog;
+    if(!b){
+      b = await setBlog(blogIds[index]);
+      if(!b) notFound();
+    }
+    return b;
+  }))
+  return blogDatas;
+};
+
+//TODO: Book Content, User List and User Feed

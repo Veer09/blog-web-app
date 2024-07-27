@@ -2,7 +2,7 @@ import prisma from "@/lib/db";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { savedBySchema } from "@/type/user";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -28,6 +28,7 @@ export const POST = async (req: NextRequest) => {
     });
     return NextResponse.json("success");
   } catch (err: any) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

@@ -3,7 +3,6 @@ import { FC } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -25,18 +24,22 @@ const TopicFollow: FC<TopicFollowProps> = async ({ title, data, followed }) => {
       <Card>
         <CardHeader>
           <CardTitle className=" font-bold text-xl">{title}</CardTitle>
-          <CardDescription>Card Description</CardDescription> 
         </CardHeader>
         <CardContent>
           <Separator className=" mb-4" />
-          {
+          {data.length === 0 ? (
+            <p className="text-2xl font-bold">
+              {followed ? "You aren't following any topic" : "No Topic to show"}
+            </p>
+          ) : (
             data.map((topic, key) => {
               const followObj = {
                 ...topic,
                 isFollowed: followed,
               };
               return <ItemSelect key={key} followObj={followObj} />;
-            })}
+            })
+          )}
         </CardContent>
         <CardFooter>
           {data.length == 7 && (

@@ -21,22 +21,6 @@ export const getBlogCommets = async (blogId: string) => {
   return comments;
 }
 
-export const getBlog = async (blogId: string) => {
-  const blog = await prisma.blog.findFirst({
-    where: {
-      id: blogId,
-    },
-    select: {
-      title: true,
-      description: true,
-      content: true,
-      coverImage: true,
-      topics: true
-    }
-  });
-  return blog;
-}
-
 export const getMostLikedBlogs = async () => {
   const blogs = await prisma.blog.findMany({
     orderBy: {

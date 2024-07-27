@@ -8,6 +8,16 @@ generator client {
     provider = "prisma-client-js"
 }
 
+model Draft{
+    id String @id @default(cuid())
+    name String 
+    content Json
+    user_id String
+    user User @relation(fields: [user_id], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
 model Topic {
     name  String @id @unique
     users User[]
@@ -28,6 +38,7 @@ model User {
     chapters        Chapter[]
     comments        Comment[]
     likes           Like[]
+    drafts          Draft[]
 }
 
 

@@ -1,10 +1,9 @@
 import BlogCard from "@/components/blog-view/BlogCard";
-import NoBlog from "@/components/NoBlog";
 import { getSavedBlog } from "@/lib/user";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import React, { FC } from "react";
-
+import { FC } from "react";
+import Image from "next/image";
 const page: FC = async () => {
   const { userId } = auth();
   if (!userId) redirect("/sign-in");
@@ -13,9 +12,9 @@ const page: FC = async () => {
     return (
       <div className="w-[350px] gap-10 h-[300px] mx-[35%] my-[7%] flex flex-col text-xl justify-center font-bold text-center items-center">
         {" "}
-        <NoBlog />
+        <Image src="/MessyDoodle.svg" height={300} width={300} alt="No Blog"/>
         <div>
-          You have not saved any blog yet.
+          You have{'\''}t saved any blog yet.
         </div>
       </div>
     );

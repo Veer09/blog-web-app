@@ -74,7 +74,7 @@ export const returnResponse = (error: any): ErrorResponse => {
       message: error.message,
     };
   }
-  if ((error.code = "P2025")) {
+  if (error.code && (error.code = "P2025")) {
     return {
       code: ErrorCodes.not_found,
       message: error.meta.cause,
@@ -87,8 +87,8 @@ export const returnResponse = (error: any): ErrorResponse => {
 };
 
 export const handleApiError = (error: any) => {
-  const { message, code } = returnResponse(error);
-  return NextResponse.json({ error: message }, { status: code });
+  const err = returnResponse(error);
+  return err;
 };
 
 export const handleClientError = (error: any) => {

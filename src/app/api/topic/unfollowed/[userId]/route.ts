@@ -14,6 +14,7 @@ export const GET = async (
     const data = await getUnfollowedTopics(params.userId, parseInt(index));
     return NextResponse.json({ topics: data }, { status: 200 });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

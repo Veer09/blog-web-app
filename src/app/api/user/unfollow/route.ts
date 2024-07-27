@@ -3,7 +3,7 @@ import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { qstashClient } from "@/lib/qstash";
 import { redis } from "@/lib/redis";
 import { UserFollowSchema } from "@/type/user";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
@@ -47,6 +47,7 @@ export const POST = async (req: NextRequest) => {
     });
     return NextResponse.json({ message: "User followed" }, { status: 200 });
   } catch (err: any) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

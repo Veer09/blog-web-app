@@ -1,5 +1,5 @@
 import { TopicFollowSchema } from "@/type/topic";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
@@ -34,6 +34,7 @@ export const POST = async (req: NextRequest) => {
     await redis.hincrby(`topic:${topicName}`, "followers", 1);
     return NextResponse.json({ message: "sucess" }, { status: 200 });
   } catch (err: any) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

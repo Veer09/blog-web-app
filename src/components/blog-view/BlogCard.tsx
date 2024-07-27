@@ -1,4 +1,7 @@
 "use client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { cachedBlog } from "@/type/blog";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,20 +14,57 @@ interface BlogCardprops {
 const BlogCard: FC<BlogCardprops> = ({ blog }) => {
   const router = useRouter();
   return (
-    <div className=" flex gap-4 justify-between cursor-pointer items-center mx-10 h-44 " onClick={() => router.push(`/blog/${blog.id}`)}>
-      <div className=" flex flex-col justify-evenly h-full">
+    <Card className="w-full cursor-pointer p-6 grid gap-6 hover:shadow-lg transition-shadow duration-300" onClick={() => router.push(`/blog/${blog.id}`)}>
+      <div className="flex justify-between items-center">
         <div>
-          <p className=" text-xl font-bold py-3">{blog.title}</p>
-          <p className=" text-sm text-slate-600">{blog.description}</p>
+          <div className="flex justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/user/${blog.autherId}`)
+              }}>
+                <AvatarImage src={blog.coverImage} />
+                <AvatarFallback>{blog.autherName}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-semibold">{blog.autherName}</h3>
+                <p className="text-muted-foreground text-sm">
+                  Published on {blog.createdAt.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-2">
+            <h2 className="text-2xl font-bold">
+              {blog.title}
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              {blog.description}
+            </p>
+            <div className="flex gap-2 mt-4 flex-wrap">
+              {
+                blog.topics.map((topic, key) => {
+                  return <Badge onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/topic/${topic}`)
+                  }} variant="outline" key={key}>{topic}</Badge>
+                })
+              }
+            </div>
+          </div>
         </div>
-        <p className=" text-xs">
-          {"Published At" + " : " + new Date(blog.createdAt).toDateString()}
-        </p>
+        <div>
+          <Image
+            src={blog.coverImage}
+            alt="dfgasrg"
+            width="200"
+            height="200"
+            className="hidden lg:block"
+          />
+        </div>
       </div>
-      {blog.coverImage ? (
-        <Image src={blog.coverImage} className=" h-24 w-24" alt="" />
-      ) : null}
-    </div>
+    </Card>
   );
 };
 

@@ -1,7 +1,7 @@
 import TopicFollow from "@/components/follows/TopicFollow";
 import UserFollow from "@/components/follows/UserFollow";
 import { getUserFollowings, getUserTopics } from "@/lib/user";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { FC } from "react";
 
@@ -12,8 +12,8 @@ const page: FC = async () => {
   const following = await getUserFollowings(userId, 7);
   return (
     <div className=" my-10">
-      <TopicFollow title="Topics you follow" data={followedTopics} followed={true}/>
-      <UserFollow title="People you follow" data={following} followed={true}/>
+      <TopicFollow title="Topic's you follow" data={followedTopics} followed={true}/>
+      <UserFollow title="User's you follow" data={following} followed={true}/>
     </div>
   );
 };

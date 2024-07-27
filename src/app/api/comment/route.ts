@@ -5,7 +5,7 @@ import {
   commentUploadSchema,
   replayCommentSchema,
 } from "@/type/comment";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -32,7 +32,8 @@ export const POST = async (req: NextRequest) => {
     revalidateTag(`comments:${comment.blogId}`);
     return NextResponse.json({ commentData }, { status: 200 });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };
 
@@ -62,7 +63,8 @@ export const DELETE = async (req: NextRequest) => {
     revalidateTag(`comments:${payload.blogId}`);
     return NextResponse.json("sucess");
   } catch (err: any) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };
 
@@ -96,6 +98,7 @@ export const PUT = async (req: NextRequest) => {
     revalidateTag(`comments:${payload.blogId}`);
     return NextResponse.json(reply, { status: 200 });
   } catch (err: any) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

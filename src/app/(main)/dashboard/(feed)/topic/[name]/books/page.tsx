@@ -1,18 +1,18 @@
-import React from "react";
-import { getBooksByTopic } from "@/lib/topic";
 import { BookCover } from "@/components/book/BookCover";
-import NoBook from "@/components/NoBook";
-
+import { getBooksByTopic } from "@/lib/topic";
+import Image from "next/image";
 const page = async ({ params }: { params: { name: string } }) => {
   const books = await getBooksByTopic(params.name);
   if (books.length === 0)
     return (
-        <div className="w-[350px] gap-10 h-[300px] mx-[35%] my-[7%] flex flex-col text-xl justify-center font-bold text-center items-center">
-        {" "}
-        <NoBook />
-        <div>
-          There are no books in this topic yet.
-        </div>
+      <div className=" flex w-full h-full justify-center my-[10%]">
+        <Image
+          src="/SitReadingDoodle.svg"
+          height={300}
+          width={300}
+          alt="No Blog"
+        />
+        <div>There are no books in this topic yet.</div>
       </div>
     );
   return (

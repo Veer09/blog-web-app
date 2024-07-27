@@ -22,7 +22,8 @@ export const GET = async (
     const fullComment = await showComments();
     return NextResponse.json({ comments: fullComment });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };
 

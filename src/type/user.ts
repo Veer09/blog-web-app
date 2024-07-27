@@ -1,3 +1,4 @@
+import { EmailAddress } from "@clerk/nextjs/server";
 import { z } from "zod";
 
 export const savedBySchema = z.string();
@@ -17,3 +18,19 @@ export const UserFollowAddSchema = z.object({
   userId: z.string(),
   followerId: z.string()
 })
+
+export const OnSignUpSchema = z.object({
+  about: z.string().min(5),
+  socialMedia: z.array(z.object({
+    name: z.string(),
+    value: z.string()
+  }))
+});
+
+export type ClerkUserTransfer = {
+  id: string,
+  imageUrl: string,
+  publicMetadata: UserPublicMetadata,
+  emailAddresses: string[],
+  fullName: string | null
+}

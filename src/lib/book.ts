@@ -1,5 +1,5 @@
 import { BookMetaData, Chapter } from "@/type/book";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import prisma from "./db";
 import { redis } from "./redis";
 

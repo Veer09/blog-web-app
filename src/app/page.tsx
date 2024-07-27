@@ -1,10 +1,10 @@
-import { auth } from "@clerk/nextjs";
 import { ArrowRightIcon, PenIcon } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { getMostLikedBlogs } from "@/lib/blog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { auth } from "@clerk/nextjs/server";
 
 const page = async () => {
   const { userId } = auth();

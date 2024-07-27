@@ -1,23 +1,21 @@
-"use client";
-import { useUser } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { FC } from "react";
 const Page: FC = () => {
-
-  const { user } = useUser() 
-  if(!user) redirect("/sign-in");
+  const { userId } = auth();
+  if (!userId) redirect("/sign-in");
 
   const Editor = dynamic(() => import("@/components/blog-create/Editor"), {
     ssr: false,
   });
-  
+
   return (
     <div className=" flex flex-col">
       <p className=" text-center font-semibold text-lg">
         Write Your Blog Here:{" "}
       </p>
-      <Editor holder={"editor-js"} blog={null}/>
+      <Editor holder={"editor-js"} />
     </div>
   );
 };

@@ -1,12 +1,10 @@
 import BlogCard from "@/components/blog-view/BlogCard";
-import NoBlog from "@/components/NoBlog";
 import { buttonVariants } from "@/components/ui/button";
 import { getUserReadingHistory } from "@/lib/user";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import React from "react";
-
 const page = async () => {
   const { userId } = auth();
   if (!userId) redirect("/sign-in");
@@ -15,8 +13,11 @@ const page = async () => {
     return (
       <div className="w-[350px] gap-10 h-[300px] mx-[35%] my-[7%] flex flex-col text-xl justify-center font-bold text-center items-center">
         {" "}
-        <NoBlog />
-        <Link href="/dashboard/following" className={`${buttonVariants()}`}>Read your first blog</Link>
+        <Image src="/MessyDoodle.svg" height={300} width={300} alt="No Blog"/>
+        <div className="flex flex-col gap-4 items-center">
+          <div className=" text-2xl font-bold">You haven{'\''}t read any blog yet!!</div>
+          <Link href="/dashborad/following" className={`${buttonVariants()} w-40`}>Read your first blog</Link>
+        </div>
       </div>
     );
   return (

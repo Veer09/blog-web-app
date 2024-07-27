@@ -1,15 +1,15 @@
 "use client";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cachedUser } from "@/type/user";
-import { auth, clerkClient } from "@clerk/nextjs";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { redirect } from "next/navigation";
-import { FC, use, useEffect } from "react";
-import { useInView } from "react-intersection-observer";
-import ItemSelect from "./ItemSelect";
-import axios from "axios";
-import ClipLoader from "react-spinners/ClipLoader";
 import { handleClientError } from "@/lib/error";
+import { cachedUser } from "@/type/user";
+import { auth } from "@clerk/nextjs/server";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { redirect } from "next/navigation";
+import { FC, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
+import ClipLoader from "react-spinners/ClipLoader";
+import ItemSelect from "./ItemSelect";
 
 interface UserFollowListProps {
   users: cachedUser[];

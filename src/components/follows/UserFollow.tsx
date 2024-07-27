@@ -3,10 +3,9 @@ import { FC } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "../ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { Separator } from "../ui/separator";
@@ -25,19 +24,30 @@ const UserFollow: FC<UserFollowProps> = async ({ title, data, followed }) => {
       <Card>
         <CardHeader>
           <CardTitle className=" font-bold text-xl">{title}</CardTitle>
-          <CardDescription>Card Description</CardDescription>
         </CardHeader>
         <CardContent>
           <Separator className=" mb-4" />
-          {data &&
+          {data.length === 0 ? (
+            <p className="text-2xl font-bold">
+              {followed ? "You aren't following any user" : "No User to show"}
+            </p>
+          ) : (
             data.map((user, key) => {
               const followObj = {
                 ...user,
-                name: (user.firstName && user.lastName) ? user.firstName + " " + user.lastName : (user.firstName) ? user.firstName : (user.lastName) ? user.lastName : "",
+                name:
+                  user.firstName && user.lastName
+                    ? user.firstName + " " + user.lastName
+                    : user.firstName
+                    ? user.firstName
+                    : user.lastName
+                    ? user.lastName
+                    : "",
                 isFollowed: followed,
               };
               return <ItemSelect key={key} followObj={followObj} />;
-            })}
+            })
+          )}
         </CardContent>
         <CardFooter>
           {data.length == 7 && (

@@ -1,12 +1,8 @@
 import { BookCover } from "@/components/book/BookCover";
-import NoBook from "@/components/NoBook";
-import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
 import { getCreatedBooks } from "@/lib/user";
-import { auth } from "@clerk/nextjs";
-import { DialogTrigger } from "@radix-ui/react-dialog";
+import { auth } from "@clerk/nextjs/server";
+import Image from "next/image";
 import { redirect } from "next/navigation";
-
 const page = async () => {
   const { userId } = auth();
   if (!userId) redirect("/sign-in");
@@ -14,12 +10,14 @@ const page = async () => {
 
   if (books.length === 0)
     return (
-      <div className="w-[350px] gap-10 h-[300px] mx-[35%] my-[7%] flex flex-col text-xl justify-center font-bold text-center items-center">
-        {" "}
-        <NoBook />
-        <div>
-          You have not created any book yet.
-        </div>
+      <div className=" flex flex-col gap-3 items-center w-full h-full justify-center my-[10%]">
+        <Image
+          src="/SitReadingDoodle.svg"
+          height={300}
+          width={300}
+          alt="No Blog"
+        />
+        <div className="text-2xl font-bold">You haven{'\''}t created any book yet!!</div>
       </div>
     );
   return (

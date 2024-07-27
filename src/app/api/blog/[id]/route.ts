@@ -2,7 +2,7 @@ import prisma from "@/lib/db";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { blogUploadSchema } from "@/type/blog";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -69,7 +69,8 @@ export const PUT = async (
 
     return NextResponse.json({ message: "Success" });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };
 
@@ -132,6 +133,7 @@ export const DELETE = async (
 
     return NextResponse.json({ message: "Success" });
   } catch (err) {
-    handleApiError(err);
+        const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });;
   }
 };

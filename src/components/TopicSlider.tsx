@@ -16,7 +16,6 @@ const TopicSlider: FC<TopicSliderProps> = ({ topics }) => {
   const pathname = usePathname();
   const currentTopic = decodeURI(pathname.split("/")[3]);
   const currentSection = pathname.split("/")[4];
-  if (!topics) return;
   return (
     <ScrollArea className=" w-[70%]">
       <Tabs value={currentTopic != 'undefined' ? currentTopic : "following"} >
