@@ -13,7 +13,6 @@ const ShowPastComment: FC<ShowPastCommentProps> = ({ pastComments, baseComment }
     <div>
       {pastComments
         ? pastComments.map((comment, key) => {
-            console.log(comment.reply_id === ((baseComment) ? baseComment.id : null));
             return ((comment.reply_id === ((baseComment) ? baseComment.id : null)) ? (
               <CommentSection key={key} comment={comment} allComments={pastComments}/>
             ) : null);

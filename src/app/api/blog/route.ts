@@ -38,7 +38,7 @@ export const POST = async (req: NextRequest) => {
         },
       },
     });
-
+    
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
       url: `${publishUrl}/api/qstash/publish-post`,

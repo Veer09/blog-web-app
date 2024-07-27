@@ -1,7 +1,7 @@
 import prisma from "@/lib/db";
 import { handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
-import { blogPublishSchema, cachedBlog } from "@/type/blog";
+import { blogPublishSchema, cachedBlog, onlyBlog } from "@/type/blog";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,27 +14,26 @@ export const POST = async (req: NextRequest) => {
     
     //Create topic if not exists
     topics.forEach(async (topic) => {
-      redisPipe.hsetnx(`topic:${topic.name}`, "name", topic.name);
-      redisPipe.hsetnx(`topic:${topic.name}`, "blogs", 1);
-      redisPipe.hsetnx(`topic:${topic.name}`, "followers", 0);
+      redisPipe.hsetnx(`topic:${topic}`, "name", topic);
+      redisPipe.hsetnx(`topic:${topic}`, "blogs", 1);
+      redisPipe.hsetnx(`topic:${topic}`, "followers", 0);
 
       //revalidate topic
-      revalidateTag(`topic:${topic.name}`);
+      revalidateTag(`topic:${topic}`);
 
       //Storing topic name in topics set
-      redisPipe.sadd(`topics`, topic.name);
+      redisPipe.sadd(`topics`, topic);
     });
 
-    const blog: cachedBlog = {
+    const blog: onlyBlog = {
       id: blogData.id,
       title: blogData.title,
       description: blogData.description,
       coverImage: blogData.coverImage,
       createdAt: blogData.createdAt,
-      autherId: userId,
-      autherName: "",
+      authorId: userId,
       likes: 0,
-      topics: topics.map(topic => topic.name),
+      topics: topics,
     }
 
     //Storing blog data

@@ -12,7 +12,6 @@ const page = async () => {
   try {
     user = await clerkClient.users.getUser(userId);
   } catch (err: any) {
-    console.log(err);
     notFound();
   }
   const userObj: ClerkUserTransfer = {

@@ -1,4 +1,4 @@
-import { cachedBlog } from "@/type/blog";
+import { cachedBlog, onlyBlog } from "@/type/blog";
 import { cachedTopic } from "@/type/topic";
 import { cachedUser } from "@/type/user";
 import { auth, clerkClient } from "@clerk/nextjs/server";
@@ -7,10 +7,7 @@ import { redis } from "./redis";
 import { BookMetaData, cachedBook } from "@/type/book";
 import { notFound } from "next/navigation";
 
-export const getUserFollowings = async (
-  userId: string,
-  index: number
-) => {
+export const getUserFollowings = async (userId: string, index: number) => {
   const count = 7;
   const followings = await prisma.user.findUnique({
     where: {
@@ -19,7 +16,7 @@ export const getUserFollowings = async (
     select: {
       following: {
         take: count,
-        skip: (index - 1) * count
+        skip: (index - 1) * count,
       },
     },
   });
@@ -28,10 +25,7 @@ export const getUserFollowings = async (
   return await getCachedUsers(ids);
 };
 
-export const getUnfollowedUsers = async (
-  userId: string,
-  index: number
-) => {
+export const getUnfollowedUsers = async (userId: string, index: number) => {
   const count = 7;
   const followings = await prisma.user.findUnique({
     where: {
@@ -49,7 +43,7 @@ export const getUnfollowedUsers = async (
     where: {
       NOT: {
         id: {
-          in: ids
+          in: ids,
         },
       },
     },
@@ -57,15 +51,12 @@ export const getUnfollowedUsers = async (
       id: true,
     },
     skip: (index - 1) * count,
-    take:count
+    take: count,
   });
   return await getCachedUsers(unfollowed.map((user) => user.id));
 };
 
-export const getUserTopics = async (
-  userId: string,
-  index: number 
-) => {
+export const getUserTopics = async (userId: string, index: number) => {
   const count = 7;
   const topics = await prisma.user
     .findUnique({
@@ -75,7 +66,7 @@ export const getUserTopics = async (
       select: {
         topics: {
           take: count,
-          skip: (index - 1) * count
+          skip: (index - 1) * count,
         },
       },
     })
@@ -142,20 +133,20 @@ export const getDraftBlogs = async (userId: string) => {
     where: {
       user_id: userId,
     },
-  })
+  });
   return drafts;
-}
+};
 
 export const findDraftById = async (draftId: string, userId: string) => {
   const draft = await prisma.draft.findUnique({
     where: {
       id: draftId,
-      user_id: userId
-    }
-  })
-  if(!draft) notFound();
+      user_id: userId,
+    },
+  });
+  if (!draft) notFound();
   return draft;
-}
+};
 
 export const isBlogLiked = async (blogId: string) => {
   const { userId } = auth();
@@ -244,7 +235,6 @@ export const getCreatedBooks = async (userId: string) => {
   return await getCachedBooks(books.createdBooks.map((book) => book.id));
 };
 
-
 export const getUserFollowedBooks = async (userId: string) => {
   const books = await prisma.user.findUnique({
     where: {
@@ -258,7 +248,7 @@ export const getUserFollowedBooks = async (userId: string) => {
       },
     },
   });
-  if(!books) return [];
+  if (!books) return [];
   const bookIds = books.followingBooks.map((book) => book.id);
   const book = await getCachedBooks(bookIds);
   return book;
@@ -276,9 +266,9 @@ export const setBook = async (bookId: string) => {
       author_id: true,
       _count: {
         select: {
-          followers: true
-        }
-      }
+          followers: true,
+        },
+      },
     },
   });
   if (!book) return null;
@@ -288,7 +278,7 @@ export const setBook = async (bookId: string) => {
     description: book.description,
     topic: book.topic_name!,
     userId: book.author_id,
-    followers: book._count.followers
+    followers: book._count.followers,
   };
   return bookData;
 };
@@ -346,15 +336,14 @@ export const setBlog = async (blogId: string) => {
   if (!blog) return null;
   const { like } = blog._count;
   const { coverImage, createdAt, description, title, user_id } = blog;
-  const blogData: cachedBlog = {
+  const blogData: onlyBlog = {
     id: blogId,
     title,
     description,
     coverImage,
     createdAt,
     likes: like,
-    autherId: user_id,
-    autherName: "",
+    authorId: user_id,
     topics: blog.topics.map((topic) => topic.name),
   };
   await redis.hmset(`blog:${blogId}`, blogData);
@@ -398,10 +387,9 @@ export const setUserBlogs = async (userId: string) => {
   });
   if (blogs.length == 0) return [];
   const blogIds = blogs.map((blog) => blog.id);
-  await redis.lset(`user:${userId}:blogs`, 0, blogIds);
+  await redis.lpush(`user:${userId}:blogs`, [...blogIds]);
   return await getCachedBlogs(blogIds);
 };
-
 
 export const getCachedUser = async (userId: string) => {
   let user: cachedUser | null = await redis.hgetall(`user${userId}`);
@@ -411,7 +399,6 @@ export const getCachedUser = async (userId: string) => {
   }
   return user;
 };
-
 
 export const getCachedUsers = async (userIds: string[]) => {
   if (userIds.length === 0) return [];
@@ -492,11 +479,17 @@ export const getCachedBooks = async (bookIds: string[]) => {
 };
 
 export const getCachedBlog = async (blogId: string) => {
-  let blog: cachedBlog | null = await redis.hgetall(`blog:${blogId}`);
+  let blog: onlyBlog | null = await redis.hgetall(`blog:${blogId}`);
   if (!blog) {
     blog = await setBlog(blogId);
     if (!blog) notFound();
   }
+  const user = await getCachedUser(blog.authorId);
+  const blogData = {
+    ...blog,
+    authorName: user.firstName + " " + user.lastName,
+    authorImage: user,
+  };
   return blog;
 };
 
@@ -506,15 +499,23 @@ export const getCachedBlogs = async (blogIds: string[]) => {
   blogIds.forEach((blogId) => {
     redisPipe.hgetall(`blog:${blogId}`);
   });
-  const blogs: (cachedBlog | null)[] = await redisPipe.exec();
-  const blogDatas = await Promise.all(blogs.map(async (blog, index) => {
-    let b = blog;
-    if(!b){
-      b = await setBlog(blogIds[index]);
-      if(!b) notFound();
-    }
-    return b;
-  }))
+  const blogs: (onlyBlog | null)[] = await redisPipe.exec();
+  const blogDatas: cachedBlog[] = await Promise.all(
+    blogs.map(async (blog, index) => {
+      let b = blog;
+      if (!b) {
+        b = await setBlog(blogIds.at(index)!);
+        if (!b) notFound();
+      }
+      const user = await getCachedUser(b.authorId);
+      const blogData = {
+        ...b,
+        authorName: user.firstName + " " + user.lastName,
+        authorImage: user.imageUrl,
+      };
+      return blogData;
+    })
+  );
   return blogDatas;
 };
 

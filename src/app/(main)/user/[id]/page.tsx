@@ -10,7 +10,6 @@ const page = async ({ params }: { params: { id: string } }) => {
   try {
     user = await clerkClient.users.getUser(params.id);
   } catch (err: any) {
-    console.log(err);
     notFound();
   }
   const blogs = await getUserBlogs(params.id);
