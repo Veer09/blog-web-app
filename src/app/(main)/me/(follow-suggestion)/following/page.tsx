@@ -8,8 +8,8 @@ import { FC } from "react";
 const page: FC = async () => {
   const { userId } = auth();
   if(!userId) return redirect('/sign-in');
-  const followedTopics = await getUserTopics(userId, 7);
-  const following = await getUserFollowings(userId, 7);
+  const followedTopics = await getUserTopics(userId, 1);
+  const following = await getUserFollowings(userId, 1);
   return (
     <div className=" my-10">
       <TopicFollow title="Topic's you follow" data={followedTopics} followed={true}/>

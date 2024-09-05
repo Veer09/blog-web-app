@@ -19,7 +19,7 @@ export const UserFollowAddSchema = z.object({
   followerId: z.string()
 })
 
-export const OnSignUpSchema = z.object({
+export const profileSchema = z.object({
   about: z.string().min(5),
   socialMedia: z.array(z.object({
     name: z.string(),

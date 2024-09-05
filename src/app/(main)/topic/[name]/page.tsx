@@ -18,12 +18,12 @@ const page: FC<PageProps> = async ({ params }) => {
   const blogs = await getBlogByTopic(params.name);
   const books = await getBooksByTopic(params.name);
   return (
-    <Tabs defaultValue="blog" className="w-[400px]">
-      <TabsList className="grid w-full grid-cols-2">
+    <Tabs defaultValue="blog" className="">
+      <TabsList className="grid w-[400px] grid-cols-2">
         <TabsTrigger value="blog">Blogs</TabsTrigger>
         <TabsTrigger value="book">Books</TabsTrigger>
       </TabsList>
-      <TabsContent value="=blog">
+      <TabsContent value="blog">
         {blogs.length === 0 && (
           <div className="w-[350px] gap-10 h-[300px] mx-[35%] my-[7%] flex flex-col text-xl justify-center font-bold text-center items-center">
             {" "}
@@ -46,12 +46,11 @@ const page: FC<PageProps> = async ({ params }) => {
             </div>
           </div>
         )}
-        <div>
+        <div className="w-[80%]">
           {blogs.map((blog, key) => {
             return (
               <div key={key}>
                 <BlogCard blog={blog} key={key} />
-                <Separator />
               </div>
             );
           })}
@@ -59,14 +58,14 @@ const page: FC<PageProps> = async ({ params }) => {
       </TabsContent>
       <TabsContent value="book">
         {books.length === 0 && (
-          <div className=" flex w-full h-full justify-center my-[10%]">
+          <div className=" flex flex-col gap-4 w-full h-full justify-center items-center my-[10%]">
             <Image
               src="/SitReadingDoodle.svg"
               height={300}
               width={300}
               alt="No Blog"
             />
-            <div>There are no books in this topic yet.</div>
+            <div className="text-2xl font-bold">There are no books in this topic yet.</div>
           </div>
         )}
 
@@ -77,7 +76,10 @@ const page: FC<PageProps> = async ({ params }) => {
                 <BookCover
                   title={book.title}
                   description={book.description}
+                  topic={book.topic}
                   id={book.id}
+                  coverImage={book.coverImage}
+                  darkText={book.darkText}
                 />
               </div>
             );

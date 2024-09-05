@@ -19,7 +19,7 @@ const page: FC = async () => {
       </div>
     );
   return (
-    <div>
+    <div className="w-[80%]">
       {savedBlog.map((blog, key) => {
         return <BlogCard blog={blog} key={key} />;
       })}

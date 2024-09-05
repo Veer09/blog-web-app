@@ -4,6 +4,7 @@ import { qstashClient } from "@/lib/qstash";
 import { redis } from "@/lib/redis";
 import { UserFollowSchema } from "@/type/user";
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
@@ -36,6 +37,8 @@ export const POST = async (req: NextRequest) => {
       },
     });
     await redis.hincrby(`user:${followerId}`, "followers", 1);
+    revalidatePath('/me/following', 'page');
+    revalidatePath('/me/suggestions', 'page');
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
       url: `${publishUrl}/api/qstash/follow-user`,

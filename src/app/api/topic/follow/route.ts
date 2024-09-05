@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
+import { revalidatePath } from "next/cache";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -32,6 +33,8 @@ export const POST = async (req: NextRequest) => {
     });
 
     await redis.hincrby(`topic:${topicName}`, "followers", 1);
+    revalidatePath('/me/following', 'page');
+    revalidatePath('/me/suggestions', 'page');
     return NextResponse.json({ message: "sucess" }, { status: 200 });
   } catch (err: any) {
         const { message, code } = handleApiError(err);

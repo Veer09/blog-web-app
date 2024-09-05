@@ -3,10 +3,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cachedBlog } from "@/type/blog";
-import { clerkClient, User } from "@clerk/nextjs/server";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 
 interface BlogCardprops {
   blog: cachedBlog;
@@ -16,7 +14,7 @@ const BlogCard: FC<BlogCardprops> = ({ blog }) => {
   const router = useRouter();
   return (
     <Card
-      className="w-full cursor-pointer px-6 py-2 grid gap-6 hover:shadow-lg transition-shadow duration-300"
+      className="cursor-pointer px-6 mb-3 py-2 grid gap-6 hover:shadow-lg transition-shadow duration-300"
       onClick={() => router.push(`/blog/${blog.id}`)}
     >
       <div className="flex justify-between items-center">
@@ -33,7 +31,15 @@ const BlogCard: FC<BlogCardprops> = ({ blog }) => {
                 <AvatarFallback>{blog.authorName}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-lg font-semibold">{blog.authorName}</h3>
+                <h3
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/user/${blog.authorId}`);
+                  }}
+                  className="text-lg font-semibold hover:underline"
+                >
+                  {blog.authorName}
+                </h3>
                 <p className="text-muted-foreground text-sm">
                   Published on {new Date(blog.createdAt).toDateString()}
                 </p>
@@ -54,6 +60,7 @@ const BlogCard: FC<BlogCardprops> = ({ blog }) => {
                     }}
                     variant="outline"
                     key={key}
+                    className="hover:underline hover:underline-offset-2"
                   >
                     {topic}
                   </Badge>
@@ -64,7 +71,7 @@ const BlogCard: FC<BlogCardprops> = ({ blog }) => {
         </div>
         <div>
           {blog.coverImage && (
-            <Image
+            <img
               src={blog.coverImage}
               alt="dfgasrg"
               width="200"

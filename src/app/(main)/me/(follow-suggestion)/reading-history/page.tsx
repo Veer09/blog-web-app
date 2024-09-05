@@ -21,7 +21,7 @@ const page = async () => {
       </div>
     );
   return (
-    <div>
+    <div className="mt-5 w-[80%]">
       {blogs.map((blog) => {
         return <BlogCard key={blog.id} blog={blog} />;
       })}

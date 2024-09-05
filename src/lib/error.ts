@@ -87,6 +87,7 @@ export const returnResponse = (error: any): ErrorResponse => {
 };
 
 export const handleApiError = (error: any) => {
+  console.log(error);
   const err = returnResponse(error);
   return err;
 };

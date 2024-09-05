@@ -5,6 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { FC } from "react";
 import { Button } from "../ui/button";
+import { toast } from "../ui/use-toast";
+import { useRouter } from "next/navigation";
 
 interface TopicFollowButtonProps {
   topic: cachedTopic & { isFollowed: boolean };
@@ -12,6 +14,7 @@ interface TopicFollowButtonProps {
 }
 
 const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
+  const router = useRouter();
   const { mutate: follow, isPending: followPending } = useMutation({
     mutationKey: ["follow"],
     mutationFn: (id: string) => {
@@ -35,6 +38,12 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       });
       handleClientError(err);
     },
+    onSuccess: () => {
+      toast({
+        description: "Topic followed Successfully",
+      })
+      router.refresh();
+    }
   });
 
   const { mutate: unfollow, isPending: unfollowPending } = useMutation({
@@ -60,6 +69,12 @@ const TopicFollowButton: FC<TopicFollowButtonProps> = ({ topic, setTopic }) => {
       });
       handleClientError(err);
     },
+    onSuccess: () => {
+      toast({
+        description: "Topic unfollowed Successfully",
+      })
+      router.refresh();
+    }
   });
   return (
     <Button

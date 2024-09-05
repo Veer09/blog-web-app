@@ -1,4 +1,4 @@
-import { findBlogById } from "@/lib/blog";
+import { getBlogById } from "@/lib/blog";
 import { unstable_cache } from "next/cache";
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
@@ -17,7 +17,7 @@ const Page: FC<Props> = async ({ params }) => {
   
   const getBlog = unstable_cache(
     async () => {
-      return await findBlogById(params.id);
+      return await getBlogById(params.id);
     },
     ["blog", params.id],
     {

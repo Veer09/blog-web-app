@@ -1,55 +1,58 @@
 "use client";
 
-import { FC, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { OnSignUpSchema } from "@/type/user";
-import axios from "axios";
-import { handleClientError } from "@/lib/error";
-import { redirect } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { handleClientError } from "@/lib/error";
+import { profileSchema } from "@/type/user";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { Trash } from "lucide-react";
+import { FC, useState } from "react";
+import { toast } from "./ui/use-toast";
 
 interface UserProfileEditProps {
-  publicMetadata?: any;
+  publicMetadata?: CustomJwtSessionClaims["metadata"];
 }
 
 export const UserProfileEdit: FC<UserProfileEditProps> = ({
   publicMetadata,
 }) => {
+
   const [socialMedia, setSocialMedia] = useState(
-    publicMetadata.socialMedia || [
+    publicMetadata?.socialMedia || [
       { name: "Website", value: "" },
       { name: "Twitter", value: "" },
       { name: "Github", value: "" },
     ]
   );
   const [newSocialMediaName, setNewSocialMediaName] = useState("");
-  const [about, setAbout] = useState(publicMetadata.about || "");
+  const [about, setAbout] = useState(publicMetadata?.about || "");
+
   const handleSocialMediaChange = (index: number, value: string) => {
     const updatedSocialMedia = [...socialMedia];
     updatedSocialMedia[index].value = value;
     setSocialMedia(updatedSocialMedia);
   };
+
   const handleAddSocialMedia = () => {
     if (newSocialMediaName.trim() !== "") {
       setSocialMedia([...socialMedia, { name: newSocialMediaName, value: "" }]);
       setNewSocialMediaName("");
     }
   };
+  
   const handleRemoveSocialMedia = (index: number) => {
     const updatedSocialMedia = [...socialMedia];
     updatedSocialMedia.splice(index, 1);
@@ -62,21 +65,23 @@ export const UserProfileEdit: FC<UserProfileEditProps> = ({
         about: about,
         socialMedia: socialMedia,
       };
-      const payload = OnSignUpSchema.parse(data);
+      const payload = profileSchema.parse(data);
       return await axios.post("/api/user/update-profile", payload);
+    },
+    onMutate: () => {
+      toast({
+        description: "Updating profile...",
+      })
     },
     onError: (error) => {
       handleClientError(error);
     },
-    onSuccess: () => {
-      redirect("/dashborad");
-    },
   });
 
   return (
-    <div className="w-full h-full my-[3%] flex justify-center items-center">
+    <div className="w-[90%] md:w-full h-full my-[3%] flex justify-center items-center">
       <Card className="w-full max-w-2xl mx-auto">
-        <ScrollArea className="h-[560px]">
+        <ScrollArea className="h-[600px]">
           <CardHeader>
             <CardTitle>Edit Profile</CardTitle>
             <CardDescription>Update your personal information.</CardDescription>

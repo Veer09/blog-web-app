@@ -37,8 +37,7 @@ export async function POST(request: Request) {
   if(payload.type === 'user.created'){
     await redis.hset(`user:${payload.data.id}`, { 
       id: payload.data.id,
-      firstName: payload.data.first_name,
-      lastName: payload.data.last_name,
+      name: payload.data.username,
       imageUrl: payload.data.image_url,
       blogs: 0,
       followers: 0,

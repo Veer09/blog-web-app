@@ -19,7 +19,7 @@ const InfiniteScrollPost: FC<InfiniteScrollPostProps> = ({ blogs }) => {
   const { ref, inView } = useInView({
     threshold: 1,
   });
-  const getPosts = async ({ pageParam = 1 }: { pageParam: number }) => {
+  const getPosts = async ({ pageParam = 2 } : { pageParam: number }) => {
     try {
       const response = await axios.get(`/api/feed?index=${pageParam}`);
       return response.data as cachedBlog[];
@@ -35,36 +35,33 @@ const InfiniteScrollPost: FC<InfiniteScrollPostProps> = ({ blogs }) => {
       return lastPage && lastPage.length === 5 ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
-    initialData: {
-      pages: [blogs],
-      pageParams: [1],
-    },
+    initialData: { pages: [blogs], pageParams: [1] },
+    refetchOnWindowFocus: false,
+    staleTime: Infinity
   });
 
-  const blogsArray = data.pages.flatMap((page) => page);
+  const blogsArray = data?.pages.flatMap((page) => page);
   useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  if(!data.pages[data.pages.length - 1]) return (<h1>Something went wrong!!</h1>)
+  if (!data?.pages[data.pages.length - 1]) return (<h1>Something went wrong!!</h1>)
   return (
-    <div className=" w-[70%]">
-      {blogsArray.map((blog, key) => {
+    <div className="w-[80%]">
+      {blogsArray?.map((blog, key) => {
         return key === blogsArray.length - 1 ? (
           <div key={key} ref={ref}>
             <BlogCard blog={blog!} />
-            <Separator />
           </div>
         ) : (
           <div key={key}>
             <BlogCard blog={blog!} />
-            <Separator />
           </div>
         );
       })}
-      <ClipLoader color="#000" loading={isFetching} size={150} />
+      <ClipLoader color="#000" loading={isFetching} size={15} />
     </div>
   );
 };

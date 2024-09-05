@@ -3,7 +3,6 @@ import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { redis } from "@/lib/redis";
 import { savedBySchema } from "@/type/user";
 import { auth } from "@clerk/nextjs/server";
-import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {

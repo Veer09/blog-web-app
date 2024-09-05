@@ -1,10 +1,10 @@
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getMostLikedBlogs } from "@/lib/blog";
+import { auth } from "@clerk/nextjs/server";
 import { ArrowRightIcon, PenIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Image from "next/image";
-import { getMostLikedBlogs } from "@/lib/blog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { auth } from "@clerk/nextjs/server";
 
 const page = async () => {
   const { userId } = auth();
@@ -80,9 +80,9 @@ const page = async () => {
                     key={key}
                     className="group flex flex-col rounded-lg bg-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md dark:bg-gray-950 dark:shadow-none dark:hover:bg-gray-800"
                   >
-                    <Image
+                    <img
                       src={blog.coverImage}
-                      width="300"
+                      width="420"
                       height="200"
                       alt="Blog Post"
                       className="aspect-[3/2] overflow-hidden rounded-t-lg object-cover object-center"

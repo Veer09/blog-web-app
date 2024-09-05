@@ -2,10 +2,14 @@ import { Chapter, UpdateDetails } from "@/type/book";
 import axios from "axios";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { DialogContent } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
+import { cachedUser } from "@/type/user";
+import { useQuery } from "@tanstack/react-query";
+import { useSearch } from "@/lib/utils";
+import ClipLoader from "react-spinners/ClipLoader";
 
 interface DialogDetailsProps {
   type: DialogType;
@@ -43,6 +47,7 @@ const DialogDetails: FC<DialogDetailsProps> = ({
     _count: {
       followers: number;
     };
+    author: cachedUser;
   }
   interface Chapter {
     id: string;
@@ -51,6 +56,7 @@ const DialogDetails: FC<DialogDetailsProps> = ({
       book: number;
     };
     user_id: string;
+    author: cachedUser;
   }
   interface Blog {
     id: string;
@@ -59,6 +65,7 @@ const DialogDetails: FC<DialogDetailsProps> = ({
       like: number;
     };
     user_id: string;
+    author: cachedUser;
   }
   const router = useRouter();
   const pathname = usePathname();
@@ -66,6 +73,29 @@ const DialogDetails: FC<DialogDetailsProps> = ({
   const [books, setBooks] = useState<Book[]>([]);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
+
+  const { data: searchData, isFetching } = useSearch(type, search);
+
+  useEffect(() => {
+    if (searchData) {
+      if (type === DialogType.Book) {
+        setBooks(searchData.data.response);
+      } else if (type === DialogType.Chapter) {
+        setChapters(searchData.data.response);
+      } else if (type === DialogType.Blog) {
+        setBlogs(searchData.data.response);
+      }
+    }
+
+    return () => {
+      setSearch("");
+      setBooks([]);
+      setChapters([]);
+      setBlogs([]);
+    }
+  }, [searchData, type]);
+
+
 
   const saveContent = (index: number) => {
     //For Update
@@ -263,25 +293,25 @@ const DialogDetails: FC<DialogDetailsProps> = ({
           link:
             type === DialogType.Book
               ? {
-                  id: books[index].id,
-                  type: DialogType.Book,
-                  user_id: books[index].author_id,
-                }
+                id: books[index].id,
+                type: DialogType.Book,
+                user_id: books[index].author_id,
+              }
               : {
-                  id: chapters[index].id,
-                  type: DialogType.Chapter,
-                  user_id: chapters[index].user_id,
-                },
+                id: chapters[index].id,
+                type: DialogType.Chapter,
+                user_id: chapters[index].user_id,
+              },
           chapterNumber: content.length + 1,
           number: updateDetails?.length,
         },
       ]);
     }
-
     setDialogOpen(false);
     setSearch("");
     router.push(pathname);
   };
+
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -291,16 +321,6 @@ const DialogDetails: FC<DialogDetailsProps> = ({
       setBlogs([]);
       return;
     }
-    const params = new URLSearchParams({
-      type: type,
-      name: e.target.value,
-    }).toString();
-    router.push(pathname + "?" + params);
-    const response = await axios.get(`/api/search?${params}`);
-
-    if (type === DialogType.Book) setBooks(response.data.books);
-    else if (type === DialogType.Chapter) setChapters(response.data.chapters);
-    else setBlogs(response.data.blogs);
   };
 
   return (
@@ -315,75 +335,78 @@ const DialogDetails: FC<DialogDetailsProps> = ({
           className="appearance-none bg-background pl-8 shadow-none my-2"
         />
       </div>
+      {
+        isFetching && <ClipLoader color="#000" className="text-center" loading={true} size={20} />
+      }
       <ScrollArea className="max-h-[300px]">
         {type === (DialogType.Book as string) && books.length !== 0
           ? books.map((item: Book, index) => (
-              <div
-                key={index}
-                className="flex items-center my-4 cursor-pointer"
-                onClick={() => {
-                  saveContent(index);
-                }}
-              >
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {item.title}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.topic_name}
-                    {item.author_id}
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">
-                  {item._count.followers}
-                </div>
+            <div
+              key={index}
+              className="flex items-center my-4 cursor-pointer"
+              onClick={() => {
+                saveContent(index);
+              }}
+            >
+              <div className="ml-4 space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {item.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {item.topic_name}
+                  {(item.author.firstName && item.author.lastName) ? item.author.firstName + " " + item.author.lastName : (item.author.firstName) ? item.author.firstName : (item.author.lastName) ? item.author.lastName : ""}
+                </p>
               </div>
-            ))
+              <div className="ml-auto font-medium">
+                {item._count.followers}
+              </div>
+            </div>
+          ))
           : type === DialogType.Book && (
-              <h1 className="text-center">No Book Found</h1>
-            )}
+            <h1 className="text-center">No Book Found</h1>
+          )}
         {type === DialogType.Chapter && chapters.length !== 0
           ? chapters.map((item: Chapter, index) => (
-              <div
-                key={index}
-                className="flex items-center"
-                onClick={() => saveContent(index)}
-              >
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {item.title}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.user_id}
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">{item._count.book}</div>
+            <div
+              key={index}
+              className="flex items-center"
+              onClick={() => saveContent(index)}
+            >
+              <div className="ml-4 space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {item.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {(item.author.firstName && item.author.lastName) ? item.author.firstName + " " + item.author.lastName : (item.author.firstName) ? item.author.firstName : (item.author.lastName) ? item.author.lastName : ""}
+                </p>
               </div>
-            ))
+              <div className="ml-auto font-medium">{item._count.book}</div>
+            </div>
+          ))
           : type === DialogType.Chapter && (
-              <h1 className="text-center">No Chapter Found</h1>
-            )}
+            <h1 className="text-center">No Chapter Found</h1>
+          )}
         {type === DialogType.Blog && blogs.length !== 0
           ? blogs.map((item: Blog, index) => (
-              <div
-                key={index}
-                className="flex items-center cursor-pointer"
-                onClick={() => saveContent(index)}
-              >
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {item.title}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.user_id}
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">{item._count.like}</div>
+            <div
+              key={index}
+              className="flex items-center cursor-pointer"
+              onClick={() => saveContent(index)}
+            >
+              <div className="ml-4 space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {item.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {(item.author.firstName && item.author.lastName) ? item.author.firstName + " " + item.author.lastName : (item.author.firstName) ? item.author.firstName : (item.author.lastName) ? item.author.lastName : ""}
+                </p>
               </div>
-            ))
+              <div className="ml-auto font-medium">{item._count.like}</div>
+            </div>
+          ))
           : type === DialogType.Blog && (
-              <h1 className="text-center">No Blog Found</h1>
-            )}
+            <h1 className="text-center">No Blog Found</h1>
+          )}
       </ScrollArea>
     </DialogContent>
   );

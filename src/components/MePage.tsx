@@ -3,23 +3,26 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cachedBlog } from "@/type/blog";
 import { BookMetaData } from "@/type/book";
-import { ClerkUserTransfer } from "@/type/user";
+import { cachedUser, ClerkUserTransfer } from "@/type/user";
 import { useAuth, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { FC, useState } from "react";
 import BlogCard from "./blog-view/BlogCard";
 import { BookCover } from "./book/BookCover";
+import UserFollowButton from "./follows/UserFollowButton";
 import { Avatar, AvatarImage } from "./ui/avatar";
 
 interface MePageProps {
   blogs: cachedBlog[];
   books: BookMetaData[];
   user: ClerkUserTransfer;
+  cachedUser: cachedUser & { isFollowed: boolean, name: string };
 }
 
-const MePage: FC<MePageProps> = ({ blogs, books, user }) => {
+const MePage: FC<MePageProps> = ({ blogs, books, user, cachedUser }) => {
   const [activeTab, setActiveTab] = useState("blogs");
+  const [cuser, setcUser] = useState(cachedUser);
   const { userId } = useAuth();
 
   return (
@@ -40,14 +43,13 @@ const MePage: FC<MePageProps> = ({ blogs, books, user }) => {
                 }}
               />
             ) : (
-              <Avatar>
+              <Avatar className="h-24 w-24">
                 <AvatarImage src={user.imageUrl} className="h-24 w-24" />
               </Avatar>
             )}
 
             <div className="text-center">
               <h2 className="text-2xl font-bold">{user.fullName}</h2>
-              {/* <p className="text-muted-foreground">Software Engineer</p> */}
             </div>
           </div>
           <div className="grid gap-2">
@@ -60,23 +62,30 @@ const MePage: FC<MePageProps> = ({ blogs, books, user }) => {
             <div>
               {user.publicMetadata.socialMedia
                 ? (user.publicMetadata.socialMedia as string[]).map(
-                    (social: any, index) => (
-                      <div key={index} className="flex items-center gap-2 mb-2">
-                        <LinkIcon className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-muted-foreground">
-                          {social.name}: {social.value}
-                        </span>
-                      </div>
-                    )
+                  (social: any, index) => (
+                    <div key={index} className="flex items-center gap-2 mb-2">
+                      <LinkIcon className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {social.name}: {social.value}
+                      </span>
+                    </div>
                   )
+                )
                 : null}
             </div>
-            <Link href="/me/edit" className={`${buttonVariants()}`}>
-              Edit Profile
-            </Link>
+            { (user.id === userId) ?
+              <Link href="/me/edit" className={`${buttonVariants()}`}>
+                Edit Profile
+              </Link>
+              : 
+              <UserFollowButton user={cuser} setUser={setcUser}/>
+            }
           </div>
         </div>
         <div className="space-y-6">
+          <div>
+            <p className="text-2xl font-bold">{cuser.name}</p>
+          </div>
           {user.publicMetadata.about ? (
             <div>
               <h3 className="text-2xl font-bold">About</h3>
@@ -86,7 +95,7 @@ const MePage: FC<MePageProps> = ({ blogs, books, user }) => {
             </div>
           ) : null}
           <div>
-            <div className="flex items-center gap-4 border-b border-muted/20 pb-4">
+            <div className="flex items-center gap-4 border-b-2 pb-2 mb-4 border-black">
               <Button
                 variant={activeTab === "blogs" ? "default" : "ghost"}
                 onClick={() => setActiveTab("blogs")}
@@ -103,7 +112,7 @@ const MePage: FC<MePageProps> = ({ blogs, books, user }) => {
               </Button>
             </div>
             {activeTab === "blogs" && (
-              <>
+              <div className="w-full">
                 {blogs.length === 0 ? (
                   <div className=" flex w-full h-full justify-center my-[10%]">
                     <Image
@@ -116,18 +125,19 @@ const MePage: FC<MePageProps> = ({ blogs, books, user }) => {
                 ) : (
                   blogs.map((blog, key) => <BlogCard key={key} blog={blog} />)
                 )}
-              </>
+              </div>
             )}
             {activeTab === "books" && (
               <>
                 {books.length === 0 ? (
-                  <div className=" flex w-full h-full justify-center my-[10%]">
+                  <div className=" flex flex-col items-center gap-4 w-full h-full justify-center my-[10%]">
                     <Image
                       src="/SitReadingDoodle.svg"
                       height={300}
                       width={300}
                       alt="No Blog"
                     />
+                    <p className="text-2xl font-bold">No Book to Show!!</p>
                   </div>
                 ) : (
                   books.map((book, key) => (
@@ -135,7 +145,10 @@ const MePage: FC<MePageProps> = ({ blogs, books, user }) => {
                       key={key}
                       title={book.title}
                       description={book.description}
+                      topic={book.topic}
                       id={book.id}
+                      coverImage={book.coverImage}
+                      darkText={book.darkText}
                     />
                   ))
                 )}

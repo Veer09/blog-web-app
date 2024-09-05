@@ -1,10 +1,11 @@
 import { handleClientError } from "@/lib/error";
 import { blogDraftSchema, saveDraftSchema } from "@/type/blog";
-import EditorJS, { OutputData } from "@editorjs/editorjs";
+import { Draft } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { redirect } from "next/navigation";
-import { FC, MutableRefObject, useState } from "react";
+import { FC, useState } from "react";
+import { UseFormReturn } from "react-hook-form";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -15,21 +16,22 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { Draft } from "@prisma/client";
 import { toast } from "../ui/use-toast";
+import { BlogForm } from "./Editor";
 
 interface DraftButtonProps {
-  data: OutputData | undefined;
+  form: UseFormReturn<BlogForm>
   draft? : Draft
 }
 
-const DraftButton: FC<DraftButtonProps> = ({ data, draft }) => {
+const DraftButton: FC<DraftButtonProps> = ({ form, draft }) => {
   const [name, setName] = useState("");
+
   const { mutate: draftBlog } = useMutation({
-    mutationFn: async (data: OutputData) => {
+    mutationFn: async () => {
       const payload = blogDraftSchema.parse({
         name: name,
-        content: data,
+        content: form.getValues('content'),
       });
       return await axios.post("/api/blog/draft", payload);
     },
@@ -42,10 +44,10 @@ const DraftButton: FC<DraftButtonProps> = ({ data, draft }) => {
   });
 
   const { mutate: saveDraft } = useMutation({
-    mutationFn: async (data: OutputData) => {
+    mutationFn: async () => {
       if(!draft) return;
       const payload = saveDraftSchema.parse({
-        content: data,
+        content: form.getValues('content'),
       });
       return await axios.put(`/api/blog/draft/${draft.id}`, payload);
     },
@@ -59,15 +61,6 @@ const DraftButton: FC<DraftButtonProps> = ({ data, draft }) => {
     }
   });
 
-  const setDraft = () => {
-    if(!data) return;
-    draftBlog(data);
-  };
-
-  const save = () => {
-    if(!data) return;
-    saveDraft(data)
-  }
   return (
     !draft ? <Dialog>
       <DialogTrigger asChild>
@@ -84,11 +77,11 @@ const DraftButton: FC<DraftButtonProps> = ({ data, draft }) => {
           onChange={(e) => setName(e.target.value)}
         />
         <DialogFooter>
-          <Button onClick={setDraft}>Submit</Button>
+          <Button onClick={() => draftBlog()}>Submit</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-    : <Button onClick={save} className=" w-[100px]">Save</Button>
+    : <Button onClick={() => saveDraft()} className=" w-[100px]">Save</Button>
   );
 };
 

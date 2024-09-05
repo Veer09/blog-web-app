@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +29,10 @@ export default function RootLayout({
             defaultTheme="light"
             disableTransitionOnChange
           >
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              {children}
+              <ReactQueryDevtools initialIsOpen={false} /> 
+            </QueryProvider>
             <Toaster />
           </ThemeProvider>
         </body>

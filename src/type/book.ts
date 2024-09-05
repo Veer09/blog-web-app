@@ -33,6 +33,8 @@ export type BookMetaData = {
   topic: string;
   userId: string;
   followers: number;
+  coverImage?: string;
+  darkText?: boolean;
 };
 
 export const bookSchema = z.object({
@@ -44,13 +46,12 @@ export const bookSchema = z.object({
 
 export type Book = z.infer<typeof bookSchema>;
 
-
-
 export const serverForm = z.object({
   name: z.string(),
   description: z.string(),
   topic: z.string(),
-  url: z.optional(z.string())
+  url: z.optional(z.string()),
+  darkText: z.boolean()
 })
 
 export const updateSchema = z.object({

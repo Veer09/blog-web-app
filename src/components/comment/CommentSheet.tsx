@@ -55,8 +55,6 @@ const CommentSheet: FC<CommentSheetProps> = ({ blogId }) => {
     setComments(res.data.comments);
   }
      
-
-
   return (
     <div>
       <Sheet>

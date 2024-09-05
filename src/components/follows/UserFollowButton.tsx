@@ -6,6 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { Button } from "../ui/button";
+import { toast } from "../ui/use-toast";
 
 interface UserFollowButtonProps {
   user: cachedUser & { isFollowed: boolean; name: string };
@@ -14,8 +15,6 @@ interface UserFollowButtonProps {
 
 const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
   const router = useRouter();
-  const queryClient = new QueryClient();
-
   const { mutate: follow, isPending: followPending } = useMutation({
     mutationKey: ["follow"],
     mutationFn: (id: string) => {
@@ -29,11 +28,18 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
         followers: user.followers + 1,
         isFollowed: !user.isFollowed,
       });
+      console.log(user);
     },
     onError: (err) => {
       handleClientError(err);
       router.refresh();
     },
+    onSuccess: () => {
+      toast({
+        description: "User followed Successfully",
+      })
+      router.refresh();
+    }
   });
 
   const { mutate: unfollow, isPending: unfollowPending } = useMutation({
@@ -54,6 +60,12 @@ const UserFollowButton: FC<UserFollowButtonProps> = ({ user, setUser }) => {
       handleClientError(err);
       router.refresh();
     },
+    onSuccess: () => {
+      toast({
+        description: "User unfollowed Successfully",
+      })
+      router.refresh();
+    }
   });
   return (
     <Button

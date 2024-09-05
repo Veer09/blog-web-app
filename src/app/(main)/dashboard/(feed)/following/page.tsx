@@ -23,7 +23,7 @@ const page: FC = async () => {
       </div>
     );
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex mt-6 w-full flex-col gap-4">
       <InfiniteScrollPost blogs={blogs} />
     </div>
   );

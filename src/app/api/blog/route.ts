@@ -1,15 +1,16 @@
+import { blogFormSchema } from "@/components/blog-create/Editor";
 import prisma from "@/lib/db";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { qstashClient } from "@/lib/qstash";
-import { blogSchema, blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs/server";
+import { permanentRedirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
 
   try {
-    const blog = blogUploadSchema.parse(body);
+    const blog = blogFormSchema.parse(body);
     const { userId } = auth();
     if (!userId)
       throw new ApiError("Unauthorizesd!!", ErrorTypes.Enum.unauthorized);
@@ -27,7 +28,7 @@ export const POST = async (req: NextRequest) => {
         content: JSON.parse(JSON.stringify(blog.content)),
         title: blog.title,
         description: blog.description,
-        coverImage: blog.image,
+        coverImage: blog.coverImage,
         topics: {
           connectOrCreate: topics.map((topic) => {
             return {
@@ -48,8 +49,8 @@ export const POST = async (req: NextRequest) => {
         topics,
       },
     });
-    const response = blogSchema.parse(blogData.id);
-    return NextResponse.json(response, { status: 200 });
+
+    permanentRedirect(`/blog/${blogData.id}`);
   } catch (err) {
     const { message, code } = handleApiError(err);
     return NextResponse.json({ error: message }, { status: code });;

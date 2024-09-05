@@ -5,11 +5,11 @@ import { z } from "zod";
 
 
 export const blogUploadSchema = z.object({
-    content: z.custom<OutputData>(),
-    title: z.string().max(100).min(3),
-    description: z.string().max(1000).min(5),
-    image: z.string().min(0),
-    topics: z.array(z.string())
+    content: z.custom<OutputData>().optional(),
+    title: z.string().max(100).min(3).optional(),
+    description: z.string().max(1000).min(5).optional(),
+    coverImage: z.string().min(0).optional(),
+    topics: z.array(z.string()).optional()
 });
 
 export const blogDraftSchema = z.object({
@@ -27,7 +27,6 @@ export const blogPublishSchema = z.object({
     blogData: z.custom<Blog>()
 })
 
-export const blogSchema = z.string()
 
 export type cachedBlog = {
     id: string;

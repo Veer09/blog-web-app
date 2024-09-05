@@ -7,11 +7,10 @@ import {
 import { ChapterType } from "@/lib/book";
 import {
   ArrowLeftCircle,
-  ArrowRightCircle,
   BookIcon,
   ChevronRightIcon,
   MenuIcon,
-  Search,
+  Search
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";

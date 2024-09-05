@@ -4,7 +4,15 @@ import { redis } from "@/lib/redis";
 import { blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs/server";
 import { revalidateTag } from "next/cache";
+import { permanentRedirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
+
+interface UpdateBlog {
+  title?: string;
+  description?: string;
+  coverImage?: string;
+  content?: ReturnType<typeof JSON.parse>;
+}
 
 export const PUT = async (
   req: NextRequest,
@@ -12,14 +20,6 @@ export const PUT = async (
 ) => {
   const payload = await req.json();
   try {
-    const blog = blogUploadSchema.parse(payload);
-    const topics = blog.topics.map((topic) => {
-      return {
-        name:
-          topic.trim().charAt(0).toUpperCase() +
-          topic.trim().slice(1).toLowerCase(),
-      };
-    });
     const { userId } = auth();
     if (!userId) {
       throw new ApiError(
@@ -27,18 +27,37 @@ export const PUT = async (
         ErrorTypes.Enum.unauthorized
       );
     }
+    const blog = blogUploadSchema.parse(payload);
+    let topics: string[] = [];
+    if (blog.topics) {
+      topics = blog.topics.map((topic) => {
+        return (
+          topic.trim().charAt(0).toUpperCase() +
+          topic.trim().slice(1).toLowerCase()
+        );
+      });
+    }
+    const updateList: UpdateBlog = {};
+    if (blog.title) updateList["title"] = blog.title;
+    if (blog.description) updateList["description"] = blog.description;
+    if (blog.coverImage) updateList["coverImage"] = blog.coverImage;
+    if (blog.content)
+      updateList["content"] = JSON.parse(JSON.stringify(blog.content));
+
     const update = await prisma.blog.update({
       where: {
         id: params.id,
         user_id: userId,
       },
       data: {
-        content: JSON.parse(JSON.stringify(blog.content)),
-        title: blog.title,
-        description: blog.description,
-        coverImage: blog.image,
+        ...updateList,
         topics: {
-          set: topics,
+          connectOrCreate: topics.map((topic) => {
+            return {
+              where: { name: topic },
+              create: { name: topic },
+            };
+          }),
         },
       },
     });
@@ -50,11 +69,9 @@ export const PUT = async (
 
     //Create topic if not exists
     topics.forEach(async (topic) => {
-      redisPipe.hsetnx(`topic:${topic.name}`, "name", topic.name);
-      redisPipe.hsetnx(`topic:${topic.name}`, "blogs", 1);
-      redisPipe.hsetnx(`topic:${topic.name}`, "followers", 0);
-      //revalidate topic
-      revalidateTag(`topic:${topic.name}`);
+      redisPipe.hsetnx(`topic:${topic}`, "name", topic);
+      redisPipe.hsetnx(`topic:${topic}`, "blogs", 1);
+      redisPipe.hsetnx(`topic:${topic}`, "followers", 0);
     });
 
     //Storing blog data
@@ -69,8 +86,8 @@ export const PUT = async (
 
     return NextResponse.json({ message: "Success" });
   } catch (err) {
-        const { message, code } = handleApiError(err);
-    return NextResponse.json({ error: message }, { status: code });;
+    const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });
   }
 };
 
@@ -79,13 +96,13 @@ export const DELETE = async (
   { params }: { params: { id: string } }
 ) => {
   const { userId } = auth();
-  if (!userId) {
-    throw new ApiError(
-      "Unauthorized!! Login first to access",
-      ErrorTypes.Enum.unauthorized
-    );
-  }
   try {
+    if (!userId) {
+      throw new ApiError(
+        "Unauthorized!! Login first to access",
+        ErrorTypes.Enum.unauthorized
+      );
+    }
     const blog = await prisma.blog.delete({
       where: {
         id: params.id,
@@ -106,10 +123,10 @@ export const DELETE = async (
       },
     });
 
-    //revalidate blog
-    revalidateTag(`blog:${blog.id}`);
-
     const redisPipe = redis.pipeline();
+
+    //Delete blog from next cache
+    revalidateTag(`blog:${blog.id}`);
 
     //Delete blog data
     redisPipe.del(`blog:${blog.id}`);
@@ -123,7 +140,6 @@ export const DELETE = async (
     //reduce blog count from topic
     blog.topics.forEach(async (topic) => {
       redisPipe.hincrby(`topic:${topic.name}`, "blogs", -1);
-      revalidateTag(`topic:${topic.name}`);
     });
 
     //remove from followers feed
@@ -131,9 +147,11 @@ export const DELETE = async (
       redisPipe.zrem(`user:${follower}:feed`, blog.id);
     });
 
-    return NextResponse.json({ message: "Success" });
+    await redisPipe.exec();
+
+    permanentRedirect('/me/blogs');
   } catch (err) {
-        const { message, code } = handleApiError(err);
-    return NextResponse.json({ error: message }, { status: code });;
+    const { message, code } = handleApiError(err);
+    return NextResponse.json({ error: message }, { status: code });
   }
 };

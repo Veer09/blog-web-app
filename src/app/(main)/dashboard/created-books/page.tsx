@@ -29,6 +29,9 @@ const page = async () => {
               title={book.title}
               description={book.description}
               id={book.id}
+              topic={book.topic}
+              coverImage={book.coverImage}
+              darkText={book.darkText}
             />
           </div>
         );

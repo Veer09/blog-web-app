@@ -10,19 +10,12 @@ export const POST = async (req: NextRequest) => {
   try {
     const { userId, topics, blogData } = blogPublishSchema.parse(body);
     const redisPipe = redis.pipeline();
-
     
     //Create topic if not exists
     topics.forEach(async (topic) => {
       redisPipe.hsetnx(`topic:${topic}`, "name", topic);
       redisPipe.hsetnx(`topic:${topic}`, "blogs", 1);
       redisPipe.hsetnx(`topic:${topic}`, "followers", 0);
-
-      //revalidate topic
-      revalidateTag(`topic:${topic}`);
-
-      //Storing topic name in topics set
-      redisPipe.sadd(`topics`, topic);
     });
 
     const blog: onlyBlog = {
@@ -52,6 +45,7 @@ export const POST = async (req: NextRequest) => {
       }
     }).then(user => user?.followers);
     if(!userFollowers) return NextResponse.json("Something went wrong!!", { status: 500 });
+    
     //Storing blog in feed of user's followers
     userFollowers.forEach((follower) => {
       redisPipe.zadd(`user:${follower.id}:feed`, {

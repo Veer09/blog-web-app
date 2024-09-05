@@ -2,7 +2,7 @@ import BlogCard from "@/components/blog-view/BlogCard";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getBlogByTopic } from "@/lib/topic";
-import { Link } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 const page = async ({ params }: { params: { name: string } }) => {
   const blogs = await getBlogByTopic(params.name);
@@ -13,17 +13,17 @@ const page = async ({ params }: { params: { name: string } }) => {
         <Image src="/MessyDoodle.svg" height={300} width={300} alt="No Blog"/>
         <div className="flex flex-col gap-4 items-center">
           <div className=" text-2xl font-bold">There is no blog in this topic</div>
-          <Link href="/dashborad/following" className={`${buttonVariants()} w-40`}>Write your blog in this topic</Link>
+          <Link href="/dashborad/following" className={`${buttonVariants()}`}>Write your blog in this topic</Link>
         </div>
       </div>
     );
+
   return (
-    <div>
+    <div className="my-5 w-[80%]">
       {blogs.map((blog, key) => {
         return (
           <div key={key}>
             <BlogCard blog={blog} key={key} />
-            <Separator />
           </div>
         );
       })}

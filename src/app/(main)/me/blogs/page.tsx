@@ -24,13 +24,12 @@ const page: FC = async () => {
       </div>
     );
   return (
-    <div className=" my-10 w-full flex items-center  justify-center">
-      <div className=" w-[100%]">
+    <div className=" my-4 w-full flex items-center  justify-center">
+      <div className="w-[80%]">
         {blogs.map((blog, key) => {
           return (
             <div key={key}>
               <BlogCard blog={blog} key={key} />
-              <Separator />
             </div>
           );
         })}

@@ -14,6 +14,7 @@ export const POST = async (req: NextRequest) => {
     if (!userId)
       throw new ApiError("Unauthorized!!", ErrorTypes.Enum.unauthorized);
 
+    
     const newBook = await prisma.book.create({
       data: {
         title: book.name,
@@ -28,17 +29,53 @@ export const POST = async (req: NextRequest) => {
           },
         },
         coverImage: book.url,
+        textDark: book.darkText,
       },
     });
 
-    await redis.hset(`book:${newBook.id}:meta`, {
-      title: newBook.title,
-      description: newBook.description,
-      topic: book.topic,
-      userId: newBook.author_id,
-      id: newBook.id,
-      followers: 0,
-    });
+    let obj;
+    if(book.url && book.darkText) {
+      obj = {
+        id: newBook.id,
+        title: newBook.title,
+        description: newBook.description,
+        topic: book.topic,
+        userId: newBook.author_id,
+        followers: 0,
+        coverImage: newBook.coverImage,
+        darkText: newBook.textDark,
+      }
+    }else if(book.url && !book.darkText) {
+      obj = {
+        id: newBook.id,
+        title: newBook.title,
+        description: newBook.description,
+        topic: book.topic,
+        userId: newBook.author_id,
+        followers: 0,
+        coverImage: newBook.coverImage,
+      }
+    }else if(!book.url && book.darkText) {
+      obj = {
+        id: newBook.id,
+        title: newBook.title,
+        description: newBook.description,
+        topic: book.topic,
+        userId: newBook.author_id,
+        followers: 0,
+        darkText: newBook.textDark,
+      }
+    }else{
+      obj = {
+        id: newBook.id,
+        title: newBook.title,
+        description: newBook.description,
+        topic: book.topic,
+        userId: newBook.author_id,
+        followers: 0,
+      }
+    }
+    await redis.hset(`book:${newBook.id}:meta`, obj);
 
     return NextResponse.json({ id: newBook.id }, { status: 200 });
   } catch (err) {

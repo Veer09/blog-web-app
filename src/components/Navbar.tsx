@@ -1,7 +1,6 @@
 "use client";
 import {
   AlbumIcon,
-  Bell,
   BookPlus,
   FilePlus2,
   Home,
@@ -18,16 +17,17 @@ import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import CreateSelection from "./CreateSelection";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { ScrollArea } from "./ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 function Navbar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const user = useUser();
-  if(!user.isLoaded) return null;
+  if (!user.isLoaded) return null;
   return (
     <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r md:block">
@@ -37,54 +37,46 @@ function Navbar({ children }: { children: React.ReactNode }) {
               <Package2 className="h-6 w-6" />
               <span className="">Blog</span>
             </Link>
-            <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
-              <Bell className="h-4 w-4" />
-              <span className="sr-only">Toggle notifications</span>
-            </Button>
           </div>
           <div className="flex-1 my-8">
             <nav className="grid gap-4 items-start px-2 text-sm font-medium lg:px-4">
               <Link
                 href="/dashboard/following/"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                  pathname.includes("/dashboard/topic") ||
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname.includes("/dashboard/topic") ||
                   pathname === "/dashboard/following"
-                    ? "text-primary bg-muted"
-                    : "text-muted-foreground"
-                }`}
+                  ? "text-primary bg-muted"
+                  : "text-muted-foreground"
+                  }`}
               >
                 <Home className="h-4 w-4" />
                 Home Feed
               </Link>
               <Link
-                href="#"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                  pathname === "/dashboard/roadmap"
-                    ? "text-primary bg-muted"
-                    : "text-muted-foreground"
-                }`}
+                href="/dashboard/followed-books"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === "/dashboard/followed-books"
+                  ? "text-primary bg-muted"
+                  : "text-muted-foreground"
+                  }`}
               >
                 <AlbumIcon className="h-4 w-4" />
                 Followed Books
               </Link>
               <Link
                 href="/dashboard/created-books"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                  pathname === "/dashboard/created-books"
-                    ? "text-primary bg-muted"
-                    : "text-muted-foreground"
-                }`}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === "/dashboard/created-books"
+                  ? "text-primary bg-muted"
+                  : "text-muted-foreground"
+                  }`}
               >
                 <BookPlus className="h-4 w-4" />
                 Created Books
               </Link>
               <Link
                 href="/me/blogs"
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                  pathname === "/me/blogs"
-                    ? "text-primary bg-muted"
-                    : "text-muted-foreground"
-                }`}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === "/me/blogs"
+                  ? "text-primary bg-muted"
+                  : "text-muted-foreground"
+                  }`}
               >
                 <FilePlus2 className="h-4 w-4" />
                 Created Blogs
@@ -92,7 +84,7 @@ function Navbar({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
           <div className=" my-10 flex justify-center">
-            <CreateSelection/>
+            <CreateSelection />
           </div>
         </div>
       </div>
@@ -150,7 +142,7 @@ function Navbar({ children }: { children: React.ReactNode }) {
               </nav>
             </SheetContent>
           </Sheet>
-          <div className="w-full flex mx-7 justify-between">
+          <div className="w-full flex mx-12 justify-between">
             <form>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -162,12 +154,29 @@ function Navbar({ children }: { children: React.ReactNode }) {
               </div>
             </form>
             <SignedIn>
-              <Link href="/me">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.user?.imageUrl}/>
-                  <AvatarFallback></AvatarFallback>
-                </Avatar>
-              </Link>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user?.imageUrl} />
+                      <AvatarFallback>{user.user?.fullName}</AvatarFallback>
+                   </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link href="/me">
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <SignOutButton>
+                      Logout
+                    </SignOutButton>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SignedIn>
             <SignedOut>
               <SignInButton>
