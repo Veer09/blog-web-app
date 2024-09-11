@@ -1,9 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/blog/:id(.*)'])
+const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/blog/:id(.*)', '/api/webhook', '/api/qstash(.*)'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
-
+const isApiRoute = createRouteMatcher(['/api(.*)'])
 export default clerkMiddleware((auth, req) => {
   const { userId, sessionClaims, redirectToSignIn } = auth()
 
@@ -14,7 +14,7 @@ export default clerkMiddleware((auth, req) => {
   if (!userId && !isPublicRoute(req)) return redirectToSignIn({ returnBackUrl: req.url })
 
 
-  if (userId && !sessionClaims?.metadata?.onboardingComplete) {
+  if (userId && !isApiRoute && !sessionClaims?.metadata?.onboardingComplete) {
     const onboardingUrl = new URL('/onboarding', req.url)
     return NextResponse.redirect(onboardingUrl)
   }

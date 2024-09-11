@@ -9,6 +9,7 @@ import { EDITOR_TOOLS } from "../../lib/tools";
 import { Form, FormControl, FormField } from "../ui/form";
 import DraftButton from "./DraftButton";
 import PostButton from "./PostButton";
+import { BlogForm, blogFormSchema } from "@/type/blog";
 
 interface EditorProps {
   holder: string;
@@ -20,15 +21,6 @@ interface EditorProps {
   draft?: Draft,
 }
 
-export const blogFormSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  coverImage: z.string(),
-  topics: z.array(z.string()),
-  content: z.custom<OutputData | undefined>(),
-})
-
-export type BlogForm = z.infer<typeof blogFormSchema>;
 
 const isOutputData = (data: any): data is OutputData => {
   return data.blocks !== undefined;
@@ -39,7 +31,7 @@ const Editor: FC<EditorProps> = ({ holder, blog, draft }) => {
   const initialData: BlogForm = {
     title: blog?.title || "",
     description: blog?.description || "",
-    coverImage: blog?.coverImage || "",
+    coverImage: blog?.coverImage || undefined,
     topics: blog?.topics.map(t => t.name) || [],
     content: undefined,
   }
@@ -90,7 +82,7 @@ const Editor: FC<EditorProps> = ({ holder, blog, draft }) => {
         />
         <div className="flex flex-col gap-4">
           <PostButton id={blog?.id} type={blog ? 'update' : 'upload'} form={form} />
-          <DraftButton form={form} draft={draft} />
+          <DraftButton content={form.watch('content')} draft={draft} />
         </div>
       </form>
     </Form>

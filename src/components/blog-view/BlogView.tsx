@@ -27,7 +27,7 @@ const BlogView: FC<BlogViewProps> = ({ content }) => {
     };
   })
   return (
-    <div id="editor-js" className="h-fit">
+    <div id="editor-js" className="max-h-fit">
     </div>
   )
 };

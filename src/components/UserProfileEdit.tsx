@@ -21,6 +21,7 @@ import axios from "axios";
 import { Trash } from "lucide-react";
 import { FC, useState } from "react";
 import { toast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
 
 interface UserProfileEditProps {
   publicMetadata?: CustomJwtSessionClaims["metadata"];
@@ -39,6 +40,7 @@ export const UserProfileEdit: FC<UserProfileEditProps> = ({
   );
   const [newSocialMediaName, setNewSocialMediaName] = useState("");
   const [about, setAbout] = useState(publicMetadata?.about || "");
+  const router = useRouter();
 
   const handleSocialMediaChange = (index: number, value: string) => {
     const updatedSocialMedia = [...socialMedia];
@@ -76,6 +78,9 @@ export const UserProfileEdit: FC<UserProfileEditProps> = ({
     onError: (error) => {
       handleClientError(error);
     },
+    onSuccess: () => {
+      router.push("/me");
+    }
   });
 
   return (

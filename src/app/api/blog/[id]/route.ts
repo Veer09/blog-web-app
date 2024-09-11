@@ -4,7 +4,6 @@ import { redis } from "@/lib/redis";
 import { blogUploadSchema } from "@/type/blog";
 import { auth } from "@clerk/nextjs/server";
 import { revalidateTag } from "next/cache";
-import { permanentRedirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 interface UpdateBlog {
@@ -149,7 +148,7 @@ export const DELETE = async (
 
     await redisPipe.exec();
 
-    permanentRedirect('/me/blogs');
+    NextResponse.json({ message: "Success" });
   } catch (err) {
     const { message, code } = handleApiError(err);
     return NextResponse.json({ error: message }, { status: code });

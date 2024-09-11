@@ -1,11 +1,11 @@
-import { handleClientError } from "@/lib/error";
+import { ClientError, handleClientError } from "@/lib/error";
 import { blogDraftSchema, saveDraftSchema } from "@/type/blog";
+import { OutputData } from "@editorjs/editorjs";
 import { Draft } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { FC, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -17,52 +17,67 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
-import { BlogForm } from "./Editor";
+import { Client } from "@upstash/qstash";
 
 interface DraftButtonProps {
-  form: UseFormReturn<BlogForm>
-  draft? : Draft
+  content: OutputData | undefined
+  draft?: Draft
 }
 
-const DraftButton: FC<DraftButtonProps> = ({ form, draft }) => {
+const DraftButton: FC<DraftButtonProps> = ({ content, draft }) => {
   const [name, setName] = useState("");
+  const router = useRouter();
 
   const { mutate: draftBlog } = useMutation({
     mutationFn: async () => {
+      if (!content) throw new ClientError("Content is required");
       const payload = blogDraftSchema.parse({
         name: name,
-        content: form.getValues('content'),
+        content: content,
       });
       return await axios.post("/api/blog/draft", payload);
     },
     onError: (err: any) => {
       handleClientError(err);
     },
+    onMutate: () => {
+      toast({
+        title: "Saving Draft",
+        description: "Please wait while we save your draft",
+      });
+    },
     onSuccess: () => {
-      redirect("/draft");
+      router.push("/draft");
     },
   });
 
   const { mutate: saveDraft } = useMutation({
     mutationFn: async () => {
-      if(!draft) return;
+      if (!draft) return;
+
       const payload = saveDraftSchema.parse({
-        content: form.getValues('content'),
+        content: content,
       });
       return await axios.put(`/api/blog/draft/${draft.id}`, payload);
     },
     onError: (err: any) => {
       handleClientError(err);
     },
-    onSuccess: () => {
+    onMutate: () => {
       toast({
-        description: "Draft saved successfully",
-      })
+        title: "Saving Draft",
+        description: "Please wait while we save your draft",
+      });
+    },
+    onSuccess: () => {
+      router.push('/draft');
     }
   });
 
   return (
-    !draft ? <Dialog>
+    !draft ? <Dialog onOpenChange={(open) => {
+      if (!open) setName("");
+    }}>
       <DialogTrigger asChild>
         <Button className=" w-[100px]">Draft</Button>
       </DialogTrigger>
@@ -81,7 +96,10 @@ const DraftButton: FC<DraftButtonProps> = ({ form, draft }) => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-    : <Button onClick={() => saveDraft()} className=" w-[100px]">Save</Button>
+      : <Button onClick={(e) => {
+        e.preventDefault();
+        saveDraft();
+      }} className=" w-[100px]">Save</Button>
   );
 };
 

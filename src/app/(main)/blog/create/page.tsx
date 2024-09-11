@@ -13,7 +13,7 @@ const Page: FC = () => {
   return (
     <div className=" flex flex-col">
       <p className=" text-center font-semibold text-lg">
-        Write Your Blog Here:{" "}
+        Share Your Idea{" "}
       </p>
       <Editor holder={"editor-js"} />
     </div>

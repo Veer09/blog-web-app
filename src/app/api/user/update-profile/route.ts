@@ -1,7 +1,6 @@
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { profileSchema } from "@/type/user";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { permanentRedirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
@@ -12,10 +11,11 @@ export const POST = async (req: NextRequest) => {
         if(!userId) throw new ApiError("Unautherized!!", ErrorTypes.Enum.unauthorized);
         await clerkClient.users.updateUserMetadata(userId, {
             publicMetadata: {
+                onboardingComplete: true,
                 ...payload,
             },
         })
-        permanentRedirect("/dashboard/following");
+        NextResponse.json({ message: "Profile updated successfully" });
     }catch(err){
         const { message, code } = handleApiError(err);
         return NextResponse.json({ error: message }, { status: code });;

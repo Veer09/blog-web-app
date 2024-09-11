@@ -12,6 +12,17 @@ export const blogUploadSchema = z.object({
     topics: z.array(z.string()).optional()
 });
 
+
+export const blogFormSchema = z.object({
+    title: z.string(),
+    description: z.string(),
+    coverImage: z.string().optional(),
+    topics: z.array(z.string()),
+    content: z.custom<OutputData | undefined>(),
+  })
+  
+  export type BlogForm = z.infer<typeof blogFormSchema>;
+
 export const blogDraftSchema = z.object({
     name: z.string(),
     content: z.custom<OutputData>()

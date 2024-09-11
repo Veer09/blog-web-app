@@ -1,14 +1,12 @@
-import { blogFormSchema } from "@/components/blog-create/Editor";
+import { blogFormSchema } from "@/type/blog";
 import prisma from "@/lib/db";
 import { ApiError, ErrorTypes, handleApiError } from "@/lib/error";
 import { qstashClient } from "@/lib/qstash";
 import { auth } from "@clerk/nextjs/server";
-import { permanentRedirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
-
   try {
     const blog = blogFormSchema.parse(body);
     const { userId } = auth();
@@ -42,16 +40,16 @@ export const POST = async (req: NextRequest) => {
     
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
-      url: `${publishUrl}/api/qstash/publish-post`,
+      url: `https://d1fa-2409-40c1-1012-5890-9830-fefd-873d-568d.ngrok-free.app/api/qstash/publish-post`,
       body: {
         userId,
         blogData,
         topics,
       },
     });
-
-    permanentRedirect(`/blog/${blogData.id}`);
+    return NextResponse.json({ id: blogData.id });
   } catch (err) {
+    console.log(err);
     const { message, code } = handleApiError(err);
     return NextResponse.json({ error: message }, { status: code });;
   }

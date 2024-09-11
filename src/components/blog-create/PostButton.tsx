@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/drawer";
 import { handleClientError } from "@/lib/error";
 import { cn } from "@/lib/utils";
-import { blogUploadSchema } from "@/type/blog";
+import { BlogForm, blogFormSchema, blogUploadSchema } from "@/type/blog";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { XIcon } from "lucide-react";
@@ -22,7 +22,8 @@ import { FormControl, FormField } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { toast } from "../ui/use-toast";
-import { BlogForm, blogFormSchema } from "./Editor";
+import { useRouter } from "next/navigation";
+
 
 
 interface PostButtonProps {
@@ -33,6 +34,7 @@ interface PostButtonProps {
 
 const PostButton: FC<PostButtonProps> = ({ type, form, id }) => {
   const [topicValue, setTopicValue] = useState<string>("");
+  const router = useRouter();
   const { mutate: upload, isPending: isUploading } = useMutation({
     mutationFn: async () => {
       const data = {
@@ -53,6 +55,9 @@ const PostButton: FC<PostButtonProps> = ({ type, form, id }) => {
         title: "Uploading Blog",
         description: "Please wait while we upload your blog",
       })
+    },
+    onSuccess: (res) => {
+      router.push(`/blog/${res.data.id}`);
     }
   });
 
@@ -85,10 +90,11 @@ const PostButton: FC<PostButtonProps> = ({ type, form, id }) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const value = topicValue.split(" ").filter((v) => v !== "");
-    const updateArray = value.map((v) => v.charAt(0).toUpperCase() + v.slice(1));
-    const finalValue = updateArray.join(" ");
-    if (e.key === "Enter" || e.key === "Tab" || e.key === "," || (e.key === " " && finalValue[topicValue.length - 1] === " ")) {
+    if (e.key === "Enter" || e.key === "Tab" || e.key === "," || (e.key === " " && topicValue[topicValue.length - 1] === " ")) {
+      const value = topicValue.split(" ").filter((v) => v !== "");
+      const updateArray = value.map((v) => v.charAt(0).toUpperCase() + v.slice(1));
+      const finalValue = updateArray.join(" ");
+      if(finalValue.length === 0) return;
       e.preventDefault();
       const regex = /^[0-9a-zA-Z\s-]*$/;
       if (!regex.test(finalValue)) {
@@ -154,8 +160,8 @@ const PostButton: FC<PostButtonProps> = ({ type, form, id }) => {
               />
             </div>
             <div className=" flex flex-col my-4 w-[50%] ">
-              <div>
-                <h3 className="text-lg font-semibold">Topics:</h3>
+              <div className=" flex items-center gap-2 mb-2">
+                <h3>Topics: </h3>
                 {
                   form.watch('topics') &&
                   form.getValues('topics').map((topic: string, index) => (
@@ -174,7 +180,7 @@ const PostButton: FC<PostButtonProps> = ({ type, form, id }) => {
                 render={({ field }) => (
                   <FormControl>
                     <Input {...field} onKeyDown={handleKeyDown} value={topicValue} autoComplete={"off"} onChange={(e) => {
-                      if (e.target.value.length > 0 && e.target.value[0] === " ") {
+                      if (e.target.value.length > 0 && (e.target.value[0] === " " || e.target.value[0] === "," )) {
                         return;
                       }
                       setTopicValue(e.target.value);

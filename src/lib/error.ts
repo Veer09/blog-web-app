@@ -1,4 +1,5 @@
 import { toast } from "@/components/ui/use-toast";
+import { Client } from "@upstash/qstash";
 import { AxiosError } from "axios";
 import { NextResponse } from "next/server";
 import { z, ZodError } from "zod";
@@ -37,6 +38,13 @@ export class ApiError extends Error {
     super(message);
     this.code = code;
     this.chapter = chapter
+  }
+}
+
+export class ClientError{
+  public readonly message: string;
+  constructor(message: string) {
+    this.message = message;
   }
 }
 
@@ -87,7 +95,6 @@ export const returnResponse = (error: any): ErrorResponse => {
 };
 
 export const handleApiError = (error: any) => {
-  console.log(error);
   const err = returnResponse(error);
   return err;
 };
@@ -105,5 +112,16 @@ export const handleClientError = (error: any) => {
       variant: 'destructive',
       description: handleZodError(error).message
     })
+  }else if(error instanceof ClientError){
+    toast({
+      variant: 'destructive',
+      description: error.message
+    })
+  }else{
+    console.log(error);
+    toast({
+      variant: 'destructive',
+      description: "Something went wrong!! Plese try again later!"
+    })  
   }
 }

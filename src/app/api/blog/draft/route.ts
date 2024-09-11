@@ -18,7 +18,7 @@ export const POST = async (req: NextRequest) => {
         name: name,
       },
     });
-    return NextResponse.json("Success!!");
+    return NextResponse.json({ message: "Draft Created" }, { status: 200 });
   } catch (err) {
         const { message, code } = handleApiError(err);
     return NextResponse.json({ error: message }, { status: code });;
