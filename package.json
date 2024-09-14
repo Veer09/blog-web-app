@@ -23,7 +23,7 @@
     "@editorjs/simple-image": "^1.6.0",
     "@editorjs/table": "^2.3.0",
     "@hookform/resolvers": "^3.9.0",
-    "@prisma/client": "^5.17.0",
+    "@prisma/client": "^5.19.1",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-collapsible": "^1.0.3",
@@ -78,7 +78,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
     "postcss": "^8",
-    "prisma": "^5.17.0",
+    "prisma": "^5.19.1",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

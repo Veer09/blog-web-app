@@ -31,7 +31,7 @@ const Editor: FC<EditorProps> = ({ holder, blog, draft }) => {
   const initialData: BlogForm = {
     title: blog?.title || "",
     description: blog?.description || "",
-    coverImage: blog?.coverImage || undefined,
+    coverImage: blog?.coverImage ?? undefined,
     topics: blog?.topics.map(t => t.name) || [],
     content: undefined,
   }

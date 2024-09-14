@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
   const body = await req.json();
   try {
-    const { userId, topics, blogData } = blogPublishSchema.parse(body);
+    const { topics, blogData } = blogPublishSchema.parse(body);
     const redisPipe = redis.pipeline();
     
     //Create topic if not exists
@@ -24,7 +24,7 @@ export const POST = async (req: NextRequest) => {
       description: blogData.description,
       coverImage: blogData.coverImage,
       createdAt: blogData.createdAt,
-      authorId: userId,
+      authorId: blogData.user_id,
       likes: 0,
       topics: topics,
     }
@@ -33,12 +33,12 @@ export const POST = async (req: NextRequest) => {
     redisPipe.hset(`blog:${blogData.id}`, blog);
 
     //Storing blog information in user's blog list
-    redisPipe.lpush(`user:${userId}:blogs`, blogData.id);
-    redisPipe.hincrby(`user:${userId}`, "blogs", 1);
+    redisPipe.lpush(`user:${blogData.user_id}:blogs`, blogData.id);
+    redisPipe.hincrby(`user:${blogData.user_id}`, "blogs", 1);
 
     const userFollowers = await prisma.user.findUnique({
       where: {
-        id: userId
+        id: blogData.user_id
       },
       select: {
         followers: true

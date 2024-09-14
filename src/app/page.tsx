@@ -80,13 +80,17 @@ const page = async () => {
                     key={key}
                     className="group flex flex-col rounded-lg bg-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md dark:bg-gray-950 dark:shadow-none dark:hover:bg-gray-800"
                   >
-                    <img
-                      src={blog.coverImage}
-                      width="420"
-                      height="200"
-                      alt="Blog Post"
-                      className="aspect-[3/2] overflow-hidden rounded-t-lg object-cover object-center"
-                    />
+                    {
+                      blog.coverImage && (
+                        <img
+                          src={blog.coverImage}
+                          width="420"
+                          height="200"
+                          alt="Blog Post"
+                          className="aspect-[3/2] overflow-hidden rounded-t-lg object-cover object-center"
+                        />
+                      )
+                    }
                     <div className="flex flex-1 flex-col justify-between p-4">
                       <div>
                         <h3 className="text-xl font-bold tracking-tight">

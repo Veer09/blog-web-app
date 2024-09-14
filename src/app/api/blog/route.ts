@@ -40,9 +40,8 @@ export const POST = async (req: NextRequest) => {
     
     const publishUrl = req.url.split("/").slice(0, 3).join("/");
     await qstashClient.publishJSON({
-      url: `https://d1fa-2409-40c1-1012-5890-9830-fefd-873d-568d.ngrok-free.app/api/qstash/publish-post`,
+      url: `${publishUrl}/api/qstash/publish-post`,
       body: {
-        userId,
         blogData,
         topics,
       },

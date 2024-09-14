@@ -33,7 +33,6 @@ export const saveDraftSchema = z.object({
 })
 
 export const blogPublishSchema = z.object({
-    userId: z.string(),
     topics: z.array(z.string()),
     blogData: z.custom<Blog>()
 })
@@ -43,7 +42,7 @@ export type cachedBlog = {
     id: string;
     title: string;
     description: string;
-    coverImage: string;
+    coverImage: string | null;
     createdAt: string | Date;
     likes: number;
     authorId: string;
@@ -56,7 +55,7 @@ export type onlyBlog = {
     id: string;
     title: string;
     description: string;
-    coverImage: string;
+    coverImage: string | null;
     createdAt: string | Date;
     likes: number;
     authorId: string;
