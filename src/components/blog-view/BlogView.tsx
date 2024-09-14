@@ -13,6 +13,7 @@ const BlogView: FC<BlogViewProps> = ({ content }) => {
     if (!ref.current) {
       const editor = new EditorJS({
         holder: 'editor-js',
+        //@ts-ignore
         tools: EDITOR_TOOLS,
         inlineToolbar: true,
         readOnly: true,

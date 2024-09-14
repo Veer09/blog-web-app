@@ -15,7 +15,7 @@ export const POST = async (req: NextRequest) => {
                 ...payload,
             },
         })
-        NextResponse.json({ message: "Profile updated successfully" });
+        return NextResponse.json({ message: "Profile updated successfully" });
     }catch(err){
         const { message, code } = handleApiError(err);
         return NextResponse.json({ error: message }, { status: code });;

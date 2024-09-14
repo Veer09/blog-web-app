@@ -3,6 +3,7 @@ import {
   AlbumIcon,
   BookPlus,
   FilePlus2,
+  File,
   Home,
   Menu,
   Package,
@@ -81,6 +82,16 @@ function Navbar({ children }: { children: React.ReactNode }) {
                 <FilePlus2 className="h-4 w-4" />
                 Created Blogs
               </Link>
+              <Link
+                href="/draft"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === "/draft"
+                  ? "text-primary bg-muted"
+                  : "text-muted-foreground"
+                  }`}
+              >
+                <File className="h-4 w-4" />
+                Drafted Blogs
+              </Link>
             </nav>
           </div>
           <div className=" my-10 flex justify-center">
@@ -154,7 +165,6 @@ function Navbar({ children }: { children: React.ReactNode }) {
               </div>
             </form>
             <SignedIn>
-
               <DropdownMenu>
                 <DropdownMenuTrigger>
                     <Avatar className="h-8 w-8">
@@ -165,8 +175,8 @@ function Navbar({ children }: { children: React.ReactNode }) {
                 <DropdownMenuContent>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link href="/me">
+                  <DropdownMenuItem asChild>
+                    <Link href="/me" className=" cursor-pointer">
                       My Profile
                     </Link>
                   </DropdownMenuItem>

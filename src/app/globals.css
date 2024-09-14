@@ -8,6 +8,15 @@ input[type=number]::-webkit-outer-spin-button {
   margin: 0; 
 }
 
+.codeflask__flatten { white-space: pre-wrap; }
+.prose :where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *)){
+  background-color: #f0f2f5;
+  color: #4f559c;
+}
+.codex-editor__redactor{
+  padding-bottom: 0px!important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

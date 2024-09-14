@@ -23,7 +23,7 @@ export const profileSchema = z.object({
   about: z.string().min(5),
   socialMedia: z.array(z.object({
     name: z.string(),
-    value: z.string()
+    value: z.string().min(5, { message: "Social media link must be atleast 5 characters long" })
   }))
 });
 

@@ -1,18 +1,19 @@
 "use client";
 
+import { handleClientError } from "@/lib/error";
 import { supabase } from "@/lib/supabase";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios, { AxiosError } from "axios";
-import { redirect } from "next/navigation";
-import { Dispatch, FC, SetStateAction, useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { custom, z } from "zod";
+import axios from "axios";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Dispatch, FC, SetStateAction } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { v4 as uuidv4 } from 'uuid';
+import { z } from "zod";
+import { bookForm } from "../CreateSelection";
 import { Button } from "../ui/button";
 import {
-  Dialog,
   DialogContent,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from "../ui/dialog";
 import {
   Form,
@@ -23,14 +24,9 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { toast } from "../ui/use-toast";
-import { useRouter } from "next/navigation";
-import { handleClientError } from "@/lib/error";
-import { v4 as uuidv4 } from 'uuid';
-import Image from "next/image";
-import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import { bookForm } from "../CreateSelection";
+import { Switch } from "../ui/switch";
+import { toast } from "../ui/use-toast";
 
 
 interface BookDialogProps {

@@ -57,8 +57,8 @@ const CreateSelection = () => {
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>
-            <Link href="/blog/create">Create Blog</Link>
+          <DropdownMenuItem asChild>
+            <Link href="/blog/create" className=" cursor-pointer">Create Blog</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>

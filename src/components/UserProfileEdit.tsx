@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { handleClientError } from "@/lib/error";
+import { ClientError, handleClientError } from "@/lib/error";
 import { profileSchema } from "@/type/user";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -22,6 +22,7 @@ import { Trash } from "lucide-react";
 import { FC, useState } from "react";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 interface UserProfileEditProps {
   publicMetadata?: CustomJwtSessionClaims["metadata"];
@@ -41,6 +42,7 @@ export const UserProfileEdit: FC<UserProfileEditProps> = ({
   const [newSocialMediaName, setNewSocialMediaName] = useState("");
   const [about, setAbout] = useState(publicMetadata?.about || "");
   const router = useRouter();
+  const { user } = useUser();
 
   const handleSocialMediaChange = (index: number, value: string) => {
     const updatedSocialMedia = [...socialMedia];
@@ -63,6 +65,11 @@ export const UserProfileEdit: FC<UserProfileEditProps> = ({
 
   const { mutate: updateProfile } = useMutation({
     mutationFn: async () => {
+      socialMedia.forEach((item) => {
+        if (item.value.trim() === "") {
+          throw new ClientError(`${item.name} link is required or delete it!!`);
+        }
+      })
       const data = {
         about: about,
         socialMedia: socialMedia,
@@ -78,9 +85,13 @@ export const UserProfileEdit: FC<UserProfileEditProps> = ({
     onError: (error) => {
       handleClientError(error);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await user?.reload();
+      toast({
+        description: "Profile updated successfully",
+      });
       router.push("/me");
-    }
+    },
   });
 
   return (

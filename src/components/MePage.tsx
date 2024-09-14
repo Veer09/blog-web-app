@@ -83,9 +83,6 @@ const MePage: FC<MePageProps> = ({ blogs, books, user, cachedUser }) => {
           </div>
         </div>
         <div className="space-y-6">
-          <div>
-            <p className="text-2xl font-bold">{cuser.name}</p>
-          </div>
           {user.publicMetadata.about ? (
             <div>
               <h3 className="text-2xl font-bold">About</h3>

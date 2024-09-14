@@ -1,15 +1,14 @@
 "use client";
+import { BlogForm, blogFormSchema } from "@/type/blog";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Blog, Draft } from "@prisma/client";
 import { FC, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { EDITOR_TOOLS } from "../../lib/tools";
 import { Form, FormControl, FormField } from "../ui/form";
 import DraftButton from "./DraftButton";
 import PostButton from "./PostButton";
-import { BlogForm, blogFormSchema } from "@/type/blog";
 
 interface EditorProps {
   holder: string;
@@ -45,11 +44,12 @@ const Editor: FC<EditorProps> = ({ holder, blog, draft }) => {
     defaultValues: initialData,
     resolver: zodResolver(blogFormSchema),
   });
-
+  
   useEffect(() => {
     if (!ref.current) {
       const editor = new EditorJS({
         holder: holder,
+        //@ts-ignore
         tools: EDITOR_TOOLS,
         placeholder: "Write your blog here...",
         inlineToolbar: true,
@@ -75,7 +75,7 @@ const Editor: FC<EditorProps> = ({ holder, blog, draft }) => {
           name="content"
           render={({ field }) => (
             <FormControl>
-              <div {...field} id={holder} className="prose max-w-full" />
+              <div {...field} id={holder} className="max-w-full" />
             </FormControl>
           )
           }
