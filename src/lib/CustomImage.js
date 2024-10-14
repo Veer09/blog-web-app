@@ -24,3 +24,4 @@ export class CustomImage extends ImageTool {
     }
   }
 }
+

@@ -23,7 +23,10 @@ export const EDITOR_TOOLS = {
   inlineCode: InlineCode,
   linkTool: LinkTool,
   list: List,
-  code: editorjsCodecup,
+  code: {
+    class: editorjsCodecup,
+    
+  },
   header: Header,
   quote: Quote,
   simpleImage: {

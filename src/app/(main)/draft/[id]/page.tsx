@@ -17,6 +17,7 @@ const page: FC<PageProps> = async ({ params }) => {
   const { userId } = auth();
   if (!userId) redirect("/sign-in");
   const draft = await getDraftById(params.id, userId);
+  if(draft.user_id !== userId) redirect("/dashboard/following");
   return (
     <>
         <Editor holder="editor-js" draft={draft}/>
