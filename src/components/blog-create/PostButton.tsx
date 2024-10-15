@@ -81,6 +81,9 @@ const PostButton: FC<PostButtonProps> = ({ type, form, id }) => {
         title: "Updating Blog",
         description: "Please wait while we update your blog",
       })
+    },
+    onSuccess: (res) => {
+      router.push(`/blog/${res.data.id}`);
     }
   });
 
@@ -120,7 +123,7 @@ const PostButton: FC<PostButtonProps> = ({ type, form, id }) => {
     <div className="">
       <Drawer>
         <DrawerTrigger className={cn(buttonVariants(), "w-[100px]")}>
-          Post
+          { type === 'update' ? 'Update' : 'Post' }
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>

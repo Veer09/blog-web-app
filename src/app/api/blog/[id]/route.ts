@@ -83,7 +83,7 @@ export const PUT = async (
 
     await redisPipe.exec();
 
-    return NextResponse.json({ message: "Success" });
+    return NextResponse.json({ message: "Success", id: update.id });
   } catch (err) {
     const { message, code } = handleApiError(err);
     return NextResponse.json({ error: message }, { status: code });

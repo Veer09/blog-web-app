@@ -16,12 +16,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FC } from "react";
 import BlogDeleteBtn from "./BlogDeleteBtn";
+import { Metadata } from "next";
 
 interface Props {
   id: string;
 }
 
-const BlogPage: FC<Props> = async ({ id }) => {
+export const BlogPage: FC<Props> = async ({ id }) => {
   //Blog
   const getBlog = unstable_cache(
     async () => {
@@ -131,5 +132,3 @@ const BlogPage: FC<Props> = async ({ id }) => {
 
   );
 };
-
-export default BlogPage;

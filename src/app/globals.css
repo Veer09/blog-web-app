@@ -17,6 +17,10 @@ input[type=number]::-webkit-outer-spin-button {
   padding-bottom: 0px!important;
 }
 
+.image-tool__image img:nth-of-type(2){
+  display: none;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

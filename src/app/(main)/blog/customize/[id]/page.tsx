@@ -1,4 +1,5 @@
 import { getBlogById } from "@/lib/blog";
+import { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
@@ -10,7 +11,9 @@ interface Props {
   };
 }
 
-const Page: FC<Props> = async ({ params }) => {
+
+
+export const Page: FC<Props> = async ({ params }) => {
   const Editor = dynamic(() => import("@/components/blog-create/Editor"), {
     ssr: false,
   });
@@ -38,4 +41,4 @@ const Page: FC<Props> = async ({ params }) => {
   );
 };
 
-export default Page;
+

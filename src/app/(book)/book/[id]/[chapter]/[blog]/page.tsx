@@ -1,4 +1,4 @@
-import BlogPage from "@/components/blog-view/BlogPage";
+import { BlogPage } from "@/components/blog-view/BlogPage";
 import BookNavbar from "@/components/book/BookNavbar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFullBook } from "@/lib/book";

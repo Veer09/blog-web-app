@@ -9,7 +9,12 @@ export class CustomImage extends ImageTool {
     this.data = data;
   }
 
-  async destroy() {
+  rendered(){
+    console.log(this.api, this.data, this.config, this.readOnly);
+  }
+
+  async removed() {
+    console.log("removed"); 
     const url = this.data.file?.url;
     const parts = url.split("/");
     const fileName = parts[parts.length - 1];

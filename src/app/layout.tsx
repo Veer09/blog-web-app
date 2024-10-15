@@ -11,8 +11,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "Blog",
+  title: "Author's Alchemy",
+  description: "Discover, Share, and Read Blogs Like Never Before! Join our innovative blogging platform where you can effortlessly share your thoughts, connect with fellow writers, and curate your favorite blogs into personalized e-books. Whether you’re a passionate blogger or an avid reader, our user-friendly interface makes it easy to explore diverse topics, engage with a vibrant community, and create collections that enhance your reading experience. Start your blogging journey today and transform your favorite reads into beautifully organized books!",
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
           >
             <QueryProvider>
               {children}
-              <ReactQueryDevtools initialIsOpen={false} /> 
+              <ReactQueryDevtools initialIsOpen={false} />
             </QueryProvider>
             <Toaster />
           </ThemeProvider>

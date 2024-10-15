@@ -5,7 +5,6 @@ import Delimiter from "@editorjs/delimiter";
 import Embed from "@editorjs/embed";
 import Header from "@editorjs/header";
 import InlineCode from "@editorjs/inline-code";
-import LinkTool from "@editorjs/link";
 import List from "@editorjs/list";
 import Quote from "@editorjs/quote";
 import SimpleImage from "@editorjs/simple-image";
@@ -21,7 +20,6 @@ export const EDITOR_TOOLS = {
   },
   delimiter: Delimiter,
   inlineCode: InlineCode,
-  linkTool: LinkTool,
   list: List,
   code: {
     class: editorjsCodecup,

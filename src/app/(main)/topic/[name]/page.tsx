@@ -39,7 +39,7 @@ const page: FC<PageProps> = async ({ params }) => {
               </div>
               <Link
                 href="/dashborad/following"
-                className={`${buttonVariants()} w-40`}
+                className={`${buttonVariants()} `}
               >
                 Write your blog in this topic
               </Link>
