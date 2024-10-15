@@ -47,6 +47,7 @@
     "@tanstack/react-query-devtools": "^5.51.23",
     "@upstash/qstash": "^2.5.2",
     "@upstash/redis": "^1.28.4",
+    "@vercel/speed-insights": "^1.0.12",
     "axios": "^1.6.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",

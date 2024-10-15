@@ -3,11 +3,10 @@ import { ThemeProvider } from "@/components/provider/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -31,7 +30,7 @@ export default function RootLayout({
           >
             <QueryProvider>
               {children}
-              <ReactQueryDevtools initialIsOpen={false} />
+              <SpeedInsights />
             </QueryProvider>
             <Toaster />
           </ThemeProvider>
