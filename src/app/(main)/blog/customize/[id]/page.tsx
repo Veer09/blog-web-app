@@ -13,7 +13,7 @@ interface Props {
 
 
 
-export const Page: FC<Props> = async ({ params }) => {
+const Page: FC<Props> = async ({ params }) => {
   const Editor = dynamic(() => import("@/components/blog-create/Editor"), {
     ssr: false,
   });
@@ -41,4 +41,4 @@ export const Page: FC<Props> = async ({ params }) => {
   );
 };
 
-
+export default Page;
